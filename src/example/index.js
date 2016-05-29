@@ -10,14 +10,11 @@ function run() {
     datastore = registerApi('Wikipedia', Wikipedia, datastore);
     datastore = build(datastore);
 
-    const res = datastore.Github.getRepos();
+    const res = datastore.Wikipedia.getAllPosts();
     res.then((x) => {
         setTimeout(() => {
-            datastore.Github.getRepos().then((x) => console.log(x));
+            datastore.Wikipedia.getSingle({id: 1}).then((x) => console.log(x));
         }, 1000);
-        setTimeout(() => {
-            datastore.Github.getRepo({id: 1379780}).then((x) => console.log(x));
-        }, 500);
     });
 }
 
