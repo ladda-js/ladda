@@ -11,10 +11,9 @@ const collectionQueries = {
     }
 };
 
-export function preRead(next, apiName, methodName, multipleEntities, args) {
-    const methodType = getConfig(apiName, methodName);
-    const typeConfig = getTypeConfig(apiName, methodType);
-    const key = createKey(apiName, methodName, multipleEntities, args, methodType);
+export function preRead(next, apiName, methodName, methodMeta, args) {
+    const typeConfig = getTypeConfig(apiName, methodMeta.entity);
+    const key = createKey(apiName, methodName, methodMeta.multipleEntities, args, methodMeta.entity);
 
     let fromCache;
     if (typeConfig && (fromCache = getFromCache(typeConfig, key))) {
@@ -26,20 +25,25 @@ export function preRead(next, apiName, methodName, multipleEntities, args) {
     }
 }
 
-export function preWrite(next, args) {
-    return next(args);
-}
-
-export function postRead(apiName, methodName, multipleEntities, args, promise) {
-    const type = getConfig(apiName, methodName);
+export function postRead(apiName, methodName, methodMeta, args, promise) {
+    const type = methodMeta.entity;
 
     promise.then((result) => {
-        saveToCache(createKey(apiName, methodName, multipleEntities, args, type),
-                    result.data);
+        saveToCache(createKey(apiName, methodName, methodMeta.multipleEntities, args, type),
+                    { data: result.data });
     });
 }
 
-export function postWrite(promise) {
+export function preWrite(next, apiName, methodName, methodMeta, args) {
+    const methodType = methodMeta.entity;
+    const key = createKey(apiName, methodName, methodMeta.multipleEntities, args, methodType);
+    saveToCache(key, {
+        data: args[0]
+    });
+    return next(args);
+}
+
+export function postWrite(apiName, methodName, methodMeta, args, promise) {
     return promise;
 }
 
@@ -59,17 +63,9 @@ function createKey(apiName, methodName, multipleEntities, args, type) {
     }
 }
 
-function getConfig(apiName, methodName) {
-    if (config[apiName] && config[apiName][methodName]) {
-        return config[apiName][methodName];
-    } else {
-        return {};
-    }
-}
-
 function getTypeConfig(apiName, typeName) {
-    if (config[apiName] && config[apiName]._types[typeName]) {
-        return config[apiName]._types[typeName];
+    if (config[typeName]) {
+        return config[typeName];
     } else {
         return {};
     }
@@ -120,15 +116,14 @@ function isValid(item, methodConfig, key) {
 
 function saveToCache(key, val) {
     const type = key.entityType;
-
     if (!storage[type]) {
         storage[type] = {};
     }
 
     if (key.type === 'COLLECTION_KEY') {
-        saveCollection(key, type, val);
+        saveCollection(key, type, val.data);
     } else {
-        saveEntity(type, val);
+        saveEntity(type, val.data);
     }
 }
 

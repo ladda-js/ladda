@@ -10,11 +10,14 @@ function run() {
     datastore = registerApi('Wikipedia', Wikipedia, datastore);
     datastore = build(datastore);
 
+
     const res = datastore.Wikipedia.getAllPosts();
     res.then((x) => {
         setTimeout(() => {
-            datastore.Wikipedia.getSingle({id: 1}).then((x) => console.log(x));
-        }, 1000);
+            datastore.Wikipedia.savePosts([{id: 31, body: 'hej'}, {id: 1, body: 'Fisk'}]).then(() => {
+                datastore.Wikipedia.getAllPosts().then((x) => console.log(4, x));
+            });
+        }, 5000);
     });
 }
 

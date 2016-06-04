@@ -1,25 +1,11 @@
+const defaultTTL = 300;
+
 export default {
-    Wikipedia: {
-        _types: {
-            WikipediaPost: {
-                ttl: 5,
-                waitForDenormalizationOn: ['Github.getRepos'],
-            }
-        },
-
-        getAllPosts: 'WikipediaPost',
-        getSingle: 'WikipediaPost'
-
+    WikipediaPost: {
+        ttl: defaultTTL,
+        waitForDenormalizationOn: ['Github.getRepos'],
     },
-
-    Github: {
-        _types: {
-            GithubRepo: {
-                ttl: 2
-            }
-        },
-
-        getRepos: 'GithubRepo',
-        getRepo: 'GithubRepo'
+    GithubRepo: {
+        ttl: defaultTTL
     }
 };

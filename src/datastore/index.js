@@ -48,7 +48,8 @@ function buildApi(middleware) {
                                    readMethods.map(decorateRead(api, middleware)));
 
         let writeMethods = Object.keys(api.api).filter(x => api.api[x].type === 'WRITE');
-        writeMethods = writeMethods.map(decorateWrite(api));
+        writeMethods = createObject(writeMethods,
+                                    writeMethods.map(decorateWrite(api, middleware)));
 
         return {
             _name: api.name,
@@ -70,12 +71,12 @@ function decorateRead(api, middleware) {
                 middleware.filter((x) => x.middleware.preRead));
             const result = preRead(args);
 
-            const postReadMiddleware = middleware.filter((x) => x.middleware.preRead);
-            const returnsMultipleEntities = api.api[toDecorate].returnsMultipleEntities;
+            const postReadMiddleware = middleware.filter((x) => x.middleware.postRead);
+            const methodMeta = createMethodMeta(api.api[toDecorate]);
             postReadMiddleware.forEach((x) => x.middleware.postRead(
                 api.name,
                 toDecorate,
-                returnsMultipleEntities,
+                methodMeta,
                 args,
                 result));
             return result.then((x) => x.data);
@@ -85,25 +86,68 @@ function decorateRead(api, middleware) {
 
 function bindPreRead(hook, apiName, toDecorate, toDecorateName, middleware) {
     const [x, ...xs] = middleware;
-
+    const methodMeta = createMethodMeta(toDecorate);
     if (xs.length === 0) {
         return x.middleware[hook].bind(null,
                                        (args) => toDecorate(...args),
                                        apiName,
                                        toDecorateName,
-                                       toDecorate.returnsMultipleEntities);
+                                       methodMeta);
     } else {
         return x.middleware[hook].bind(null,
                                        bindPreRead(hook, apiName, toDecorate, toDecorateName, xs),
                                        apiName,
                                        toDecorateName,
-                                       toDecorate.returnsMultipleEntities);
+                                       methodMeta);
     }
 }
 
-function decorateWrite(datastore) {
+function bindPreWrite(hook, apiName, toDecorate, toDecorateName, middleware) {
+    const [x, ...xs] = middleware;
+    const methodMeta = createMethodMeta(toDecorate);
+    if (xs.length === 0) {
+        return x.middleware[hook].bind(null,
+                                       (args) => toDecorate(...args),
+                                       apiName,
+                                       toDecorateName,
+                                       methodMeta);
+    } else {
+        return x.middleware[hook].bind(null,
+                                       bindPreWrite(hook, apiName, toDecorate, toDecorateName, xs),
+                                       apiName,
+                                       toDecorateName,
+                                       methodMeta);
+    }
+}
+
+function decorateWrite(api, middleware) {
     return (toDecorate) => {
-        return datastore[toDecorate];
+        return (...args) => {
+            const preWrite = bindPreWrite(
+                'preWrite',
+                api.name,
+                api.api[toDecorate],
+                toDecorate,
+                middleware.filter((x) => x.middleware.preWrite));
+            const result = preWrite(args);
+
+            const postWriteMiddleware = middleware.filter((x) => x.middleware.postWrite);
+            const methodMeta = createMethodMeta(api.api[toDecorate]);
+            postWriteMiddleware.forEach((x) => x.middleware.postWrite(
+                api.name,
+                toDecorate,
+                methodMeta,
+                args,
+                result));
+            return result.then((x) => x.data);
+        };
+    };
+}
+
+function createMethodMeta(method) {
+    return {
+        multipleEntities: method.multipleEntities,
+        entity: method.entity,
     };
 }
 
