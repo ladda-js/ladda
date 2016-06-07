@@ -1,11 +1,10 @@
+import { compose } from './fp';
 import {
     createDatastore,
     registerApi,
     registerMiddleware,
     build } from 'datastore';
 import caching from 'caching';
-import { compose } from './fp';
-
 import * as JsonPlaceholder from './api/jsonplaceholder';
 import * as Github from './api/github';
 import cacheConfig from './cache-config';
