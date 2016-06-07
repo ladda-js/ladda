@@ -8,25 +8,29 @@ export function createDatastore() {
     };
 }
 
-export function registerApi(name, api, datastore) {
-    if (datastore._built) {
-        throw new Error('Cannot register APIs after built');
-    }
+export function registerApi(name, api) {
+    return datastore => {
+        if (datastore._built) {
+            throw new Error('Cannot register APIs after built');
+        }
 
-    return {
-        ...datastore,
-        _apis: [...datastore._apis, { name, api }]
+        return {
+            ...datastore,
+            _apis: [...datastore._apis, { name, api }]
+        };
     };
 }
 
-export function registerMiddleware(name, middleware, datastore) {
-    if (datastore._built) {
-        throw new Error('Cannot register middleware after built');
-    }
+export function registerMiddleware(middleware) {
+    return datastore => {
+        if (datastore._built) {
+            throw new Error('Cannot register middleware after built');
+        }
 
-    return {
-        ...datastore,
-        _middleware: [...datastore._middleware, { name, middleware }]
+        return {
+            ...datastore,
+            _middleware: [...datastore._middleware, {  middleware }]
+        };
     };
 }
 
