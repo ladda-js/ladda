@@ -21,9 +21,9 @@ return build(configure(datastore));
 However, Ladda does support caching, which is what distinguish it
 from just a bunch of fetch methods.
 
+# Code
+Check out [/src/example](https://github.com/petercrona/ladda/blob/master/src/example/index.js) for a really simple example. This should quickly give you an idea of what this is about. The example API is defined in [/src/example/api/jsonplaceholder](https://github.com/petercrona/ladda/blob/master/src/example/api/jsonplaceholder.js) and the cache confing you find in [/src/example/cache-config.js](https://github.com/petercrona/ladda/blob/master/src/example/cache-config.js).
+
 # Try it out
 Clone the repo, go to the folder (/ladda) and run: *webpack-dev-server*.
 Inspect the network traffic and play around with src/example/index.js.
-
-# Example
-Check out [/src/example](https://github.com/petercrona/ladda/blob/master/src/example/index.js) for a really simple example. This should quickly give you an idea of what this is about. The example API is defined in [/src/example/api/jsonplaceholder](https://github.com/petercrona/ladda/blob/master/src/example/api/jsonplaceholder.js) and the cache confing you find in [/src/example/cache-config.js](https://github.com/petercrona/ladda/blob/master/src/example/cache-config.js).
