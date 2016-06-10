@@ -15,7 +15,8 @@ const configure = compose(
   registerApi('JsonPlaceholder', JsonPlaceholder)
 );
 
-return build(configure(datastore));
+const api = build(configure(datastore));
+api.JsonPlaceholder.getAllPosts().then((posts) => console.log('posts', posts));
 ```
 
 However, Ladda does support caching, which is what distinguish it
