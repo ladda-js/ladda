@@ -13,14 +13,17 @@ function run() {
     const datastore = buildDatastore();
 
     Promise.resolve()
-        .then(getAllPosts(datastore))
-        .then(savePosts(datastore))
-        .then(getAllPosts(datastore))
-        .then(printAllPosts);
+           .then(getAllPosts(datastore))
+           .then(savePosts(datastore))
+           .then(getSomePosts(datastore))
+           .then(getSomePosts(datastore))
+           .then(printAllPosts)
+           .then(getAllPosts(datastore))
+           .then(printAllPosts);
 
     /*
-     Note that we only fetched the posts once
-     and we got the correct result.
+       Two times we fetch data. Once for the some posts and once
+       for all posts.
      */
 }
 
@@ -33,6 +36,10 @@ function buildDatastore() {
     );
 
     return build(configure(datastore));
+}
+
+function getSomePosts(datastore) {
+    return () => datastore.JsonPlaceholder.getAllPostsWithIdHigerThan(80);
 }
 
 function getAllPosts(datastore) {

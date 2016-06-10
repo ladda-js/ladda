@@ -7,6 +7,15 @@ export function getAllPosts() {
     return get('http://jsonplaceholder.typicode.com/posts');
 }
 
+getAllPostsWithIdHigerThan.type = 'READ';
+getAllPostsWithIdHigerThan.entity = 'JsonPlacerholderPost';
+getAllPostsWithIdHigerThan.multipleEntities = true;
+export function getAllPostsWithIdHigerThan(id) {
+    return get('http://jsonplaceholder.typicode.com/posts').then(x => {
+        return { ...x, data: x.data.filter(y => y.id > id) };
+    });
+}
+
 getSingle.type = 'READ';
 getSingle.entity = 'JsonPlacerholderPost';
 getSingle.multipleEntities = false;

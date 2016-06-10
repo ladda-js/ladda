@@ -45,7 +45,7 @@ export default function Caching(config) {
         const key = createKey(apiName, methodName, methodMeta.multipleEntities, args, methodType);
         saveToCache(key, {
             data: args[0]
-        });
+        }, 'WRITE');
         return next(args);
     }
 
@@ -94,10 +94,10 @@ export default function Caching(config) {
     }
 
     function getCollectionFromCache(key) {
-        if (storage[key.entityType]) {
+        if (collectionQueries[key.value]) {
             return {
-                data: Object.keys(storage[key.entityType])
-                            .map((x) => storage[key.entityType][x].data)
+                data: collectionQueries[key.value].ids
+                    .map((x) => storage[key.entityType][x].data)
             };
         } else {
             return false;
@@ -120,29 +120,34 @@ export default function Caching(config) {
         }
     }
 
-    function saveToCache(key, val) {
+    function saveToCache(key, val, operation) {
         const type = key.entityType;
         if (!storage[type]) {
             storage[type] = {};
         }
 
         if (key.type === 'COLLECTION_KEY') {
-            saveCollection(key, type, val.data);
+            saveCollection(key, type, val.data, operation);
         } else {
             saveEntity(type, val.data);
         }
     }
 
-    function saveCollection(key, type, val) {
+    function saveCollection(key, type, val, operation) {
         val.forEach((x) => {
             storage[type][x.id] = {
                 data: x,
                 timestamp: Date.now()
             };
         });
-        collectionQueries[key.value] = {
-            timestamp: Date.now()
-        };
+
+        if (operation !== 'WRITE') {
+            const ids = val.map((x) => x.id);
+            collectionQueries[key.value] = {
+                timestamp: Date.now(),
+                ids
+            };
+        }
     }
 
     function saveEntity(type, val) {
