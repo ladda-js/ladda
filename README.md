@@ -1,4 +1,4 @@
-# ladda
+# Ladda
 JavaScript data fetching layer with support for middleware.
 
 # Background
