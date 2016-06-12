@@ -1,8 +1,8 @@
 {
-  "name": "ladda",
-  "version": "0.0.1",
+  "name": "laddare",
+  "version": "0.0.3",
   "description": "Data fetching layaer with support for caching",
-  "main": "bundle.js",
+  "main": "dist/bundle.js",
   "dependencies": {
     "axios": "^0.11.1"
   },
