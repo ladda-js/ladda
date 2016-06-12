@@ -1,7 +1,7 @@
 {
   "name": "ladda",
-  "version": "1.0.0",
-  "description": "Simple caching layer",
+  "version": "0.0.1",
+  "description": "Data fetching layaer with support for caching",
   "main": "bundle.js",
   "dependencies": {
     "axios": "^0.11.1"
@@ -16,5 +16,5 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Peter Crona <petercrona89@gmail.com> (http://www.icecoldcode.com)",
-  "license": "ISC"
+  "license": "MIT"
 }
