@@ -9,12 +9,17 @@ export default function Caching(config) {
             timestamp: 1212
         }
     };
+    const temporaryIds = {
+
+    };
 
     return {
         preRead,
         postRead,
         preWrite,
-        postWrite
+        postWrite,
+        postDelete,
+        preDelete
     };
 
     function preRead(next, apiName, methodName, methodMeta, args) {
@@ -40,20 +45,73 @@ export default function Caching(config) {
         });
     }
 
-    function preWrite(next, apiName, methodName, methodMeta, args) {
+    function preWrite(next, apiName, methodName, methodMeta, jobId, args) {
         const methodType = methodMeta.entity;
-        const key = createKey(apiName, methodName, methodMeta.multipleEntities, args, methodType);
+        const key = createKey(apiName,
+                              methodName,
+                              methodMeta.multipleEntities,
+                              args,
+                              methodType,
+                              jobId);
         saveToCache(key, {
             data: args[0]
         }, 'WRITE');
         return next(args);
     }
 
-    function postWrite(apiName, methodName, methodMeta, args, promise) {
+    function postWrite(apiName, methodName, methodMeta, jobId, args, promise) {
+        if (temporaryIds[jobId] !== undefined) {
+            temporaryIds[jobId].promise = promise;
+        }
+
+        const config = getTypeConfig(apiName, methodMeta.entity);
+
+        promise.then(replaceTemporaryWithFinalId(methodMeta, jobId))
+               .then(invalidateCacheIfDesired(config, methodMeta.entity, args));
+
         return promise;
     }
 
-    function createKey(apiName, methodName, multipleEntities, args, type) {
+    function preDelete(next, apiName, methodName, methodMeta, jobId, args) {
+        if (methodMeta.multipleEntities) {
+            args[0].map(deleteFromCache(methodMeta.entity));
+        } else {
+            deleteFromCache(methodMeta.entity)(args[0]);
+        }
+
+        return next(args);
+    }
+
+    function deleteFromCache(type) {
+        return entity => {
+            delete storage[type][entity.id];
+        };
+    }
+
+    function postDelete(promise) {
+        return promise;
+    }
+
+    function invalidateCacheIfDesired(config, entityType, args) {
+        if (newEntityWasCreated(args[0]) && config.invalidateOnCreate) {
+            collectionQueries[entityType] = {};
+        }
+    }
+
+    function newEntityWasCreated(entity) {
+        return entity.id === undefined;
+    }
+
+    function replaceTemporaryWithFinalId(methodMeta, jobId) {
+        return realEntity => {
+            const tempId = temporaryIds[jobId].id;
+            const entityWithTempId = storage[methodMeta.entity][tempId];
+            delete storage[methodMeta.entity][tempId];
+            storage[methodMeta.entity][realEntity.data.id] = entityWithTempId;
+        }
+    }
+
+    function createKey(apiName, methodName, multipleEntities, args, type, jobId) {
         if (multipleEntities) {
             return {
                 type: 'COLLECTION_KEY',
@@ -64,9 +122,21 @@ export default function Caching(config) {
             return {
                 type: 'ENTITY_KEY',
                 entityType: type,
-                id: args[0].id
+                id: args[0].id || createTemporaryId(jobId)
             };
         }
+    }
+
+    function createTemporaryId(jobId) {
+        const id = generateEntityIdFromJobId(jobId);
+        temporaryIds[jobId] = {
+            id
+        };
+        return id;
+    }
+
+    function generateEntityIdFromJobId(jobId) {
+        return 'TEMPORARY_ID_' + jobId;
     }
 
     function getTypeConfig(apiName, typeName) {
@@ -94,13 +164,23 @@ export default function Caching(config) {
     }
 
     function getCollectionFromCache(key) {
-        if (collectionQueries[key.value]) {
+        if (collectionQueries[key.entityType] &&
+            collectionQueries[key.entityType][key.value]) {
             return {
-                data: collectionQueries[key.value].ids
-                    .map((x) => storage[key.entityType][x].data)
+                data: collectionQueries[key.entityType][key.value].ids
+                    .map((x) => getEntityDataIfExist(storage[key.entityType][x]))
+                    .filter((x) => x !== null)
             };
         } else {
             return false;
+        }
+    }
+
+    function getEntityDataIfExist(entity) {
+        if (entity) {
+            return entity.data;
+        } else {
+            return null;
         }
     }
 
@@ -114,7 +194,7 @@ export default function Caching(config) {
 
     function isValid(item, methodConfig, key) {
         if (key.type === 'COLLECTION_KEY') {
-            return collectionQueries[key.value].timestamp + methodConfig.ttl * 1000 >= Date.now();
+            return collectionQueries[key.entityType][key.value].timestamp + methodConfig.ttl * 1000 >= Date.now();
         } else {
             return item.timestamp + methodConfig.ttl * 1000 >= Date.now();
         }
@@ -129,7 +209,7 @@ export default function Caching(config) {
         if (key.type === 'COLLECTION_KEY') {
             saveCollection(key, type, val.data, operation);
         } else {
-            saveEntity(type, val.data);
+            saveEntity(key, type, val.data);
         }
     }
 
@@ -143,15 +223,20 @@ export default function Caching(config) {
 
         if (operation !== 'WRITE') {
             const ids = val.map((x) => x.id);
-            collectionQueries[key.value] = {
+
+            if (!collectionQueries[key.entityType]) {
+                collectionQueries[key.entityType] = {};
+            }
+
+            collectionQueries[key.entityType][key.value] = {
                 timestamp: Date.now(),
                 ids
             };
         }
     }
 
-    function saveEntity(type, val) {
-        storage[type][val.id] = {
+    function saveEntity(key, type, val) {
+        storage[type][key.id] = {
             data: val,
             timestamp: Date.now()
         };

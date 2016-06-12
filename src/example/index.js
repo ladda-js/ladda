@@ -14,11 +14,13 @@ function run() {
 
     Promise.resolve()
            .then(getAllPosts(datastore))
-           .then(savePosts(datastore))
-           .then(getSomePosts(datastore))
-           .then(getSomePosts(datastore))
-           .then(printAllPosts)
-           .then(getAllPosts(datastore))
+        //           .then(savePosts(datastore))
+        // .then(createPost(datastore))
+        //           .then(getSomePosts(datastore))
+        //           .then(getSomePosts(datastore))
+        //           .then(printAllPosts)
+           .then(deletePost(datastore))
+           .catch(getAllPosts(datastore))
            .then(printAllPosts);
 
     /*
@@ -54,6 +56,33 @@ function savePosts(datastore) {
         ]
     );
 }
+
+function createPost(datastore) {
+    return () => datastore.JsonPlaceholder.createPost(
+        {
+            body: 'hej'
+        },
+        'annat arg'
+    );
+}
+
+function deletePost(datastore) {
+    return () => datastore.JsonPlaceholder.deletePost([
+        {
+            id: '44'
+        },
+        {
+            id: '45'
+        },
+        {
+            id: '46'
+        },
+        {
+            id: '47'
+        }
+    ]);
+}
+
 
 function printAllPosts(posts) {
     console.log(posts);

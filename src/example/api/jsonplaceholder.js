@@ -1,4 +1,4 @@
-import { get, post } from 'axios';
+import { get, post, delete as remove } from 'axios';
 
 getAllPosts.type = 'READ';
 getAllPosts.entity = 'JsonPlacerholderPost';
@@ -30,9 +30,23 @@ export function savePost(entity) {
     return post('http://jsonplaceholder.typicode.com/posts/' + entity.id, { ...entity });
 }
 
+createPost.type = 'WRITE';
+createPost.entity = 'JsonPlacerholderPost';
+createPost.multipleEntities = false;
+export function createPost(entity) {
+    return post('http://jsonplaceholder.typicode.com/posts', { ...entity });
+}
+
 savePosts.type = 'WRITE';
 savePosts.entity = 'JsonPlacerholderPost';
 savePosts.multipleEntities = true;
 export function savePosts(entity) {
     return post('http://jsonplaceholder.typicode.com/posts/', { ...entity });
+}
+
+deletePost.type = 'DELETE';
+deletePost.entity = 'JsonPlacerholderPost';
+deletePost.multipleEntities = true;
+export function deletePost(entity) {
+    return remove('http://jsonplaceholder.typicode.com/posts', { ...entity });
 }

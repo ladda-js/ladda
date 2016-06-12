@@ -1,5 +1,7 @@
 import * as IdentityMiddleware from './identity-middleware';
 
+let jobCounter = 0;
+
 export function createDatastore() {
     return {
         _middleware: [ {name: 'identity', middleware: IdentityMiddleware} ],
@@ -55,10 +57,15 @@ function buildApi(middleware) {
         writeMethods = createObject(writeMethods,
                                     writeMethods.map(decorateWrite(api, middleware)));
 
+        let deleteMethods = Object.keys(api.api).filter(x => api.api[x].type === 'DELETE');
+        deleteMethods = createObject(deleteMethods,
+                                     deleteMethods.map(decorateDelete(api, middleware)));
+
         return {
             _name: api.name,
             ...readMethods,
-            ...writeMethods
+            ...writeMethods,
+            ...deleteMethods
         };
     };
 }
@@ -106,7 +113,7 @@ function bindPreRead(hook, apiName, toDecorate, toDecorateName, middleware) {
     }
 }
 
-function bindPreWrite(hook, apiName, toDecorate, toDecorateName, middleware) {
+function bindPreWrite(hook, apiName, toDecorate, toDecorateName, jobId, middleware) {
     const [x, ...xs] = middleware;
     const methodMeta = createMethodMeta(toDecorate);
     if (xs.length === 0) {
@@ -114,24 +121,30 @@ function bindPreWrite(hook, apiName, toDecorate, toDecorateName, middleware) {
                                        (args) => toDecorate(...args),
                                        apiName,
                                        toDecorateName,
-                                       methodMeta);
+                                       methodMeta,
+                                       jobId);
     } else {
-        return x.middleware[hook].bind(null,
-                                       bindPreWrite(hook, apiName, toDecorate, toDecorateName, xs),
-                                       apiName,
-                                       toDecorateName,
-                                       methodMeta);
+        return x.middleware[hook].bind(
+            null,
+            bindPreWrite(hook, apiName, toDecorate, toDecorateName, jobId, xs),
+            apiName,
+            toDecorateName,
+            methodMeta,
+            jobId);
     }
 }
 
 function decorateWrite(api, middleware) {
     return (toDecorate) => {
         return (...args) => {
+            const jobId = jobCounter++;
+
             const preWrite = bindPreWrite(
                 'preWrite',
                 api.name,
                 api.api[toDecorate],
                 toDecorate,
+                jobId,
                 middleware.filter((x) => x.middleware.preWrite));
             const result = preWrite(args);
 
@@ -141,12 +154,63 @@ function decorateWrite(api, middleware) {
                 api.name,
                 toDecorate,
                 methodMeta,
+                jobId,
                 args,
                 result));
             return result.then((x) => x.data);
         };
     };
 }
+
+function bindPreDelete(hook, apiName, toDecorate, toDecorateName, jobId, middleware) {
+    const [x, ...xs] = middleware;
+    const methodMeta = createMethodMeta(toDecorate);
+    if (xs.length === 0) {
+        return x.middleware[hook].bind(null,
+                                       (args) => toDecorate(...args),
+                                       apiName,
+                                       toDecorateName,
+                                       methodMeta,
+                                       jobId);
+    } else {
+        return x.middleware[hook].bind(
+            null,
+            bindPreWrite(hook, apiName, toDecorate, toDecorateName, jobId, xs),
+            apiName,
+            toDecorateName,
+            methodMeta,
+            jobId);
+    }
+}
+
+function decorateDelete(api, middleware) {
+    return (toDecorate) => {
+        return (...args) => {
+            const jobId = jobCounter++;
+
+            const preDelete = bindPreDelete(
+                'preDelete',
+                api.name,
+                api.api[toDecorate],
+                toDecorate,
+                jobId,
+                middleware.filter((x) => x.middleware.preDelete));
+            const result = preDelete(args);
+
+            const postDeleteMiddleware = middleware.filter((x) => x.middleware.postDelete);
+            const methodMeta = createMethodMeta(api.api[toDecorate]);
+            postDeleteMiddleware.forEach((x) => x.middleware.postDelete(
+                api.name,
+                toDecorate,
+                methodMeta,
+                jobId,
+                args,
+                result));
+            return result.then((x) => x.data);
+        };
+    };
+}
+
 
 function createMethodMeta(method) {
     return {
