@@ -1,6 +1,6 @@
 {
   "name": "laddare",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Data fetching layaer with support for caching",
   "main": "dist/bundle.js",
   "dependencies": {
