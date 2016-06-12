@@ -56,6 +56,10 @@ export default function Caching(config) {
         saveToCache(key, {
             data: args[0]
         }, 'WRITE');
+
+        const typeConfig = getTypeConfig(apiName, methodMeta.entity);
+        invalidateCacheIfDesired(typeConfig, methodMeta.entity, args);
+
         return next(args);
     }
 
@@ -64,10 +68,9 @@ export default function Caching(config) {
             temporaryIds[jobId].promise = promise;
         }
 
-        const config = getTypeConfig(apiName, methodMeta.entity);
-
+        const typeConfig = getTypeConfig(apiName, methodMeta.entity);
         promise.then(replaceTemporaryWithFinalId(methodMeta, jobId))
-               .then(invalidateCacheIfDesired(config, methodMeta.entity, args));
+               .then(invalidateCacheIfDesired(typeConfig, methodMeta.entity, args));
 
         return promise;
     }
