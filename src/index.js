@@ -16,6 +16,8 @@ const config = {
 };
 
 const api = build(config);
+console.log(api);
+/*
 const promises = [api.JsonPlacerholderPost.decoratedApi[4].val({ name: 'Kalle' }),
                   api.JsonPlacerholderPost.decoratedApi[4].val({ name: 'Erik' }),
                   api.JsonPlacerholderPost.decoratedApi[4].val({ name: 'Leffe' })];
@@ -33,3 +35,4 @@ Promise.all(promises).then(() => {
         });
     });
 });
+*/

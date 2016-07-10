@@ -67,7 +67,7 @@ function hasExpired(timestamp, ttl) {
 
 export function updateItem(datastore, query, value) {
     return replaceTempIdInQuery(datastore, query).then(translatedQuery => {
-        return datastore.entityCache[createKey(translatedQuery)] = withTimestamp(value);
+        return datastore.entityCache[createKey(translatedQuery)] = withTimestamp(value, Date.now());
     });
 }
 
@@ -98,7 +98,7 @@ export function getCollection(datastore, query) {
     if (collection && hasExpired(collection.timestamp, ttl)) {
         return Promise.all(withoutTimestamp(collection).map(id => {
             return getItem(datastore, createQuery(query.type, id));
-        }));
+        }).filter(x => x !== undefined));
     } else {
         return Promise.resolve(undefined);
     }

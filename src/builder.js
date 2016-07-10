@@ -8,9 +8,10 @@ export function build(config) {
     const indexedEntities = toObject(abstractEntities.filter((x) => !x.val.viewOf), {});
     abstractEntities.forEach(registerViews(indexedEntities));
     abstractEntities.forEach(copyInvalidateToViews(indexedEntities));
+    abstractEntities.forEach(setDefaults);
     abstractEntities.forEach(decorateApi(createDatastore(createTtlMap(abstractEntities))));
 
-    return toObject(abstractEntities, {});
+    return compile(abstractEntities, {});
 }
 
 function createTtlMap(abstractEntities) {
@@ -80,6 +81,15 @@ function copyInvalidateToViews(indexedEntities) {
     };
 }
 
+function setDefaults(abstractEntity) {
+    if (!abstractEntity.val.invalidates) {
+        abstractEntity.val.invalidates = [];
+    }
+    if (!abstractEntity.val.views) {
+        abstractEntity.val.views = [];
+    }
+}
+
 function addInvalidates(abstractEntity, invalidates) {
     if (abstractEntity.val.invalidates) {
         abstractEntity.val.invalidates.push(...invalidates);
@@ -99,6 +109,18 @@ function toObject(val, obj) {
 
     val.forEach((x) => {
         obj[x.name] = toObject(x.val, {});
+    });
+
+    return obj;
+}
+
+function compile(val, obj) {
+    if (!Array.isArray(val)) {
+        return val;
+    }
+
+    val.forEach((x) => {
+        obj[x.name] = toObject(x.val.decoratedApi, {});
     });
 
     return obj;

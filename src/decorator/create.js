@@ -9,7 +9,7 @@ import {
 export function decorateCreate(apiFn, datastore, abstractEntity) {
     const type = abstractEntity.name;
     return (item) => {
-        const createPromise = apiFn();
+        const createPromise = apiFn(item);
         const insertId = createItem(datastore,
                                     createQueryFromItem(type, item),
                                     item,
