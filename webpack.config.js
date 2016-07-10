@@ -5,8 +5,8 @@ module.exports = {
     output: {
         path: __dirname + '/dist',
         filename: 'bundle.js',
-        library: 'ladda',
-        libraryTarget: 'commonjs2'
+        //library: 'ladda',
+        //libraryTarget: 'commonjs2'
     },
     resolve: {
         root: path.resolve(__dirname),
