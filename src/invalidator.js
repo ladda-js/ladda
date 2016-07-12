@@ -1,7 +1,7 @@
 import { invalidate as invalidateDatastore } from 'datastore';
 
 export function invalidate(datastore, abstractEntity, operation) {
-    const invalidateOn = abstractEntity.val.invalidatesOn || ['CREATE', 'DELETE'];
+    const invalidateOn = abstractEntity.val.invalidatesOn || ['CREATE'];
     if (invalidateOn.indexOf(operation) === -1) {
         return;
     }

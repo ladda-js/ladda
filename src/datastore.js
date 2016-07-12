@@ -2,6 +2,7 @@
 // Datastore - reference for datastore
 // Item - a single entity, which contains all info to perform operations
 import { createQuery } from './query';
+import { merge } from 'merger';
 
 export function createDatastore(ttlMap) {
     return {
@@ -112,6 +113,14 @@ export function invalidate(datastore, type) {
     if (datastore.queryCache) {
         datastore.queryCache[type] = {};
     }
+}
+
+export function patchItem(datastore, query, item) {
+    getItem(datastore, query).then(superItem => {
+        if (superItem) {
+            updateItem(datastore, query, merge(item, superItem));
+        }
+    });
 }
 
 function safeCollectionLookup(datastore, query) {
