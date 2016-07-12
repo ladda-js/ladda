@@ -52,13 +52,17 @@ export function addItem(datastore, query, value) {
 
 export function getItem(datastore, query) {
     return replaceTempIdInQuery(datastore, query).then(translatedQuery => {
-        const item = datastore.entityCache[createKey(translatedQuery)];
-        const ttl = datastore.ttlMap[translatedQuery.type];
-
-        if (item && hasExpired(item.timestamp, ttl)) {
-            return withoutTimestamp(item);
-        }
+        return getItemSync(datastore, translatedQuery);
     });
+}
+
+function getItemSync(datastore, query) {
+    var item = datastore.entityCache[createKey(query)];
+    var ttl = datastore.ttlMap[query.type];
+
+    if (item && hasExpired(item.timestamp, ttl)) {
+        return withoutTimestamp(item);
+    }
 }
 
 function hasExpired(timestamp, ttl) {
@@ -97,7 +101,7 @@ export function getCollection(datastore, query) {
 
     if (collection && hasExpired(collection.timestamp, ttl)) {
         return Promise.all(withoutTimestamp(collection).map(id => {
-            return getItem(datastore, createQuery(query.type, id));
+            return getItemSync(datastore, createQuery(query.type, id));
         }).filter(x => x !== undefined));
     } else {
         return Promise.resolve(undefined);
