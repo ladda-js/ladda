@@ -1,12 +1,12 @@
 const path = require('path');
 
 module.exports = {
-    entry: './src/release.js',
+    entry: './src/index.js',
     output: {
         path: __dirname + '/dist',
         filename: 'bundle.js',
-        library: 'ladda',
-        libraryTarget: 'commonjs2'
+        //library: 'ladda',
+        //libraryTarget: 'commonjs2'
     },
     resolve: {
         root: path.resolve(__dirname),

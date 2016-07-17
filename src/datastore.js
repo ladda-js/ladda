@@ -2,7 +2,7 @@
 // Datastore - reference for datastore
 // Item - a single entity, which contains all info to perform operations
 import { createQuery } from './query';
-import { merge } from 'merger';
+import { merge } from './merger';
 
 export function createDatastore(ttlMap) {
     return {
@@ -23,9 +23,8 @@ export function createItem(datastore, query, value, promise) {
 }
 
 export function replaceTempId(datastore, query, realId) {
-    addTemporaryToRealId(datastore, query.value, realId);
-    const item = getItem(datastore, query);
-    deleteItem(datastore, query);
+    const item = getItemSync(datastore, query);
+    deleteItemSync(datastore, query);
     addItem(datastore, { ...query, value: realId }, item);
 }
 
@@ -37,7 +36,7 @@ function replaceTempIdInQuery(datastore, query) {
     if (/^tmp-/.test(query.value) && !entityExist(datastore, query)) {
         // Try to get item with id, if not exist try with id from translation table
         return datastore.tempToRealId[query.value]
-                        .then(result => createQuery(query.type, result.id));
+                        .then(newId => createQuery(query.type, newId));
     } else {
         return Promise.resolve(query);
     }
@@ -78,8 +77,12 @@ export function updateItem(datastore, query, value) {
 
 export function deleteItem(datastore, query) {
     return replaceTempIdInQuery(datastore, query).then(translatedQuery => {
-        delete datastore.entityCache[createKey(translatedQuery)];
+        deleteItemSync(datastore, translatedQuery);
     });
+}
+
+function deleteItemSync(datastore, query) {
+    delete datastore.entityCache[createKey(query)];
 }
 
 export function addCollection(datastore, query, value) {
