@@ -1,52 +1,46 @@
-import { get, post, delete as remove } from 'axios';
+import { get, post, put, delete as remove } from 'axios';
 
-getAllPosts.type = 'READ';
-getAllPosts.entity = 'JsonPlacerholderPost';
-getAllPosts.multipleEntities = true;
+getAllPosts.operation = 'READ';
+getAllPosts.plural = true;
 export function getAllPosts() {
-    return get('http://jsonplaceholder.typicode.com/posts');
+    return get('http://jsonplaceholder.typicode.com/posts').then(x => x.data);
 }
 
-getAllPostsWithIdHigerThan.type = 'READ';
-getAllPostsWithIdHigerThan.entity = 'JsonPlacerholderPost';
-getAllPostsWithIdHigerThan.multipleEntities = true;
+getAllPostsWithIdHigerThan.operation = 'READ';
+getAllPostsWithIdHigerThan.plural = true;
 export function getAllPostsWithIdHigerThan(id) {
     return get('http://jsonplaceholder.typicode.com/posts').then(x => {
-        return { ...x, data: x.data.filter(y => y.id > id) };
+        return x.data.filter(y => y.id > id);
     });
 }
 
-getSingle.type = 'READ';
-getSingle.entity = 'JsonPlacerholderPost';
-getSingle.multipleEntities = false;
-export function getSingle(args) {
-    return get('http://jsonplaceholder.typicode.com/posts/' + args.id);
+getSingle.operation = 'READ';
+getSingle.plural = false;
+getSingle.byId = true;
+export function getSingle(id) {
+    return get('http://jsonplaceholder.typicode.com/posts/' + id).then((x) => x.data);
 }
 
-savePost.type = 'WRITE';
-savePost.entity = 'JsonPlacerholderPost';
-savePost.multipleEntities = false;
+savePost.operation = 'UPDATE';
+savePost.plural = false;
 export function savePost(entity) {
-    return post('http://jsonplaceholder.typicode.com/posts/' + entity.id, { ...entity });
+    return put('http://jsonplaceholder.typicode.com/posts/' + entity.id, { ...entity });
 }
 
-createPost.type = 'WRITE';
-createPost.entity = 'JsonPlacerholderPost';
-createPost.multipleEntities = false;
+createPost.operation = 'CREATE';
+createPost.plural = false;
 export function createPost(entity) {
-    return post('http://jsonplaceholder.typicode.com/posts', { ...entity });
+    return post('http://jsonplaceholder.typicode.com/posts', { ...entity }).then((x)=>x.data);
 }
 
-savePosts.type = 'WRITE';
-savePosts.entity = 'JsonPlacerholderPost';
-savePosts.multipleEntities = true;
+savePosts.operation = 'UPDATE';
+savePosts.plural = true;
 export function savePosts(entity) {
     return post('http://jsonplaceholder.typicode.com/posts/', { ...entity });
 }
 
-deletePost.type = 'DELETE';
-deletePost.entity = 'JsonPlacerholderPost';
-deletePost.multipleEntities = true;
-export function deletePost(entity) {
-    return remove('http://jsonplaceholder.typicode.com/posts', { ...entity });
+deletePost.operation = 'DELETE';
+deletePost.plural = true;
+export function deletePost(id) {
+    return remove('http://jsonplaceholder.typicode.com/posts/' + id);
 }
