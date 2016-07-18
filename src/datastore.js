@@ -33,13 +33,17 @@ function addTemporaryToRealId(datastore, tmpId, realId) {
 }
 
 function replaceTempIdInQuery(datastore, query) {
-    if (/^tmp-/.test(query.value) && !entityExist(datastore, query)) {
+    if (isQueryForTempId(query) && !entityExist(datastore, query)) {
         // Try to get item with id, if not exist try with id from translation table
         return datastore.tempToRealId[query.value]
                         .then(newId => createQuery(query.type, newId));
     } else {
         return Promise.resolve(query);
     }
+}
+
+function isQueryForTempId(query) {
+    return /^tmp-/.test(query.value);
 }
 
 function entityExist(datastore, query) {
@@ -60,7 +64,7 @@ function getItemSync(datastore, query) {
     var item = datastore.entityCache[createKey(query)];
     var ttl = datastore.ttlMap[query.type];
 
-    if (item && hasExpired(item.timestamp, ttl)) {
+    if (item && (isQueryForTempId(query) || hasExpired(item.timestamp, ttl))) {
         return withoutTimestamp(item);
     }
 }

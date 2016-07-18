@@ -15,8 +15,8 @@ describe('Datastore', () => {
             expect(itemOneId).to.not.equal(itemTwoId);
         });
 
-        it('A created id can be retrieved given that the type has a ttl', (done) => {
-            const datastore = createDatastore({ user: 500 });
+        it('A created id can be retrieved', (done) => {
+            const datastore = createDatastore({});
             const query = createQuery('user');
             const itemOneId = createItem(datastore, query, 'value', 'promise');
             const itemRetrieved = getItem(datastore, createQuery('user', itemOneId));
