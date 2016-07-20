@@ -8,17 +8,25 @@ import {
 
 export function decorateRead(apiFn, datastore, type) {
     return (query) => {
+        if (apiFn.alwaysGetFreshData === true) {
+            return executeApiFnAndCache(apiFn, datastore, type, query);
+        }
+
         const fromCache = getFromCache(apiFn, datastore, type, query);
         return fromCache.then(itemFromCache => {
             if (itemFromCache) {
                 return itemFromCache;
             } else {
-                const result = apiFn(query);
-                result.then(addToCache(apiFn, datastore, type, query));
-                return result;
+                return executeApiFnAndCache(apiFn, datastore, type, query);
             }
         });
     };
+}
+
+function executeApiFnAndCache(apiFn, datastore, type, query) {
+    const result = apiFn(query);
+    result.then(addToCache(apiFn, datastore, type, query));
+    return result;
 }
 
 function getFromCache(apiFn, datastore, type, query) {
