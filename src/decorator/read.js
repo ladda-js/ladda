@@ -52,7 +52,9 @@ function getFromEntityCache(datastore, type, id) {
 function addToCache(apiFn, datastore, type, query) {
     return data => {
         if (shouldUseQueryCache(apiFn.plural, apiFn.byId)) {
-            addCollection(datastore, createQueryForCollection(type, query, apiFn.name), data);
+            [apiFn.name].concat(apiFn.cacheAliases || []).map((fnName) => {
+                addCollection(datastore, createQueryForCollection(type, query, fnName), data);
+            });
         } else {
             addItem(datastore, createQuery(type, query), data);
         }
