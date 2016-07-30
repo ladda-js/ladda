@@ -1,4 +1,4 @@
-import { invalidate } from 'invalidator';
+import { invalidateEntity, invalidateFunction } from 'invalidator';
 import { createQuery, createQueryFromItem } from 'query';
 import {
     addItem,
@@ -19,7 +19,8 @@ export function decorateCreate(apiFn, datastore, abstractEntity) {
 
         createPromise.then((result) => {
             replaceTempIdInItemAndViews(datastore, abstractEntity, insertId, result);
-            invalidate(datastore, abstractEntity, 'CREATE');
+            invalidateEntity(datastore, abstractEntity, 'CREATE');
+            invalidateFunction(datastore, abstractEntity, apiFn);
         });
 
         return createPromise;

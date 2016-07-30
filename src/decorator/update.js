@@ -1,4 +1,4 @@
-import { invalidate } from 'invalidator';
+import { invalidateEntity, invalidateFunction } from 'invalidator';
 import { createQueryFromItem } from 'query';
 import {
     updateItem,
@@ -11,7 +11,8 @@ export function decorateUpdate(apiFn, datastore, abstractEntity) {
         updateSuperEntity(datastore, abstractEntity, item);
         const result = apiFn(item);
         result.then(() => {
-            invalidate(datastore, abstractEntity, 'UPDATE');
+            invalidateEntity(datastore, abstractEntity, 'UPDATE');
+            invalidateFunction(datastore, abstractEntity, apiFn);
         });
         return result;
     };

@@ -1,4 +1,4 @@
-import { invalidate } from 'invalidator';
+import { invalidateEntity, invalidateFunction } from 'invalidator';
 import { createQuery } from 'query';
 import {
     deleteItem
@@ -10,7 +10,8 @@ export function decorateDelete(apiFn, datastore, abstractEntity) {
 
         const result = apiFn(id);
         result.then(() => {
-            invalidate(datastore, abstractEntity, 'DELETE');
+            invalidateEntity(datastore, abstractEntity, 'DELETE');
+            invalidateFunction(datastore, abstractEntity, apiFn);
         });
         return result;
     };

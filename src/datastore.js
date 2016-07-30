@@ -116,9 +116,31 @@ export function getCollection(datastore, query) {
     }
 }
 
-export function invalidate(datastore, type) {
+export function invalidate(datastore, type, method) {
     if (datastore.queryCache) {
-        datastore.queryCache[type] = {};
+        if (method) {
+            invalidateQueryCacheByFunction(datastore, type, method);
+        } else {
+            datastore.queryCache[type] = {};
+        }
+    }
+}
+
+function invalidateQueryCacheByFunction(datastore, type, method) {
+    const matcher = getMatcher(type, method);
+    const candidates = Object.keys(datastore.queryCache[type] || {});
+    const toInvalidate = candidates.filter((x) => matcher.test(x));
+    toInvalidate.forEach(key => {
+        delete datastore.queryCache[type][key];
+    });
+}
+
+function getMatcher(type, method) {
+    if (method.slice(method.length - 3, method.length) === '(*)') {
+        const cleanMethod = method.slice(0, method.length - 3);
+        return new RegExp('^' + type + '-' + cleanMethod + '-.*$');
+    } else {
+        return new RegExp('^' + type + '-' + method + '-$');
     }
 }
 

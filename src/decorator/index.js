@@ -29,13 +29,13 @@ function addDecoratedApi(abstractEntity, decoratedApi) {
 }
 
 function decorateApiFn(abstractEntity, apiFn, datastore) {
-    const type = abstractEntity.name;
+    apiFn.invalidates = apiFn.invalidates || [];
 
     switch (apiFn.operation) {
         case 'CREATE':
             return decorateCreate(apiFn, datastore, abstractEntity);
         case 'READ':
-            return decorateRead(apiFn, datastore, type);
+            return decorateRead(apiFn, datastore, abstractEntity);
         case 'UPDATE':
             return decorateUpdate(apiFn, datastore, abstractEntity);
         case 'DELETE':

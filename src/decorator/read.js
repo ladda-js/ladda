@@ -1,4 +1,5 @@
 import { createQuery } from 'query';
+import { invalidateEntity, invalidateFunction } from 'invalidator';
 import {
     getItem,
     getCollection,
@@ -6,26 +7,26 @@ import {
     addCollection,
 } from 'datastore';
 
-export function decorateRead(apiFn, datastore, type) {
+export function decorateRead(apiFn, datastore, abstractEntity) {
     return (query) => {
         if (apiFn.alwaysGetFreshData === true) {
-            return executeApiFnAndCache(apiFn, datastore, type, query);
+            return executeApiFnAndCache(apiFn, datastore, abstractEntity, query);
         }
 
-        const fromCache = getFromCache(apiFn, datastore, type, query);
+        const fromCache = getFromCache(apiFn, datastore, abstractEntity.name, query);
         return fromCache.then(itemFromCache => {
             if (itemFromCache) {
                 return itemFromCache;
             } else {
-                return executeApiFnAndCache(apiFn, datastore, type, query);
+                return executeApiFnAndCache(apiFn, datastore, abstractEntity, query);
             }
         });
     };
 }
 
-function executeApiFnAndCache(apiFn, datastore, type, query) {
+function executeApiFnAndCache(apiFn, datastore, abstractEntity, query) {
     const result = apiFn(query);
-    result.then(addToCache(apiFn, datastore, type, query));
+    result.then(addToCache(apiFn, datastore, abstractEntity, query));
     return result;
 }
 
@@ -49,15 +50,22 @@ function getFromEntityCache(datastore, type, id) {
     return getItem(datastore, createQuery(type, id));
 }
 
-function addToCache(apiFn, datastore, type, query) {
+function addToCache(apiFn, datastore, abstractEntity, query) {
     return data => {
         if (shouldUseQueryCache(apiFn.plural, apiFn.byId)) {
             [apiFn.name].concat(apiFn.cacheAliases || []).map((fnName) => {
-                addCollection(datastore, createQueryForCollection(type, query, fnName), data);
+                addCollection(datastore,
+                              createQueryForCollection(abstractEntity.name,
+                                                       query,
+                                                       fnName),
+                              data);
             });
         } else {
-            addItem(datastore, createQuery(type, query), data);
+            addItem(datastore, createQuery(abstractEntity.name, query), data);
         }
+
+        invalidateEntity(datastore, abstractEntity, 'READ');
+        invalidateFunction(datastore, abstractEntity, apiFn);
     };
 }
 
