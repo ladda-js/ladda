@@ -40,6 +40,21 @@ export function getProjects(foo) {
 }
 ```
 
+# Api Function Annotations
+  As you can see above we are adding information directly on the function object. Functions can be configured using:
+
+  * alwaysGetFreshData : <default: false> : Always fetch data and save in cache
+  * plural : <required> : Used when operation is set to READ. Informs Ladda that a list of multiple entities is expected.
+  * invalidates : <default: []> : Invalidates the query cache for the specified api function in the same type. If suffixed with (*) query cache regardless of query will be cleared. Otherwise only api function called without parameters.
+  * operation : <required> : CREATE | READ | UPDATE | DELETE - necessary for Ladda to handle caching correclty.
+
+# Entity Config
+  For Ladda to work optimally you need to specify the relationship between entities and other caching settings.
+
+  * viewOf : null : Specifies that the current entity is a view of another entity. The super entity will influence the cache of the view and vice versa. Eg. if a UserPreview is a view of User, then updating a user's name calling User.updateName({ id, name }) will update UserPreview.name and vice versa.
+  * ttl : 300 : How long the cache is valid in seconds. After the number of seconds specified Ladda will pretend the cached entity don't exist.
+  * invalidates : [] : Other entities to invalidate on operations specified in "invalidatesOn"
+  * invalidatesOn : [CREATE] : Operations to invalidate on, where operations can be CREATE, READ, UPDATE, DELETE.
 
 # Try it out
 Do a "npm install ladda-cache" in your project. Stay tuned for an example project.
