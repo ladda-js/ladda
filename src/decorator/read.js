@@ -31,15 +31,11 @@ function executeApiFnAndCache(apiFn, datastore, abstractEntity, query) {
 }
 
 function getFromCache(apiFn, datastore, type, query) {
-    if (shouldUseQueryCache(apiFn.plural, apiFn.byId)) {
+    if (apiFn.plural) {
         return getFromQueryCache(datastore, type, query, apiFn.name);
     } else {
         return getFromEntityCache(datastore, type, query);
     }
-}
-
-function shouldUseQueryCache(plural, byId) {
-    return plural === true || byId === false;
 }
 
 function getFromQueryCache(datastore, type, query, apiFnName) {
@@ -52,14 +48,13 @@ function getFromEntityCache(datastore, type, id) {
 
 function addToCache(apiFn, datastore, abstractEntity, query) {
     return data => {
-        if (shouldUseQueryCache(apiFn.plural, apiFn.byId)) {
-            [apiFn.name].concat(apiFn.cacheAliases || []).map((fnName) => {
-                addCollection(datastore,
-                              createQueryForCollection(abstractEntity.name,
-                                                       query,
-                                                       fnName),
-                              data);
-            });
+        if (apiFn.plural) {
+            const collectionQuery = createQueryForCollection(abstractEntity.name,
+                                                             query,
+                                                             apiFn.name);
+            addCollection(datastore,
+                          collectionQuery,
+                          data);
         } else {
             addItem(datastore, createQuery(abstractEntity.name, query), data);
         }
