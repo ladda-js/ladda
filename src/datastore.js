@@ -121,9 +121,24 @@ export function invalidate(datastore, type, method) {
         if (method) {
             invalidateQueryCacheByFunction(datastore, type, method);
         } else {
+            if (type.indexOf('(*)') !== -1) {
+                var allMatcher = getAllMatcher(type.substring(0, type.length - 3));
+                var candidates = Object.keys(datastore.entityCache || {});
+                var toInvalidate = candidates.filter(function (x) {
+                    return allMatcher.test(x);
+                });
+                toInvalidate.forEach(function (key) {
+                    delete datastore.entityCache[key];
+                });
+                datastore.queryCache[type.substring(0, type.length - 3)] = {};
+            }
             datastore.queryCache[type] = {};
         }
     }
+}
+
+function getAllMatcher(type) {
+    return new RegExp('^' + type + '.*$');
 }
 
 function invalidateQueryCacheByFunction(datastore, type, method) {
