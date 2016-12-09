@@ -173,7 +173,7 @@ function safeCollectionLookup(datastore, query) {
 
 function createKey(query) {
     return Object.keys(query).map(x => {
-        if (typeof query[x] === 'object') {
+        if (query[x] && typeof query[x] === 'object') {
             return createKey(query[x]);
         } else {
             return query[x];
