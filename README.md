@@ -1,5 +1,5 @@
 # Ladda
-Ladda is a tool that moves caching logic, in particular invalidation logic, out from our application code. It allows us to easily model what should be invalidated when an entity is created, updated or deleted. For example, when an objective is deleted we want to invalidate the activity stream. Rather than tainting our application code with this we can observe that an objective was deleted and do what is necessary.
+Ladda is a tool that moves caching logic, in particular invalidation logic, out from our application code. It allows us to easily model what should be invalidated when an entity is created, updated or deleted. For example, when a user is deleted you might want to invalidate blog posts, since you know that deleting a user also delets all blog posts by the user. Rather than tainting application code with this we can observe that a user was deleted and do what is necessary.
 
 # When to Use Ladda
 Ladda is not meant to cover all cases. This is very intentional. Bad libraries are often the result of trying to do too much. You should only use Ladda when you have or intend to follow REST to a high extent. This means:
