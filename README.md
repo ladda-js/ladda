@@ -6,11 +6,11 @@ Ladda is not meant to cover all cases. This is very intentional. Bad libraries a
 
 * Define an entity E such that E.id uniquely identifies the entity.
 * Define create, read, update and delete such that:
-* **create: { E  \ {id} }** where E \ {id} means E without id.
-* **update: { E }**
-* **delete: { id }**
-* **read: { id }** where the backend responds with E
-* **readMultiple: { … }** where the backend responds with [E] and “…” is an unique query.
+  * **create: { E  \ {id} }** where E \ {id} means E without id.
+  * **update: { E }**
+  * **delete: { id }**
+  * **read: { id }** where the backend responds with E
+  * **readMultiple: { … }** where the backend responds with [E] and “…” is an unique query.
 
 Ladda can be used in more cases. It is very flexible and often allows you to work around issues. But you need to think about how you are using it then. If you want to do some custom solution, where E don’t have an id or call it something else, then you need to use something else or be creative.
 
