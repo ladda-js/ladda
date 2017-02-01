@@ -79,7 +79,7 @@ A function declared with “operation = CREATE” is expected to as its only par
 ```
 { name: “Peter”, from: “Sweden”, livingIn: “Germany” }
 ```
-The server is required to respond with { id: <uniqueIdForItem> }. The response can contain more data, but only the id will be used. Note the assumption that the server will not manipulate the entity saved.
+The server is required to respond with `{ id: <uniqueIdForItem> }`. The response can contain more data, but only the id will be used. Note the assumption that the server will not manipulate the entity saved.
 
 *READ - Singular:*
 
