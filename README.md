@@ -49,7 +49,7 @@ export function getProjects(foo) {
 # Main Concepts
 **Type**
 
-For example “User” can be a type. API-methods are associated with a type. So for example a method “deleteById(id)” will automatically delete the entry from the cache for “User”. You can think of a type as defining a namespace for the cache.
+For example “User” can be a type. API-methods are associated with a type. So for example a method `deleteById(id)` will automatically delete the entry from the cache for “User”. You can think of a type as defining a namespace for the cache.
 
 To define the type user:
 ```
@@ -76,9 +76,9 @@ Ladda relies on IDs being available. These are assumed to uniquely identify an e
 *CREATE*:
 
 A function declared with “operation = CREATE” is expected to as its only parameter get an item without the “id” being set. For example:
-
+```
 { name: “Peter”, from: “Sweden”, livingIn: “Germany” }
-
+```
 The server is required to respond with { id: <uniqueIdForItem> }. The response can contain more data, but only the id will be used. Note the assumption that the server will not manipulate the entity saved.
 
 *READ - Singular:*
@@ -87,28 +87,28 @@ An id is expected to be provided as the only argument. The response from the ser
 
 *READ - Plural:*
 
-An query, which is just an object, is expected to be provided as the only argument. The response from the server is expected to be a list of item. Each item must have an ID specified. Eg. if [userA, userB] is returned, userA.id and userB.id are required to be set.
+An query, which is just an object, is expected to be provided as the only argument. The response from the server is expected to be a list of item. Each item must have an ID specified. Eg. if `[userA, userB]` is returned, userA.id and userB.id are required to be set.
 
 **Singular**
 
-This is defined by setting for example “getUserById.plural = false;”. This is only important for READ. See example above under “READ - Singular”.
+This is defined by setting for example `getUserById.plural = false;`. This is only important for READ. See example above under “READ - Singular”.
 
 **Plural**
 
-This is defined by setting for example “getUserById.plural = true;”. This is only important for READ. See example above under “READ - Plural”.
+This is defined by setting for example `getUserById.plural = true;`. This is only important for READ. See example above under “READ - Plural”.
 
 **Query**
 
-This is only important for “READ - Plural”. Consider an endpoint that gives you all the users born in 1989 and that have names starting with A. A query might look like: { nameStartsWith: “A”, born: 1989 }.
+This is only important for “READ - Plural”. Consider an endpoint that gives you all the users born in 1989 and that have names starting with A. A query might look like: `{ nameStartsWith: “A”, born: 1989 }`.
 
 
 **API**
 
-Every type is associated with an API, which is simply an object with functions. For instance { getById: fetchFromDBFunction }. Each function in the API needs to be decorated with at least “operation”. For example:
-
+Every type is associated with an API, which is simply an object with functions. For instance `{ getById: fetchFromDBFunction }`. Each function in the API needs to be decorated with at least “operation”. For example:
+```
 getById.operation = “READ”;
 function getById(id) { return fetchFromDBFunction(id); }
-
+```
 It has to return a Promise. As mentioned about, depending on the operation certain requirements are made:
 
 CREATE: An object with id set is returned: { id }
@@ -130,7 +130,7 @@ Example:
 
 **viewOf**
 
-Specifies that the current type is a view of another entity. The super type will influence the cache of the view and vice versa. Eg. if a UserPreview is a view of User, then updating a user's name calling User.updateName({ id, name }) will update UserPreview.name and vice versa. Default is no super type.
+Specifies that the current type is a view of another entity. The super type will influence the cache of the view and vice versa. Eg. if a UserPreview is a view of User, then updating a user's name calling `User.updateName({ id, name })` will update UserPreview.name and vice versa. Default is no super type.
 
 **ttl**
 
