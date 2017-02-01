@@ -24,8 +24,6 @@ import { build } from 'ladda-cache';
 const config = {
     projects: {
         ttl: 300,
-        invalidates: ['projects', 'projectPreview'],
-        invalidatesOn: ['CREATE'],
         api: project
     }
 };
@@ -37,8 +35,6 @@ where project is a bunch of api-methods returning promises, eg:
 
 ```javascript
 createProject.operation = 'CREATE';
-createProject.plural = false;
-createProject.invalidates = ['getProjects(*)'];
 export function createProject(project) {
     return post(resource, { postData: project });
 }
