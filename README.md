@@ -48,6 +48,7 @@ export function getProjects(foo) {
 
 # Main Concepts
 **Type**
+
 For example “User” can be a type. API-methods are associated with a type. So for example a method “deleteById(id)” will automatically delete the entry from the cache for “User”. You can think of a type as defining a namespace for the cache.
 
 To define the type user:
@@ -57,9 +58,11 @@ User: {
 }
 ```
 **Item**
+
 An instance of a type. For example userA and userB are items of type User. Could look like `{ id: “randomId”, name: “Kalle” }`. Always have “id” specified except for when you create a new one.
 
 **Operation**
+
 Ladda follows the CRUD-model. Operations are:
 * CREATE: Create a new item, for example a new User, given an item without id specified.
 * READ: Get one or multiple items given a query or id.
@@ -67,9 +70,11 @@ Ladda follows the CRUD-model. Operations are:
 * DELETE: Remove an item given a id.
 
 **ID**
+
 Ladda relies on IDs being available. These are assumed to uniquely identify an entity of a certain type. For example “user.id”, where user is an entity in the type User, is assumed to uniquely identify a specific user. The main assumptions, per operations, are:
 
 *CREATE*:
+
 A function declared with “operation = CREATE” is expected to as its only parameter get an item without the “id” being set. For example:
 
 { name: “Peter”, from: “Sweden”, livingIn: “Germany” }
@@ -77,22 +82,28 @@ A function declared with “operation = CREATE” is expected to as its only par
 The server is required to respond with { id: <uniqueIdForItem> }. The response can contain more data, but only the id will be used. Note the assumption that the server will not manipulate the entity saved.
 
 *READ - Singular:*
+
 An id is expected to be provided as the only argument. The response from the server is expected to be an item with “id” set.
 
 *READ - Plural:*
+
 An query, which is just an object, is expected to be provided as the only argument. The response from the server is expected to be a list of item. Each item must have an ID specified. Eg. if [userA, userB] is returned, userA.id and userB.id are required to be set.
 
 **Singular**
+
 This is defined by setting for example “getUserById.plural = false;”. This is only important for READ. See example above under “READ - Singular”.
 
 **Plural**
+
 This is defined by setting for example “getUserById.plural = true;”. This is only important for READ. See example above under “READ - Plural”.
 
 **Query**
+
 This is only important for “READ - Plural”. Consider an endpoint that gives you all the users born in 1989 and that have names starting with A. A query might look like: { nameStartsWith: “A”, born: 1989 }.
 
 
 **API**
+
 Every type is associated with an API, which is simply an object with functions. For instance { getById: fetchFromDBFunction }. Each function in the API needs to be decorated with at least “operation”. For example:
 
 getById.operation = “READ”;
@@ -118,15 +129,19 @@ Example:
 ```
 
 **viewOf**
+
 Specifies that the current type is a view of another entity. The super type will influence the cache of the view and vice versa. Eg. if a UserPreview is a view of User, then updating a user's name calling User.updateName({ id, name }) will update UserPreview.name and vice versa. Default is no super type.
 
 **ttl**
+
 How long the cache is valid in seconds. After the number of seconds specified Ladda will pretend the cached entity don't exist. Default is no TTL (meaning no caching at all).
 
 **invalidates**
+
 Other entities to invalidate on operations specified in "invalidatesOn". Default is none.
 
 **invalidatesOn**
+
 Operations to invalidate on, where operations can be CREATE, READ, UPDATE, DELETE. Default is CREATE.
 
 
@@ -148,15 +163,19 @@ export function poll(query) {
 }
 ```
 **alwaysGetFreshData**
+
 Always fetch data (even if it exists in the cache) and save in cache. Default is false.
 
 **plural**
+
 Used when operation is set to READ. Informs Ladda that a list of multiple entities is expected. Default is false.
 
 **invalidates**
+
 Invalidates the query cache for the specified api function in the same type. If suffixed with (*) all caching for the specified api function will be cleared (regardless of which arguments it was called with). Otherwise only api function called without parameters. Default is none.
 
 **operation**
+
 CREATE | READ | UPDATE | DELETE - necessary for Ladda to handle caching correclty. Always has to be specified.
 
 # Try it out
