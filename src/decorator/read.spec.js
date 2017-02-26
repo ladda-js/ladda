@@ -149,5 +149,22 @@ describe('Read', () => {
                 });
             });
         });
+        it('throws if id is missing', (done) => {
+            const es = createEntityStore(config);
+            const qc = createQueryCache(es);
+            const e = {...config[0], ttl: 300};
+            const xOrg = {name: 'Kalle'};
+            const aFn = sinon.spy(() => {
+                return Promise.resolve(xOrg);
+            });
+            aFn.plural = false;
+            const res = decorateRead(es, qc, e, aFn);
+
+            res().catch(e => {
+                expect(e).to.be.a('Error');
+                done();
+            });
+
+        });
     });
 });

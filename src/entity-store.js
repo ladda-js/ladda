@@ -69,12 +69,20 @@ const entityValueExist = (s, e, v) => !!read(s, createEntityKey(e, v));
 
 // EntityStore -> Entity -> Value -> ()
 const setEntityValue = (s, e, v) => {
+    if (!v.id) {
+        throw new Error(`Value is missing id, tried to add to entity ${e.name}`);
+    }
     const k = createEntityKey(e, v);
     set(s, k, v);
+    return v;
 };
 
 // EntityStore -> Entity -> Value -> ()
 const setViewValue = (s, e, v) => {
+    if (!v.id) {
+        throw new Error(`Value is missing id, tried to add to view ${e.name}`);
+    }
+
     if (entityValueExist(s, e, v)) {
         const eValue = read(s, createEntityKey(e, v));
         setEntityValue(s, e, merge(v, eValue));
@@ -83,6 +91,8 @@ const setViewValue = (s, e, v) => {
         const k = createViewKey(e, v);
         set(s, k, v);
     }
+
+    return v;
 };
 
 // EntityStore -> Entity -> Value -> ()

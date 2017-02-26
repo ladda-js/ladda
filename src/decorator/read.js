@@ -18,8 +18,7 @@ const decorateReadSingle = (es, qc, e, aFn) => {
         }
 
         const p = aFn(...args);
-        p.then(put(es, e));
-        return p;
+        return p.then(put(es, e));
     };
 };
 
