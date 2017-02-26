@@ -1,69 +1,38 @@
-import { createQuery } from 'query';
-import { invalidateEntity, invalidateFunction } from 'invalidator';
-import {
-    getItem,
-    getCollection,
-    addItem,
-    addCollection,
-} from 'datastore';
+import {get, put, contains} from 'entity-store';
+import {query} from 'query-cache';
 
-export function decorateRead(apiFn, datastore, abstractEntity) {
-    return (query) => {
-        if (apiFn.alwaysGetFreshData === true) {
-            return executeApiFnAndCache(apiFn, datastore, abstractEntity, query);
-        }
+const getTtl = e => e.ttl;
 
-        const fromCache = getFromCache(apiFn, datastore, abstractEntity.name, query);
-        return fromCache.then(itemFromCache => {
-            if (itemFromCache) {
-                return itemFromCache;
-            } else {
-                return executeApiFnAndCache(apiFn, datastore, abstractEntity, query);
+// Entity -> Int -> Bool
+const hasExpired = (e, timestamp) => {
+    return (Date.now() - timestamp) > getTtl(e);
+};
+
+const decorateReadSingle = (es, qc, e, aFn) => {
+    return (...args) => {
+        if (contains(es, e, args)) {
+            const v = get(es, e, args);
+            if (!hasExpired(e, v.timestamp)) {
+                return Promise.resolve(v.value);
             }
-        });
-    };
-}
-
-function executeApiFnAndCache(apiFn, datastore, abstractEntity, query) {
-    const result = apiFn(query);
-    result.then(addToCache(apiFn, datastore, abstractEntity, query));
-    return result;
-}
-
-function getFromCache(apiFn, datastore, type, query) {
-    if (apiFn.plural) {
-        return getFromQueryCache(datastore, type, query, apiFn.name);
-    } else {
-        return getFromEntityCache(datastore, type, query);
-    }
-}
-
-function getFromQueryCache(datastore, type, query, apiFnName) {
-    return getCollection(datastore, createQueryForCollection(type, query, apiFnName));
-}
-
-function getFromEntityCache(datastore, type, id) {
-    return getItem(datastore, createQuery(type, id));
-}
-
-function addToCache(apiFn, datastore, abstractEntity, query) {
-    return data => {
-        if (apiFn.plural) {
-            const collectionQuery = createQueryForCollection(abstractEntity.name,
-                                                             query,
-                                                             apiFn.name);
-            addCollection(datastore,
-                          collectionQuery,
-                          data);
-        } else {
-            addItem(datastore, createQuery(abstractEntity.name, query), data);
         }
 
-        invalidateEntity(datastore, abstractEntity, 'READ');
-        invalidateFunction(datastore, abstractEntity, apiFn);
+        const p = aFn(...args);
+        p.then(put(es, e));
+        return p;
     };
-}
+};
 
-function createQueryForCollection(type, query, apiFnName) {
-    return createQuery(type, query, { name: apiFnName });
+const decorateReadPlural = (es, qc, e, aFn) => {
+    return (...args) => {
+        return query(qc, e, aFn, args);
+    };
+};
+
+export function decorateRead(es, qc, e, aFn) {
+    if (aFn.plural) {
+        return decorateReadPlural(es, qc, e, aFn);
+    } else {
+        return decorateReadSingle(es, qc, e, aFn);
+    }
 }
