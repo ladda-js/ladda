@@ -1,16 +1,35 @@
 /* Handles queries, in essence all GET operations.
  * Provides invalidation and querying. Uses the underlying EntityStore for all actual data.
  * Only ids are stored here.
- * TODO: Move hasExpired and ApiFn logic out to decorator or move from decorator to entity store
- * so that query cache and entity store have similar responsibilities.
  */
 
-import {put, get} from './entity-store';
+import {put as putInEs, get as getFromEs} from './entity-store';
 import {on2, prop, join, reduce, identity,
         curry, map, map_, startsWith, compose, filter} from 'fp';
 
+const serializeObject = (o) => {
+    return Object.keys(o).map(x => {
+        if (o[x] && typeof o[x] === 'object') {
+            return serializeObject(o[x]);
+        } else {
+            return o[x];
+        }
+    }).join('-');
+};
+
+const mySerializer = (x) => {
+    const serialize = (y) => {
+        if (y && typeof y === 'object') {
+            return serializeObject(y);
+        } else {
+            return y;
+        }
+    };
+    return map(serialize, x);
+};
+
 // Entity -> [String] -> String
-const createKey = on2(reduce(join('-')), prop('name'), identity);
+const createKey = on2(reduce(join('-')), prop('name'), mySerializer);
 
 // Value -> CacheValue
 const toCacheValue = xs => ({value: xs, timestamp: Date.now()});
@@ -18,62 +37,47 @@ const toCacheValue = xs => ({value: xs, timestamp: Date.now()});
 // CacheValue -> Value
 const toValue = prop('value');
 
-// Entity -> Int
-const getTtl = e => e.ttl * 1000 || 0;
-
 // QueryCache -> String -> Bool
 const inCache = (qc, k) => !!qc.cache[k];
 
 // QueryCache -> Entity -> String -> CacheValue
 const getFromCache = (qc, e, k) => {
     const rawValue = toValue(qc.cache[k]);
-    return Array.isArray(rawValue)
-        ? map(get(qc.entityStore, e), rawValue)
-        : get(qc.entityStore, e, rawValue);
-};
-
-// QueryCache -> Entity -> String -> Int
-const getExpireForQuery = (qc, e, k) => {
-    return qc.cache[k].timestamp;
-};
-
-// Entity -> Int -> Bool
-const hasExpired = (e, expire) => {
-    return (Date.now() - expire) > getTtl(e);
+    const value = Array.isArray(rawValue)
+        ? map(getFromEs(qc.entityStore, e), rawValue)
+        : getFromEs(qc.entityStore, e, rawValue);
+    return {
+        ...qc.cache[k],
+        value
+    };
 };
 
 // QueryCache -> Entity -> String -> Promise -> Promise
-const saveInCache = curry((qc, e, k, xs) => {
+export const put = curry((qc, e, aFn, args, xs) => {
+    const k = createKey(e, [aFn.name, ...filter(identity, args)]);
     if (Array.isArray(xs)) {
         qc.cache[k] = toCacheValue(map(prop('id'), xs));
     } else {
         qc.cache[k] = toCacheValue(prop('id', xs));
     }
-    map_(put(qc.entityStore, e), Array.isArray(xs) ? xs : [xs]);
+    map_(putInEs(qc.entityStore, e), Array.isArray(xs) ? xs : [xs]);
     return xs;
 });
 
-// Entity -> Value -> Int -> ApiFunction -> Promise
-const getValue = (e, v, expire, getFromApi) => {
-    if (hasExpired(e, expire)) {
-        return getFromApi();
-    } else {
-        return Array.isArray(v)
-            ? Promise.resolve(map(toValue, v)) : Promise.resolve(toValue(v));
-    }
+// Value -> Promise
+export const getValue = (v) => {
+    return Array.isArray(v)
+        ? map(toValue, v) : toValue(v);
 };
 
-// QueryCache -> Entity -> ApiFunction -> Args -> Value
-export const query = (qc, e, aFn, args) => {
+export const contains = (qc, e, aFn, args) => {
     const k = createKey(e, [aFn.name, ...filter(identity, args)]);
-    const getFromApi = () => aFn(...args).then(saveInCache(qc, e, k));
-    if (!inCache(qc, k)) {
-        return getFromApi();
-    } else {
-        const v = getFromCache(qc, e, k);
-        const expire = getExpireForQuery(qc, e, k);
-        return getValue(e, v, expire, getFromApi);
-    }
+    return inCache(qc, k);
+};
+
+export const get = (qc, e, aFn, args) => {
+    const k = createKey(e, [aFn.name, ...filter(identity, args)]);
+    return getFromCache(qc, e, k);
 };
 
 // Entity -> Operation -> Bool

@@ -1,8 +1,13 @@
-import {get, put, contains} from 'entity-store';
-import {query} from 'query-cache';
+import {get as getFromEs,
+        put as putInEs,
+        contains as inEs} from 'entity-store';
+import {get as getFromQc,
+        put as putInQc,
+        contains as inQc,
+        getValue} from 'query-cache';
 import {passThrough} from 'fp';
 
-const getTtl = e => e.ttl;
+const getTtl = e => (e.ttl || 0) * 1000;
 
 // Entity -> Int -> Bool
 const hasExpired = (e, timestamp) => {
@@ -11,20 +16,27 @@ const hasExpired = (e, timestamp) => {
 
 const decorateReadSingle = (es, qc, e, aFn) => {
     return (...args) => {
-        if (contains(es, e, args)) {
-            const v = get(es, e, args);
+        if (inEs(es, e, args)) {
+            const v = getFromEs(es, e, args);
             if (!hasExpired(e, v.timestamp)) {
                 return Promise.resolve(v.value);
             }
         }
 
-        return aFn(...args).then(passThrough(put(es, e)));
+        return aFn(...args).then(passThrough(putInEs(es, e)));
     };
 };
 
 const decorateReadQuery = (es, qc, e, aFn) => {
     return (...args) => {
-        return query(qc, e, aFn, args);
+        if (inQc(qc, e, aFn, args)) {
+            const v = getFromQc(qc, e, aFn, args);
+            if (!hasExpired(e, v.timestamp)) {
+                return Promise.resolve(getValue(v.value));
+            }
+        }
+
+        return aFn(...args).then(passThrough(putInQc(qc, e, aFn, args)));
     };
 };
 

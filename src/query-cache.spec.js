@@ -1,5 +1,5 @@
 import {createEntityStore} from './entity-store';
-import {createQueryCache, query, invalidate} from './query-cache';
+import {createQueryCache, query, invalidate, get} from './query-cache';
 import sinon from 'sinon';
 
 const config = [
@@ -45,7 +45,7 @@ describe('QueryCache', () => {
         });
     });
 
-    describe('query', () => {
+    xdescribe('query', () => {
         it('If not in cache, call aFn', (done) => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
@@ -141,7 +141,7 @@ describe('QueryCache', () => {
             });
         });
     });
-    describe('invalidate', () => {
+    xdescribe('invalidate', () => {
         it('calls aFn for invalidated entity', (done) => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
