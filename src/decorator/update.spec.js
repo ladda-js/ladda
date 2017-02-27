@@ -48,7 +48,6 @@ describe('Update', () => {
                 return Promise.resolve({});
             });
 
-            aFn.plural = false;
             const res = decorateUpdate(es, qc, e, aFn);
             res(xOrg).then(() => {
                 expect(get(es, e, 1).value).to.equal(xOrg);

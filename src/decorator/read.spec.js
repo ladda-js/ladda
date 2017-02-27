@@ -47,7 +47,6 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            aFn.plural = false;
             const res = decorateRead(es, qc, e, aFn);
             res(1).then((x) => {
                 expect(x).to.equal(xOrg);
@@ -62,7 +61,6 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            aFn.plural = false;
             const res = decorateRead(es, qc, e, aFn);
 
             const firstCall = res(1);
@@ -82,7 +80,6 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            aFn.plural = false;
             const res = decorateRead(es, qc, e, aFn);
 
             const firstCall = res(1);
@@ -102,7 +99,6 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            aFn.plural = true;
             const res = decorateRead(es, qc, e, aFn);
             res(1).then((x) => {
                 expect(x).to.equal(xOrg);
@@ -117,7 +113,6 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            aFn.plural = true;
             const res = decorateRead(es, qc, e, aFn);
 
             const firstCall = res(1);
@@ -137,7 +132,6 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            aFn.plural = true;
             const res = decorateRead(es, qc, e, aFn);
 
             const firstCall = res(1);
@@ -157,7 +151,6 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            aFn.plural = false;
             const res = decorateRead(es, qc, e, aFn);
 
             res().catch(e => {

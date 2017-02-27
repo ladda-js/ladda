@@ -48,7 +48,6 @@ describe('Delete', () => {
                 return Promise.resolve({});
             });
             put(es, e, xOrg);
-            aFn.plural = false;
             const res = decorateDelete(es, qc, e, aFn);
             res(1).then(() => {
                 expect(get(es, e, 1)).to.equal(undefined);

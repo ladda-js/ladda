@@ -48,7 +48,6 @@ describe('Create', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(response);
             });
-            aFn.plural = false;
             const res = decorateCreate(es, qc, e, aFn);
             res(xOrg).then((newX) => {
                 expect(newX).to.equal(response);

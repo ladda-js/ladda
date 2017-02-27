@@ -22,16 +22,16 @@ const decorateReadSingle = (es, qc, e, aFn) => {
     };
 };
 
-const decorateReadPlural = (es, qc, e, aFn) => {
+const decorateReadQuery = (es, qc, e, aFn) => {
     return (...args) => {
         return query(qc, e, aFn, args);
     };
 };
 
 export function decorateRead(es, qc, e, aFn) {
-    if (aFn.plural) {
-        return decorateReadPlural(es, qc, e, aFn);
-    } else {
+    if (aFn.byId) {
         return decorateReadSingle(es, qc, e, aFn);
+    } else {
+        return decorateReadQuery(es, qc, e, aFn);
     }
 }

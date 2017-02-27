@@ -20,10 +20,8 @@ const config = {
     }
 };
 config.user.api.getUsers.operation = 'READ';
-config.user.api.getUsers.plural = true;
 config.user.api.deleteUser.operation = 'DELETE';
 config.userPreview.api.getPreviews.operation = 'READ';
-config.userPreview.api.getPreviews.plural = true;
 config.userPreview.api.updatePreview.operation = 'UPDATE';
 
 describe('builder', () => {
