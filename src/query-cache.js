@@ -6,7 +6,8 @@
  */
 
 import {put, get} from './entity-store';
-import {on2, prop, join, reduce, identity, curry, map, map_, startsWith, compose, debug} from 'fp';
+import {on2, prop, join, reduce, identity,
+        curry, map, map_, startsWith, compose, filter} from 'fp';
 
 // Entity -> [String] -> String
 const createKey = on2(reduce(join('-')), prop('name'), identity);
@@ -27,8 +28,8 @@ const inCache = (qc, k) => !!qc.cache[k];
 const getFromCache = (qc, e, k) => {
     const rawValue = toValue(qc.cache[k]);
     return Array.isArray(rawValue)
-        ? map(get(qc.entityStore, e), toValue(qc.cache[k]))
-        : get(qc.entityStore, e, toValue(qc.cache[k]));
+        ? map(get(qc.entityStore, e), rawValue)
+        : get(qc.entityStore, e, rawValue);
 };
 
 // QueryCache -> Entity -> String -> Int
@@ -57,13 +58,14 @@ const getValue = (e, v, expire, getFromApi) => {
     if (hasExpired(e, expire)) {
         return getFromApi();
     } else {
-        return Promise.resolve(toValue(v));
+        return Array.isArray(v)
+            ? Promise.resolve(map(toValue, v)) : Promise.resolve(toValue(v));
     }
 };
 
 // QueryCache -> Entity -> ApiFunction -> Args -> Value
 export const query = (qc, e, aFn, args) => {
-    const k = createKey(e, [aFn.name, ...args]);
+    const k = createKey(e, [aFn.name, ...filter(identity, args)]);
     const getFromApi = () => aFn(...args).then(saveInCache(qc, e, k));
     if (!inCache(qc, k)) {
         return getFromApi();

@@ -16,6 +16,11 @@ export const curry = (f) => (...args) => {
     }
 };
 
+export const passThrough = curry((f, x) => {
+    f(x);
+    return x;
+});
+
 export const startsWith = curry((x, xs) => xs.indexOf(x) === 0);
 
 export const join = curry((separator, x, y) => x + separator + y);
@@ -136,3 +141,14 @@ export const ifs = (...config) =>
             }
         }
     };
+
+const takeIf = curry((p, m, x) => {
+    if (p(x)) {
+        m.push(x);
+    }
+    return m;
+});
+
+export const filter = curry((p, xs) => {
+    return reduce(takeIf(p), [], xs);
+});

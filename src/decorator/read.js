@@ -1,5 +1,6 @@
 import {get, put, contains} from 'entity-store';
 import {query} from 'query-cache';
+import {passThrough} from 'fp';
 
 const getTtl = e => e.ttl;
 
@@ -17,8 +18,7 @@ const decorateReadSingle = (es, qc, e, aFn) => {
             }
         }
 
-        const p = aFn(...args);
-        return p.then(put(es, e));
+        return aFn(...args).then(passThrough(put(es, e)));
     };
 };
 
