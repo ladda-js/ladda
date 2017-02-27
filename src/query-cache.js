@@ -19,7 +19,7 @@ const toCacheValue = xs => ({value: xs, timestamp: Date.now()});
 const toValue = prop('value');
 
 // Entity -> Int
-const getTtl = e => e.ttl || 0;
+const getTtl = e => e.ttl * 1000 || 0;
 
 // QueryCache -> String -> Bool
 const inCache = (qc, k) => !!qc.cache[k];
