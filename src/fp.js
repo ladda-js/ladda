@@ -28,7 +28,7 @@ export const join = curry((separator, x, y) => x + separator + y);
 export const on = curry((f, g, h, x) => f(g(x), h(x)));
 
 // a -> a -> bool
-const isEqual = curry((x, y) => x === y);
+export const isEqual = curry((x, y) => x === y);
 
 // UnFn -> UnFn -> UnFn -> Value -> Value -> BiFn
 export const on2 = curry((f, g, h, x, y) => f(g(x), h(y)));
@@ -85,7 +85,7 @@ export const toPairs = x => {
 
 // [[key, val]] -> Object<Key, Val>
 export const fromPairs = xs => {
-    const addToObj = (o, [k, v]) => o[k] = v;
+    const addToObj = (o, [k, v]) => passThrough(() => o[k] = v, o);
     return reduce(addToObj, {}, xs);
 };
 
@@ -112,35 +112,6 @@ export const toObject = curry((getK, xs) => reduce(
     {},
     xs
 ));
-
-const getFirstMatchingPattern = curry((args, result, pattern) => {
-    if (result) { return result; }
-
-    const fn = last(pattern);
-    const patternsFromConfig = init(pattern);
-    const patternsFromArgs = args.slice(0, patternsFromConfig.length);
-    const argsFromArgs = args.slice(patternsFromConfig.length);
-
-    if (isEqual(patternsFromConfig, patternsFromArgs)) {
-        return fn(...argsFromArgs);
-    }
-
-});
-
-export const ifs = (...config) =>
-    (...args) => {
-        const result = reduce(getFirstMatchingPattern(args), null, config);
-        if (result) {
-            return result;
-        } else {
-            const [pattern, otherwiseCandidate] = last(config);
-            if (pattern === '_otherwise') {
-                return otherwiseCandidate(...args);
-            } else {
-                throw new Error('Non-exhaustive pattern');
-            }
-        }
-    };
 
 const takeIf = curry((p, m, x) => {
     if (p(x)) {
