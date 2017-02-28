@@ -36,7 +36,7 @@ describe('EntityStore', () => {
     describe('createEntityStore', () => {
         it('returns store', () => {
             const s = createEntityStore(config);
-            expect(s).to.not.equal(null);
+            expect(s).to.be.ok;
         });
     });
     describe('put', () => {
