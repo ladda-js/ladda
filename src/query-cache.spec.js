@@ -66,6 +66,26 @@ describe('QueryCache', () => {
             put(qc, e, aFn, args, xs);
             expect(contains(qc, e, aFn, args)).to.be.true;
         });
+        it('if an element exist, and args contains a complex object, return true', () => {
+            const es = createEntityStore(config);
+            const qc = createQueryCache(es);
+            const e = config[0];
+            const aFn = (x) => x;
+            const args = [1, {hello: {world: 'Kalle'}}, 3];
+            const xs = [{id: 1}, {id: 2}, {id: 3}];
+            put(qc, e, aFn, args, xs);
+            expect(contains(qc, e, aFn, args)).to.be.true;
+        });
+        it('if an element exist, and args contains a simple object, return true', () => {
+            const es = createEntityStore(config);
+            const qc = createQueryCache(es);
+            const e = config[0];
+            const aFn = (x) => x;
+            const args = [1, {hello: 'world'}, 3];
+            const xs = [{id: 1}, {id: 2}, {id: 3}];
+            put(qc, e, aFn, args, xs);
+            expect(contains(qc, e, aFn, args)).to.be.true;
+        });
         it('if an element does not exist, return false', () => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);

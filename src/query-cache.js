@@ -7,6 +7,7 @@ import {put as putInEs, get as getFromEs} from './entity-store';
 import {on2, prop, join, reduce, identity,
         curry, map, map_, startsWith, compose, filter} from 'fp';
 
+// @TODO consider moving serialize code to separate module.
 const serializeObject = (o) => {
     return Object.keys(o).map(x => {
         if (o[x] && typeof o[x] === 'object') {
