@@ -84,7 +84,7 @@ const setViewValue = (s, e, v) => {
     }
 
     if (entityValueExist(s, e, v)) {
-        const eValue = read(s, createEntityKey(e, v));
+        const eValue = read(s, createEntityKey(e, v)).value;
         setEntityValue(s, e, merge(v, eValue));
         rmViews(s, e); // all views will prefer entity cache since it is newer
     } else {
@@ -111,15 +111,17 @@ const getViewValue = (s, e, id) => {
     const onlyEntityValueExist = entityValue && !viewValue;
     const onlyViewValueExist = viewValue && !entityValue;
 
-    if (onlyEntityValueExist) {
+    if (!viewValue && !entityValue) {
+        return undefined;
+    } else if (onlyEntityValueExist) {
         return entityValue;
     } else if (onlyViewValueExist) {
         return viewValue;
-    } else if (entityValue.timestamp > viewValue.timestamp) {
+    } else if (entityValue.timestamp >= viewValue.timestamp) {
         return entityValue;
-    } else {
-        return viewValue;
     }
+    // @TODO note that view value can't be newer when both exist.
+    // Need to get rid of timestamps!
 };
 
 // EntityStore -> Entity -> id -> ()
