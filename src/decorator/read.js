@@ -14,16 +14,16 @@ const hasExpired = (e, timestamp) => {
     return (Date.now() - timestamp) > getTtl(e);
 };
 
-const decorateReadSingle = (es, qc, e, aFn) => {
-    return (...args) => {
-        if (inEs(es, e, args)) {
-            const v = getFromEs(es, e, args);
+const decorateReadSingle = (es, e, aFn) => {
+    return (id) => {
+        if (inEs(es, e, id)) {
+            const v = getFromEs(es, e, id);
             if (!hasExpired(e, v.timestamp)) {
                 return Promise.resolve(v.value);
             }
         }
 
-        return aFn(...args).then(passThrough(putInEs(es, e)));
+        return aFn(id).then(passThrough(putInEs(es, e)));
     };
 };
 
@@ -42,7 +42,7 @@ const decorateReadQuery = (es, qc, e, aFn) => {
 
 export function decorateRead(es, qc, e, aFn) {
     if (aFn.byId) {
-        return decorateReadSingle(es, qc, e, aFn);
+        return decorateReadSingle(es, e, aFn);
     } else {
         return decorateReadQuery(es, qc, e, aFn);
     }

@@ -39,6 +39,36 @@ const config = [
 
 describe('Read', () => {
     describe('decorateRead', () => {
+        it('calls api fn if not in cache with byId set', (done) => {
+            const es = createEntityStore(config);
+            const qc = createQueryCache(es);
+            const e = config[0];
+            const xOrg = {id: 1, name: 'Kalle'};
+            const aFn = sinon.spy(() => {
+                return Promise.resolve(xOrg);
+            });
+            aFn.byId = true;
+            const res = decorateRead(es, qc, e, aFn);
+            res(1).then(() => {
+                expect(aFn.callCount).to.equal(1);
+                done();
+            });
+        });
+        it('does not call api fn if in cache with byId set', (done) => {
+            const es = createEntityStore(config);
+            const qc = createQueryCache(es);
+            const e = config[0];
+            const xOrg = {id: 1, name: 'Kalle'};
+            const aFn = sinon.spy(() => {
+                return Promise.resolve(xOrg);
+            });
+            aFn.byId = true;
+            const res = decorateRead(es, qc, e, aFn);
+            res(1).then(res.bind(null, 1)).then(() => {
+                expect(aFn.callCount).to.equal(1);
+                done();
+            });
+        });
         it('calls api fn if not in cache', (done) => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
@@ -48,8 +78,8 @@ describe('Read', () => {
                 return Promise.resolve(xOrg);
             });
             const res = decorateRead(es, qc, e, aFn);
-            res(1).then((x) => {
-                expect(x).to.equal(xOrg);
+            res(1).then(() => {
+                expect(aFn.callCount).to.equal(1);
                 done();
             });
         });
@@ -66,7 +96,7 @@ describe('Read', () => {
             const firstCall = res(1);
 
             firstCall.then(() => {
-                res(1).then((x) => {
+                res(1).then(() => {
                     expect(aFn.callCount).to.equal(1);
                     done();
                 });
@@ -85,7 +115,7 @@ describe('Read', () => {
             const firstCall = res(1);
 
             firstCall.then(() => {
-                res(1).then((x) => {
+                res(1).then(() => {
                     expect(aFn.callCount).to.equal(2);
                     done();
                 });
@@ -118,7 +148,7 @@ describe('Read', () => {
             const firstCall = res(1);
 
             firstCall.then(() => {
-                res(1).then((x) => {
+                res(1).then(() => {
                     expect(aFn.callCount).to.equal(1);
                     done();
                 });
@@ -137,7 +167,7 @@ describe('Read', () => {
             const firstCall = res(1);
 
             firstCall.then(() => {
-                res(1).then((x) => {
+                res(1).then(() => {
                     expect(aFn.callCount).to.equal(2);
                     done();
                 });
