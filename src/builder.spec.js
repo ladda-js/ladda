@@ -1,32 +1,41 @@
 import {build} from './builder';
+import sinon from 'sinon';
 
-const config = {
+const getUsers = () => Promise.resolve([{id: 1}, {id: 2}]);
+getUsers.operation = 'READ';
+
+const deleteUser = () => Promise.resolve();
+deleteUser.operation = 'DELETE';
+
+const config = () => ({
     user: {
         ttl: 300,
         api: {
-            getUsers: (x) => x,
-            deleteUser: (x) => x,
+            getUsers,
+            deleteUser
         },
         invalidates: ['alles']
-    },
-    userPreview: {
-        ttl: 200,
-        api: {
-            getPreviews: (x) => x,
-            updatePreview: (x) => x,
-        },
-        invalidates: ['fda'],
-        viewOf: 'user'
     }
-};
-config.user.api.getUsers.operation = 'READ';
-config.user.api.deleteUser.operation = 'DELETE';
-config.userPreview.api.getPreviews.operation = 'READ';
-config.userPreview.api.updatePreview.operation = 'UPDATE';
+});
 
 describe('builder', () => {
-    it('builds stuff', () => {
-        const api = build(config);
-        expect(api).to.not.equal(null);
+    it('Builds the API', () => {
+        const api = build(config());
+        expect(api).to.be.ok;
+    });
+    it('Two read api calls will only require one api request to be made', (done) => {
+        const myConfig = config();
+        myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
+        const api = build(myConfig);
+
+        const expectOnlyOneApiCall = () => {
+            expect(myConfig.user.api.getUsers.callCount).to.equal(1);
+            done();
+        };
+
+        Promise.resolve()
+               .then(() => api.user.getUsers())
+               .then(() => api.user.getUsers())
+               .then(expectOnlyOneApiCall);
     });
 });
