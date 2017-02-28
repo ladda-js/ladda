@@ -1,6 +1,5 @@
 import {createEntityStore} from './entity-store';
-import {createQueryCache, query, invalidate, get} from './query-cache';
-import sinon from 'sinon';
+import {createQueryCache, getValue, put, contains, get, invalidate} from './query-cache';
 
 const config = [
     {
@@ -21,17 +20,17 @@ const config = [
             getPreviews: (x) => x,
             updatePreview: (x) => x,
         },
-        invalidates: ['fda'],
+        invalidates: ['fds'],
         viewOf: 'user'
     },
     {
-        name: 'listUser',
+        name: 'cars',
         ttl: 200,
         api: {
-            getPreviews: (x) => x,
-            updatePreview: (x) => x,
+            getCars: (x) => x,
+            updateCar: (x) => x,
         },
-        invalidates: ['fda'],
+        invalidates: ['user'],
         viewOf: 'user'
     }
 ];
@@ -44,190 +43,73 @@ describe('QueryCache', () => {
             expect(qc).to.be.a('object');
         });
     });
-
-    xdescribe('query', () => {
-        it('If not in cache, call aFn', (done) => {
-            const es = createEntityStore(config);
-            const qc = createQueryCache(es);
-            const e = config[0];
-            const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-            query(qc, e, aFn, [1, 2, 3]).then((x) => {
-                expect(aFn.called).to.be.true;
-                done();
-            });
+    describe('getValue', () => {
+        it('extracts values from an array of cache values and returns these', () => {
+            const expected = [[1, 2, 3], [4, 5, 6]];
+            const data = [{value: [1, 2, 3]}, {value: [4, 5, 6]}];
+            expect(getValue(data)).to.deep.equal(expected);
         });
-        it('If in cache, do not call aFn', (done) => {
-            const es = createEntityStore(config);
-            const qc = createQueryCache(es);
-            const e = config[0];
-            const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-            const firstCall = query(qc, e, aFn, [1, 2, 3]);
-
-            firstCall.then(() => {
-                query(qc, e, aFn, [1, 2, 3]).then((x) => {
-                    expect(aFn.callCount).to.equal(1);
-                    done();
-                });
-            });
-        });
-        it('If in cache but expired, do call aFn', (done) => {
-            const es = createEntityStore(config);
-            const qc = createQueryCache(es);
-            const e = {...config[0], ttl: -1};
-            const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-            const firstCall = query(qc, e, aFn, [1, 2, 3]);
-
-            firstCall.then(() => {
-                query(qc, e, aFn, [1, 2, 3]).then((x) => {
-                    expect(aFn.callCount).to.equal(2);
-                    done();
-                });
-            });
-        });
-        it('return value from aFn', (done) => {
-            const es = createEntityStore(config);
-            const qc = createQueryCache(es);
-            const e = config[0];
-            const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-
-            query(qc, e, aFn, [1, 2, 3]).then((x) => {
-                expect(x).to.equal(xOrg);
-                done();
-            });
-        });
-        it('return value from aFn when just one', (done) => {
-            const es = createEntityStore(config);
-            const qc = createQueryCache(es);
-            const e = config[0];
-            const xOrg = {id: 1, name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-
-            query(qc, e, aFn, [1, 2, 3]).then((x) => {
-                expect(x).to.equal(xOrg);
-                done();
-            }).catch((x) => console.log(x));
-        });
-
-        it('return value from aFn when just one and using cache', (done) => {
-            const es = createEntityStore(config);
-            const qc = createQueryCache(es);
-            const e = config[0];
-            const xOrg = {id: 1, name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-
-            const firstCall = query(qc, e, aFn, [1, 2, 3]);
-            firstCall.then(() => {
-                query(qc, e, aFn, [1, 2, 3]).then((x) => {
-                    expect(x).to.equal(xOrg);
-                    expect(aFn.callCount).to.be.equal(1);
-                    done();
-                }).catch((x) => console.log(x));
-            });
+        it('extracts values from a cache value and returns it', () => {
+            const expected = [1, 2, 3];
+            const data = {value: [1, 2, 3]};
+            expect(getValue(data)).to.deep.equal(expected);
         });
     });
-    xdescribe('invalidate', () => {
-        it('calls aFn for invalidated entity', (done) => {
+    describe('contains & put', () => {
+        it('if an element exist, return true', () => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
             const e = config[0];
-            const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-            aFn.operation = 'READ';
-            const firstCall = query(qc, e, aFn, [1, 2, 3]);
-
-            firstCall.then(() => {
-                invalidate(qc, e, aFn);
-                query(qc, e, aFn, [1, 2, 3]).then((x) => {
-                    expect(aFn.callCount).to.equal(2);
-                    done();
-                });
-            });
+            const aFn = (x) => x;
+            const args = [1, 2, 3];
+            const xs = [{id: 1}, {id: 2}, {id: 3}];
+            put(qc, e, aFn, args, xs);
+            expect(contains(qc, e, aFn, args)).to.be.true;
         });
-        it('does not call aFn for invalidated entity if operation not in invalidatesOn', (done) => {
+        it('if an element does not exist, return false', () => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
             const e = config[0];
-            const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-            const firstCall = query(qc, e, aFn, [1, 2, 3]);
-
-            firstCall.then(() => {
-                invalidate(qc, e, aFn, 'POST');
-                query(qc, e, aFn, [1, 2, 3]).then((x) => {
-                    expect(aFn.callCount).to.equal(1);
-                    done();
-                });
-            });
+            const aFn = (x) => x;
+            const args = [1, 2, 3];
+            expect(contains(qc, e, aFn, args)).to.be.false;
         });
-        it('does invalidate specific query if configured', (done) => {
+    });
+    describe('get', () => {
+        it('if an element exist, return it', () => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
             const e = config[0];
-            const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-
-            const getUsers2 = sinon.spy(function foo() {
-                return Promise.resolve(xOrg);
-            });
-
-            aFn.invalidates = [getUsers2.name];
-
-            const firstCall = query(qc, e, getUsers2, [1, 2, 3]);
-
-            firstCall.then(() => {
-                invalidate(qc, e, aFn, 'POST');
-                query(qc, e, getUsers2, [1, 2, 3]).then((x) => {
-                    expect(getUsers2.callCount).to.equal(2);
-                    done();
-                });
-            });
+            const aFn = (x) => x;
+            const args = [1, 2, 3];
+            const xs = [{id: 1}, {id: 2}, {id: 3}];
+            put(qc, e, aFn, args, xs);
+            expect(getValue(get(qc, e, aFn, args).value)).to.deep.equal(xs);
         });
-        it('does not invalidate query if not configured', (done) => {
+        it('if an does not exist, throw an error', () => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
             const e = config[0];
-            const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-
-            const getUsers2 = sinon.spy(function foo() {
-                return Promise.resolve(xOrg);
-            });
-
-            aFn.invalidates = ['fdsa'];
-
-            const firstCall = query(qc, e, getUsers2, [1, 2, 3]);
-
-            firstCall.then(() => {
-                invalidate(qc, e, aFn, 'POST');
-                query(qc, e, getUsers2, [1, 2, 3]).then((x) => {
-                    expect(getUsers2.callCount).to.equal(1);
-                    done();
-                });
-            });
+            const aFn = (x) => x;
+            const args = [1, 2, 3];
+            const fnUnderTest = () => getValue(get(qc, e, aFn, args).value);
+            expect(fnUnderTest).to.throw(Error);
+        });
+    });
+    describe('invalidate', () => {
+        it('invalidates other cache as specified', () => {
+            const es = createEntityStore(config);
+            const qc = createQueryCache(es);
+            const eUser = config[0];
+            const eCars = config[2];
+            const aFn = (x) => x;
+            aFn.operation = 'CREATE';
+            const args = [1, 2, 3];
+            const xs = [{id: 1}, {id: 2}, {id: 3}];
+            put(qc, eUser, aFn, args, xs);
+            invalidate(qc, eCars, aFn);
+            const hasUser = contains(qc, eUser, aFn, args);
+            expect(hasUser).to.be.false;
         });
     });
 });

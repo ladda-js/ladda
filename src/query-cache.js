@@ -52,7 +52,7 @@ const getFromCache = (qc, e, k) => {
     };
 };
 
-// QueryCache -> Entity -> String -> Promise -> Promise
+// QueryCache -> Entity -> ApiFunction -> [a] -> [b] -> [b]
 export const put = curry((qc, e, aFn, args, xs) => {
     const k = createKey(e, [aFn.name, ...filter(identity, args)]);
     if (Array.isArray(xs)) {
@@ -70,19 +70,31 @@ export const getValue = (v) => {
         ? map(toValue, v) : toValue(v);
 };
 
+// QueryCache -> Entity -> ApiFunction -> [a] -> Bool
 export const contains = (qc, e, aFn, args) => {
     const k = createKey(e, [aFn.name, ...filter(identity, args)]);
     return inCache(qc, k);
 };
 
+// QueryCache -> Entity -> ApiFunction -> [a] -> Bool
 export const get = (qc, e, aFn, args) => {
     const k = createKey(e, [aFn.name, ...filter(identity, args)]);
+    if (!inCache(qc, k)) {
+        throw new Error(
+            `Tried to access ${e.name} with key ${k} which doesn't exist.
+             Do a contains check first!`
+        );
+    }
     return getFromCache(qc, e, k);
 };
 
+// Entity -> [String]
+const getInvalidatesOn = e => e.invalidatesOn || ['CREATE', 'UPDATE', 'DELETE'];
+
 // Entity -> Operation -> Bool
 const shouldInvalidateEntity = (e, op) => {
-    return e.invalidatesOn && e.invalidatesOn.indexOf(op) > -1;
+    const invalidatesOn = getInvalidatesOn(e);
+    return invalidatesOn && invalidatesOn.indexOf(op) > -1;
 };
 
 // QueryCache -> String -> ()
