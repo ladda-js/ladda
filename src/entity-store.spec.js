@@ -186,5 +186,13 @@ describe('EntityStore', () => {
             const r = contains(s, e, v.id);
             expect(r).to.be.false;
         });
+        it('does not crash when removing not existing value', () => {
+            const s = createEntityStore(config);
+            const v = {id: 'hello'};
+            const e = { name: 'user'};
+            const fn = () => remove(s, e, v.id);
+            const r = contains(s, e, v.id);
+            expect(fn).to.not.throw();
+        });
     });
 });

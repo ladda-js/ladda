@@ -32,6 +32,14 @@ const config = [
         },
         invalidates: ['user'],
         viewOf: 'user'
+    },
+    {
+        name: 'bikes',
+        ttl: 200,
+        api: {
+            getCars: (x) => x,
+            updateCar: (x) => x,
+        }
     }
 ];
 
@@ -130,6 +138,15 @@ describe('QueryCache', () => {
             invalidate(qc, eCars, aFn);
             const hasUser = contains(qc, eUser, aFn, args);
             expect(hasUser).to.be.false;
+        });
+        it('does not crash when no invalidates specified', () => {
+            const es = createEntityStore(config);
+            const qc = createQueryCache(es);
+            const eBikes = config[3];
+            const aFn = (x) => x;
+            aFn.operation = 'CREATE';
+            const fn = () => invalidate(qc, eBikes, aFn);
+            expect(fn).to.not.throw();
         });
     });
 });

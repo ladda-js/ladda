@@ -109,21 +109,21 @@ const invalidateEntity = curry((qc, entityName) => {
     map_(removeIfEntity, keys);
 });
 
+// Object -> a
+const getInvalidates = x => x.invalidates || [];
+
 // QueryCache -> Entity -> Operation -> ()
 const invalidateBasedOnEntity = (qc, e, aFn) => {
     if (shouldInvalidateEntity(e, aFn.operation)) {
-        map_(invalidateEntity(qc), e.invalidates);
+        map_(invalidateEntity(qc), getInvalidates(e));
     }
 };
-
-// ApiFunction -> [String]
-const getInvalidatesFromApiFn = aFn => aFn.invalidates || [];
 
 // QueryCache -> Entity -> ApiFunction -> Operation -> ()
 const invalidateBasedOnApiFn = (qc, e, aFn) => {
     const prependEntity = x => `${e.name}-${x}`;
     const invalidateEntityByApiFn = compose(invalidateEntity(qc), prependEntity);
-    map_(invalidateEntityByApiFn, getInvalidatesFromApiFn(aFn));
+    map_(invalidateEntityByApiFn, getInvalidates(aFn));
 };
 
 // QueryCache -> Entity -> ApiFunction -> Operation -> ()

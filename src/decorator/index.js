@@ -5,6 +5,10 @@ import {decorateUpdate} from './update';
 import {decorateDelete} from './delete';
 
 const decorateApi = curry((entityStore, queryCache, entity, apiFn) => {
+    if (!apiFn.operation) {
+        return apiFn;
+    }
+
     const handler = {
         CREATE: decorateCreate,
         READ: decorateRead,
