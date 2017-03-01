@@ -108,20 +108,13 @@ const getEntityValue = (s, e, id) => {
 const getViewValue = (s, e, id) => {
     const entityValue = read(s, createEntityKey(e, {id}));
     const viewValue = read(s, createViewKey(e, {id}));
-    const onlyEntityValueExist = entityValue && !viewValue;
     const onlyViewValueExist = viewValue && !entityValue;
 
-    if (!viewValue && !entityValue) {
-        return undefined;
-    } else if (onlyEntityValueExist) {
-        return entityValue;
-    } else if (onlyViewValueExist) {
+    if (onlyViewValueExist) {
         return viewValue;
-    } else if (entityValue.timestamp >= viewValue.timestamp) {
+    } else {
         return entityValue;
     }
-    // @TODO note that view value can't be newer when both exist.
-    // Need to get rid of timestamps!
 };
 
 // EntityStore -> Entity -> id -> ()
