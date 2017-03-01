@@ -1,30 +1,11 @@
-import { invalidateEntity, invalidateFunction } from 'invalidator';
-import { createQuery } from 'query';
-import {
-    deleteItem
-} from 'datastore';
+import {remove} from 'entity-store';
+import {invalidate} from 'query-cache';
+import {passThrough} from 'fp';
 
-export function decorateDelete(apiFn, datastore, abstractEntity) {
-    return (id) => {
-        deleteFromEntityAndViews(datastore, abstractEntity, id);
-
-        const result = apiFn(id);
-        result.then(() => {
-            invalidateEntity(datastore, abstractEntity, 'DELETE');
-            invalidateFunction(datastore, abstractEntity, apiFn);
-        });
-        return result;
+export function decorateDelete(es, qc, e, aFn) {
+    return (...args) => {
+        remove(es, e, args.join(''));
+        return aFn(...args)
+                   .then(passThrough(() => invalidate(qc, e, aFn)));
     };
-}
-
-function deleteFromEntityAndViews(datastore, abstractEntity, id) {
-    const types = [
-        abstractEntity.val.viewOf,
-        abstractEntity.name,
-        ...abstractEntity.val.views
-    ].filter(x => x);
-
-    types.forEach(type => {
-        deleteItem(datastore, createQuery(type, id));
-    });
 }

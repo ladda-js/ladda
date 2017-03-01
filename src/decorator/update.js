@@ -1,34 +1,11 @@
-import { invalidateEntity, invalidateFunction } from 'invalidator';
-import { createQueryFromItem } from 'query';
-import {
-    updateItem,
-    patchItem
-} from 'datastore';
+import {put} from 'entity-store';
+import {invalidate} from 'query-cache';
+import {passThrough} from 'fp';
 
-export function decorateUpdate(apiFn, datastore, abstractEntity) {
-    return (item) => {
-        updateItemAndViews(datastore, abstractEntity, item);
-        updateSuperEntity(datastore, abstractEntity, item);
-        const result = apiFn(item);
-        result.then(() => {
-            invalidateEntity(datastore, abstractEntity, 'UPDATE');
-            invalidateFunction(datastore, abstractEntity, apiFn);
-        });
-        return result;
+export function decorateUpdate(es, qc, e, aFn) {
+    return (eValue, ...args) => {
+        put(es, e, eValue);
+        return aFn(eValue, ...args)
+            .then(passThrough(() => invalidate(qc, e, aFn)));
     };
-}
-
-function updateItemAndViews(datastore, abstractEntity, item) {
-    const types = [abstractEntity.name, ...abstractEntity.val.views];
-    types.forEach(type => {
-        updateItem(datastore, createQueryFromItem(type, item), item);
-    });
-}
-
-function updateSuperEntity(datastore, abstractEntity, item) {
-    const superEntity = abstractEntity.val.viewOf;
-    if (!superEntity) {
-        return;
-    }
-    patchItem(datastore, createQueryFromItem(superEntity, item), item);
 }

@@ -1,0 +1,146 @@
+/* A data structure that is aware of views and entities.
+ * 1. If a value exist both in a view and entity, the newest value is preferred.
+ * 2. If a view or entity is removed, the connected views and entities are also removed.
+ * 3. If a new view value is added, it will be merged into the entity value if such exist.
+ * otherwise a new view value will be added.
+ *
+ * Note that a view will always return at least what constitutes the view.
+ * It can return the full entity too. This means the client code needs to take this into account
+ * by not depending on only a certain set of values being there.
+ * This is done to save memory and to simplify always providing the latest data.
+ * Of course, this also requiers the view to truly be a subset of the entity.
+ */
+
+import {merge} from './merger';
+import {curry, reduce, map_} from 'fp';
+
+// Value -> StoreValue
+const toStoreValue = v => ({value: v, timestamp: Date.now()});
+
+// EntityStore -> String -> Value
+const read = ([_, s], k) => s[k];
+
+// EntityStore -> String -> Value -> ()
+const set = ([eMap, s], k, v) => s[k] = toStoreValue(v);
+
+// EntityStore -> String -> ()
+const rm = curry(([_, s], k) => delete s[k]);
+
+// Entity -> Type
+const getEntityType = e => e.viewOf || e.name;
+
+// EntityStore -> Entity -> ()
+const rmViews = ([eMap, s], e) => {
+    const entityType = getEntityType(e);
+    const toRemove = [...eMap[entityType]];
+    map_(rm([eMap, s]), toRemove);
+};
+
+// Entity -> Value -> String -> ()
+const createEntityKey = (e, v) => {
+    return getEntityType(e) + v.id;
+};
+
+// Entity -> Value -> String -> ()
+const createViewKey = (e, v) => {
+    return e.name + v.id;
+};
+
+// Entity -> Bool
+const isView = e => !!e.viewOf;
+
+// EntityStore -> Entity -> Value -> ()
+export const remove = (es, e, id) => {
+    rm(es, createEntityKey(e, {id}));
+    rmViews(es, e);
+};
+
+// EntityStore -> Entity -> Value
+const handle = curry((viewHandler, entityHandler, s, e, v) => {
+    if (isView(e)) {
+        return viewHandler(s, e, v);
+    } else {
+        return entityHandler(s, e, v);
+    }
+});
+
+// EntityStore -> Entity -> Value -> Bool
+const entityValueExist = (s, e, v) => !!read(s, createEntityKey(e, v));
+
+// EntityStore -> Entity -> Value -> ()
+const setEntityValue = (s, e, v) => {
+    if (!v.id) {
+        throw new Error(`Value is missing id, tried to add to entity ${e.name}`);
+    }
+    const k = createEntityKey(e, v);
+    set(s, k, v);
+    return v;
+};
+
+// EntityStore -> Entity -> Value -> ()
+const setViewValue = (s, e, v) => {
+    if (!v.id) {
+        throw new Error(`Value is missing id, tried to add to view ${e.name}`);
+    }
+
+    if (entityValueExist(s, e, v)) {
+        const eValue = read(s, createEntityKey(e, v)).value;
+        setEntityValue(s, e, merge(v, eValue));
+        rmViews(s, e); // all views will prefer entity cache since it is newer
+    } else {
+        const k = createViewKey(e, v);
+        set(s, k, v);
+    }
+
+    return v;
+};
+
+// EntityStore -> Entity -> Value -> ()
+export const put = handle(setViewValue, setEntityValue);
+
+// EntityStore -> Entity -> String -> Value
+const getEntityValue = (s, e, id) => {
+    const k = createEntityKey(e, {id});
+    return read(s, k);
+};
+
+// EntityStore -> Entity -> String -> Value
+const getViewValue = (s, e, id) => {
+    const entityValue = read(s, createEntityKey(e, {id}));
+    const viewValue = read(s, createViewKey(e, {id}));
+    const onlyViewValueExist = viewValue && !entityValue;
+
+    if (onlyViewValueExist) {
+        return viewValue;
+    } else {
+        return entityValue;
+    }
+};
+
+// EntityStore -> Entity -> id -> ()
+export const get = handle(getViewValue, getEntityValue);
+
+export const contains = (es, e, id) => !!handle(getViewValue, getEntityValue)(es, e, id);
+
+// [Object, Object] -> Entity -> [Object, Object]
+const registerView = ([eMap, store], e) => {
+    if (!eMap[e.viewOf]) {
+        eMap[e.viewOf] = [];
+    }
+    eMap[e.viewOf].push(e.name);
+    return [eMap, store];
+};
+
+// [Object, Object] -> Entity -> [Object, Object]
+const registerEntity = ([eMap, store], e) => {
+    if (!eMap[e.name]) {
+        eMap[e.name] = [];
+    }
+    return [eMap, store];
+};
+
+// [a] -> [Object, Object]
+const updateIndex = (m, e) => isView(e) ? registerView(m, e) : registerEntity(m, e);
+
+// [Entity] -> EntityStore
+export const createEntityStore = c => reduce(updateIndex, [{}, {}], c);
