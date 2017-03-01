@@ -6,31 +6,10 @@
 import {put as putInEs, get as getFromEs} from './entity-store';
 import {on2, prop, join, reduce, identity,
         curry, map, map_, startsWith, compose, filter} from 'fp';
-
-// @TODO consider moving serialize code to separate module.
-const serializeObject = (o) => {
-    return Object.keys(o).map(x => {
-        if (o[x] && typeof o[x] === 'object') {
-            return serializeObject(o[x]);
-        } else {
-            return o[x];
-        }
-    }).join('-');
-};
-
-const mySerializer = (x) => {
-    const serialize = (y) => {
-        if (y && typeof y === 'object') {
-            return serializeObject(y);
-        } else {
-            return y;
-        }
-    };
-    return map(serialize, x);
-};
+import {serialize} from 'serializer';
 
 // Entity -> [String] -> String
-const createKey = on2(reduce(join('-')), prop('name'), mySerializer);
+const createKey = on2(reduce(join('-')), prop('name'), map(serialize));
 
 // Value -> CacheValue
 const toCacheValue = xs => ({value: xs, timestamp: Date.now()});

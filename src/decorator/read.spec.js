@@ -39,6 +39,36 @@ const config = [
 
 describe('Read', () => {
     describe('decorateRead', () => {
+        it('throws error if idFrom ARGS and array is returned', (done) => {
+            const es = createEntityStore(config);
+            const qc = createQueryCache(es);
+            const e = config[0];
+            const xOrg = [{id: 1, name: 'Kalle'}];
+            const aFn = sinon.spy(() => {
+                return Promise.resolve(xOrg);
+            });
+            aFn.idFrom = 'ARGS';
+            const res = decorateRead(es, qc, e, aFn);
+            res(1).catch(x => {
+                expect(x).to.be.an('Error');
+                done();
+            });
+        });
+        it('does set id to serialized args if idFrom ARGS', (done) => {
+            const es = createEntityStore(config);
+            const qc = createQueryCache(es);
+            const e = config[0];
+            const xOrg = {name: 'Kalle'};
+            const aFn = sinon.spy(() => {
+                return Promise.resolve(xOrg);
+            });
+            aFn.idFrom = 'ARGS';
+            const res = decorateRead(es, qc, e, aFn);
+            res({hello: 'hej', other: 'svej'}).then(x => {
+                expect(x).to.deep.equal({id: 'hej-svej', name: 'Kalle'});
+                done();
+            });
+        });
         it('calls api fn if not in cache with byId set', (done) => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);

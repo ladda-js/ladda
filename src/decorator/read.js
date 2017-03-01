@@ -5,7 +5,8 @@ import {get as getFromQc,
         put as putInQc,
         contains as inQc,
         getValue} from 'query-cache';
-import {passThrough} from 'fp';
+import {passThrough, curry} from 'fp';
+import {serialize} from 'serializer';
 
 const getTtl = e => (e.ttl || 0) * 1000;
 
@@ -27,6 +28,20 @@ const decorateReadSingle = (es, e, aFn) => {
     };
 };
 
+const addId = curry((aFn, args, o) => {
+    // TODO Add id as a special field, allowing us to remove it before returning to the user.
+    // Eg. o.__ladda__id
+    if (aFn.idFrom === 'ARGS') {
+        if (Array.isArray(o)) {
+            throw new Error('idFrom is only supported for objects');
+        }
+        o.id = serialize(args);
+        return o;
+    } else {
+        return o;
+    }
+});
+
 const decorateReadQuery = (es, qc, e, aFn) => {
     return (...args) => {
         if (inQc(qc, e, aFn, args) && !aFn.alwaysGetFreshData) {
@@ -36,7 +51,7 @@ const decorateReadQuery = (es, qc, e, aFn) => {
             }
         }
 
-        return aFn(...args).then(passThrough(putInQc(qc, e, aFn, args)));
+        return aFn(...args).then(addId(aFn, args)).then(passThrough(putInQc(qc, e, aFn, args)));
     };
 };
 
