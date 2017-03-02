@@ -53,6 +53,23 @@ describe('builder', () => {
                .then(() => api.user.getUsers())
                .then(expectOnlyOneApiCall);
     });
+    fit('1000 calls is not slow', (done) => {
+        const myConfig = config();
+        myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
+        myConfig.user.api.getUsers.idFrom = 'ARGS';
+        const api = build(myConfig);
+        const start = Date.now();
+        const checkTimeConstraint = (xs) => {
+            expect(Date.now() - start < 1000).to.be.true;
+            done();
+        };
+
+        let bc = Promise.resolve();
+        for (let i = 0; i < 1000; i++) {
+            bc = bc.then(() => api.user.getUsers('wei'));
+        }
+        bc.then(checkTimeConstraint);
+    });
     it('Works with non default id set', (done) => {
         const myConfig = config();
         myConfig.__config = {idField: 'mySecretId'};
