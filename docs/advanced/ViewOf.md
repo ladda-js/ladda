@@ -1,0 +1,3 @@
+# Entity Composition
+
+- viewOf
