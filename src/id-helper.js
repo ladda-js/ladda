@@ -1,5 +1,13 @@
 import {serialize} from 'serializer';
-import {curry, map} from 'fp';
+import {curry, map, prop} from 'fp';
+
+const getIdGetter = (aFn) => {
+    if (aFn && aFn.idFrom && typeof aFn.idFrom === 'function') {
+        return aFn.idFrom;
+    } else {
+        return prop('id');
+    }
+};
 
 export const addId = curry((aFn, args, o) => {
     if (aFn && aFn.idFrom === 'ARGS') {
@@ -8,15 +16,16 @@ export const addId = curry((aFn, args, o) => {
             __ladda__id: serialize(args)
         };
     } else {
+        const getId = getIdGetter(aFn);
         if (Array.isArray(o)) {
             return map(x => ({
                 ...x,
-                __ladda__id: x.id
+                __ladda__id: getId(x)
             }), o);
         } else {
             return {
                 ...o,
-                __ladda__id: o.id
+                __ladda__id: getId(o)
             };
         }
     }
