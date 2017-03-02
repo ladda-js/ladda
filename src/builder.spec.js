@@ -15,9 +15,6 @@ const config = () => ({
             deleteUser
         },
         invalidates: ['alles']
-    },
-    __config: {
-        idField: 'id'
     }
 });
 
@@ -48,6 +45,24 @@ describe('builder', () => {
 
         const expectOnlyOneApiCall = (xs) => {
             expect(xs).to.be.deep.equal([{id: 1}, {id: 2}]);
+            done();
+        };
+
+        Promise.resolve()
+               .then(() => api.user.getUsers())
+               .then(() => api.user.getUsers())
+               .then(expectOnlyOneApiCall);
+    });
+    it('Works with non default id set', (done) => {
+        const myConfig = config();
+        myConfig.__config = {idField: 'mySecretId'};
+        myConfig.user.api.getUsers = sinon.spy(() =>
+            Promise.resolve([{mySecretId: 1}, {mySecretId: 2}]));
+        myConfig.user.api.getUsers.operation = 'READ';
+        const api = build(myConfig);
+        const expectOnlyOneApiCall = (xs) => {
+            expect(myConfig.user.api.getUsers.callCount).to.equal(1);
+            expect(xs).to.be.deep.equal([{mySecretId: 1}, {mySecretId: 2}]);
             done();
         };
 
