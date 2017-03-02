@@ -39,18 +39,18 @@ const config = [
 
 describe('Read', () => {
     describe('decorateRead', () => {
-        it('throws error if idFrom ARGS and array is returned', (done) => {
+        it('stores and returns an array with elements that lack id', (done) => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
             const e = config[0];
-            const xOrg = [{id: 1, name: 'Kalle'}];
+            const xOrg = [{name: 'Kalle'}, {name: 'Anka'}];
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
             aFn.idFrom = 'ARGS';
             const res = decorateRead(es, qc, e, aFn);
-            res(1).catch(x => {
-                expect(x).to.be.an('Error');
+            res(1).then(x => {
+                expect(x).to.deep.equal(xOrg);
                 done();
             });
         });

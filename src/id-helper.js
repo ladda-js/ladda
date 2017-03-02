@@ -3,9 +3,6 @@ import {curry, map} from 'fp';
 
 export const addId = curry((aFn, args, o) => {
     if (aFn && aFn.idFrom === 'ARGS') {
-        if (Array.isArray(o)) {
-            throw new Error('Array not supported');
-        }
         return {
             ...o,
             __ladda__id: serialize(args),
