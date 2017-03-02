@@ -38,4 +38,19 @@ describe('builder', () => {
                .then(() => api.user.getUsers())
                .then(expectOnlyOneApiCall);
     });
+    it('Two read api calls will return the same output', (done) => {
+        const myConfig = config();
+        myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
+        const api = build(myConfig);
+
+        const expectOnlyOneApiCall = (xs) => {
+            expect(xs).to.be.deep.equal([{id: 1}, {id: 2}]);
+            done();
+        };
+
+        Promise.resolve()
+               .then(() => api.user.getUsers())
+               .then(() => api.user.getUsers())
+               .then(expectOnlyOneApiCall);
+    });
 });

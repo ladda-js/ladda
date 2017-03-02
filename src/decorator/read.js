@@ -20,7 +20,7 @@ const decorateReadSingle = (es, e, aFn) => {
         if (inEs(es, e, id) && !aFn.alwaysGetFreshData) {
             const v = getFromEs(es, e, id);
             if (!hasExpired(e, v.timestamp)) {
-                return Promise.resolve(compose(removeId, prop('value')));
+                return Promise.resolve(removeId(v.value));
             }
         }
 
@@ -33,7 +33,7 @@ const decorateReadQuery = (es, qc, e, aFn) => {
         if (inQc(qc, e, aFn, args) && !aFn.alwaysGetFreshData) {
             const v = getFromQc(qc, e, aFn, args);
             if (!hasExpired(e, v.timestamp)) {
-                return Promise.resolve(compose(removeId, getValue(v.value)));
+                return Promise.resolve(removeId(getValue(v.value)));
             }
         }
 
