@@ -5,8 +5,7 @@ export const addId = curry((aFn, args, o) => {
     if (aFn && aFn.idFrom === 'ARGS') {
         return {
             ...o,
-            __ladda__id: serialize(args),
-            __ladda__blob: true
+            __ladda__id: serialize(args)
         };
     } else {
         if (Array.isArray(o)) {
@@ -31,12 +30,10 @@ export const removeId = (o) => {
     if (Array.isArray(o)) {
         return map(x => {
             delete x.__ladda__id;
-            delete x.__ladda__blob;
             return x;
         }, o);
     } else {
         delete o.__ladda__id;
-        delete o.__ladda__blob;
         return o;
     }
 };

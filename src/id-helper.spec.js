@@ -9,7 +9,7 @@ describe('IdHelper', () => {
         const o = {name: 'kalle'};
         const aFn = {idFrom: 'ARGS'};
         expect(addId(aFn, [1,2,3], o)).to.deep.equal(
-            {...o, __ladda__id: '1-2-3', __ladda__blob: true}
+            {...o, __ladda__id: '1-2-3'}
         );
     });
     it('removing id from undefined returns undefined', () => {
