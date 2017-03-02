@@ -1,6 +1,6 @@
 # Table of Contents
 
-* [Ladda](/README.md)
+* [Read Me](/README.md)
 * [Introduction](/docs/Introduction.md)
 * [Demo](/docs/Demo.md)
 * [Getting Started](/docs/GettingStarted.md)
