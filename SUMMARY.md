@@ -1,1 +1,4 @@
-docs/README.md
+# Summary
+
+* [Ladda](SUMMARY.md)
+
