@@ -72,7 +72,7 @@ describe('QueryCache', () => {
             const aFn = (x) => x;
             const args = [1, 2, 3];
             const xs = [{id: 1}, {id: 2}, {id: 3}];
-            put(qc, e, aFn, args, addId(undefined, undefined, xs));
+            put(qc, e, aFn, args, addId({}, undefined, undefined, xs));
             expect(contains(qc, e, aFn, args)).to.be.true;
         });
         it('if an element exist, and args contains a complex object, return true', () => {
@@ -82,7 +82,7 @@ describe('QueryCache', () => {
             const aFn = (x) => x;
             const args = [1, {hello: {world: 'Kalle'}}, 3];
             const xs = [{id: 1}, {id: 2}, {id: 3}];
-            put(qc, e, aFn, args, addId(undefined, undefined, xs));
+            put(qc, e, aFn, args, addId({}, undefined, undefined, xs));
             expect(contains(qc, e, aFn, args)).to.be.true;
         });
         it('if an element exist, and args contains a simple object, return true', () => {
@@ -92,7 +92,7 @@ describe('QueryCache', () => {
             const aFn = (x) => x;
             const args = [1, {hello: 'world'}, 3];
             const xs = [{id: 1}, {id: 2}, {id: 3}];
-            put(qc, e, aFn, args, addId(undefined, undefined, xs));
+            put(qc, e, aFn, args, addId({}, undefined, undefined, xs));
             expect(contains(qc, e, aFn, args)).to.be.true;
         });
         it('if an element does not exist, return false', () => {
@@ -113,7 +113,7 @@ describe('QueryCache', () => {
             const args = [1, 2, 3];
             const xs = [{id: 1}, {id: 2}, {id: 3}];
             const xsRet = [{id: 1, __ladda__id: 1}, {id: 2, __ladda__id: 2}, {id: 3, __ladda__id: 3}];
-            put(qc, e, aFn, args, addId(undefined, undefined, xs));
+            put(qc, e, aFn, args, addId({}, undefined, undefined, xs));
             expect(getValue(get(qc, e, aFn, args).value)).to.deep.equal(xsRet);
         });
         it('if an does not exist, throw an error', () => {
@@ -136,7 +136,7 @@ describe('QueryCache', () => {
             aFn.operation = 'CREATE';
             const args = [1, 2, 3];
             const xs = [{id: 1}, {id: 2}, {id: 3}];
-            put(qc, eUser, aFn, args, addId(undefined, undefined, xs));
+            put(qc, eUser, aFn, args, addId({}, undefined, undefined, xs));
             invalidate(qc, eCars, aFn);
             const hasUser = contains(qc, eUser, aFn, args);
             expect(hasUser).to.be.false;

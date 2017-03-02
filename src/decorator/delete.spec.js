@@ -48,7 +48,7 @@ describe('Delete', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve({});
             });
-            put(es, e, addId(undefined, undefined, xOrg));
+            put(es, e, addId({}, undefined, undefined, xOrg));
             const res = decorateDelete(es, qc, e, aFn);
             res(1).then(() => {
                 expect(get(es, e, 1)).to.equal(undefined);

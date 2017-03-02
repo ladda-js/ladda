@@ -15,6 +15,9 @@ const config = () => ({
             deleteUser
         },
         invalidates: ['alles']
+    },
+    __config: {
+        idField: 'id'
     }
 });
 

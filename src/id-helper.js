@@ -1,22 +1,22 @@
 import {serialize} from 'serializer';
 import {curry, map, prop} from 'fp';
 
-const getIdGetter = (aFn) => {
+const getIdGetter = (c, aFn) => {
     if (aFn && aFn.idFrom && typeof aFn.idFrom === 'function') {
         return aFn.idFrom;
     } else {
-        return prop('id');
+        return prop(c.idField || 'id');
     }
 };
 
-export const addId = curry((aFn, args, o) => {
+export const addId = curry((c, aFn, args, o) => {
     if (aFn && aFn.idFrom === 'ARGS') {
         return {
             ...o,
             __ladda__id: serialize(args)
         };
     } else {
-        const getId = getIdGetter(aFn);
+        const getId = getIdGetter(c, aFn);
         if (Array.isArray(o)) {
             return map(x => ({
                 ...x,

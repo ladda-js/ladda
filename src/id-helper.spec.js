@@ -3,12 +3,12 @@ import {addId, removeId} from 'id-helper';
 describe('IdHelper', () => {
     it('removeId is the inverse of addId', () => {
         const o = {id: 1};
-        expect(removeId(addId(undefined, undefined, o))).to.deep.equal(o);
+        expect(removeId(addId({}, undefined, undefined, o))).to.deep.equal(o);
     });
     it('addId creates id from args if idFrom is ARGS', () => {
         const o = {name: 'kalle'};
         const aFn = {idFrom: 'ARGS'};
-        expect(addId(aFn, [1,2,3], o)).to.deep.equal(
+        expect(addId({}, aFn, [1,2,3], o)).to.deep.equal(
             {...o, __ladda__id: '1-2-3'}
         );
     });
@@ -23,7 +23,7 @@ describe('IdHelper', () => {
     it('addId can use a custom function', () => {
         const o = {myId: 15};
         const aFn = {idFrom: x => x.myId};
-        const res = addId(aFn, [1,2,3], o);
+        const res = addId({}, aFn, [1,2,3], o);
         expect(res).to.deep.equal({...o, __ladda__id: 15});
     });
 });

@@ -15,7 +15,7 @@ const hasExpired = (e, timestamp) => {
     return (Date.now() - timestamp) > getTtl(e);
 };
 
-const decorateReadSingle = (es, e, aFn) => {
+const decorateReadSingle = (c, es, e, aFn) => {
     return (id) => {
         if (inEs(es, e, id) && !aFn.alwaysGetFreshData) {
             const v = getFromEs(es, e, id);
@@ -24,11 +24,11 @@ const decorateReadSingle = (es, e, aFn) => {
             }
         }
 
-        return aFn(id).then(passThrough(compose(putInEs(es, e), addId(aFn, id))));
+        return aFn(id).then(passThrough(compose(putInEs(es, e), addId(c, aFn, id))));
     };
 };
 
-const decorateReadQuery = (es, qc, e, aFn) => {
+const decorateReadQuery = (c, es, qc, e, aFn) => {
     return (...args) => {
         if (inQc(qc, e, aFn, args) && !aFn.alwaysGetFreshData) {
             const v = getFromQc(qc, e, aFn, args);
@@ -38,14 +38,14 @@ const decorateReadQuery = (es, qc, e, aFn) => {
         }
 
         return aFn(...args)
-                   .then(passThrough(compose(putInQc(qc, e, aFn, args), addId(aFn, args))));
+                   .then(passThrough(compose(putInQc(qc, e, aFn, args), addId(c, aFn, args))));
     };
 };
 
-export function decorateRead(es, qc, e, aFn) {
+export function decorateRead(c, es, qc, e, aFn) {
     if (aFn.byId) {
-        return decorateReadSingle(es, e, aFn);
+        return decorateReadSingle(c, es, e, aFn);
     } else {
-        return decorateReadQuery(es, qc, e, aFn);
+        return decorateReadQuery(c, es, qc, e, aFn);
     }
 }

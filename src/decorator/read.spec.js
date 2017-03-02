@@ -48,7 +48,7 @@ describe('Read', () => {
                 return Promise.resolve(xOrg);
             });
             aFn.idFrom = 'ARGS';
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
             res(1).then(x => {
                 expect(x).to.deep.equal(xOrg);
                 done();
@@ -63,7 +63,7 @@ describe('Read', () => {
                 return Promise.resolve(xOrg);
             });
             aFn.idFrom = 'ARGS';
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
             res({hello: 'hej', other: 'svej'}).then(x => {
                 expect(x).to.deep.equal({name: 'Kalle'});
                 done();
@@ -78,7 +78,7 @@ describe('Read', () => {
                 return Promise.resolve(xOrg);
             });
             aFn.byId = true;
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
             res(1).then(() => {
                 expect(aFn.callCount).to.equal(1);
                 done();
@@ -93,7 +93,7 @@ describe('Read', () => {
                 return Promise.resolve(xOrg);
             });
             aFn.byId = true;
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
             res(1).then(res.bind(null, 1)).then(() => {
                 expect(aFn.callCount).to.equal(1);
                 done();
@@ -107,7 +107,7 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
             res(1).then(() => {
                 expect(aFn.callCount).to.equal(1);
                 done();
@@ -121,7 +121,7 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
 
             const firstCall = res(1);
 
@@ -140,7 +140,7 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
 
             const firstCall = res(1);
 
@@ -159,7 +159,7 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
             res(1).then((x) => {
                 expect(x).to.equal(xOrg);
                 done();
@@ -173,7 +173,7 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
 
             const firstCall = res(1);
 
@@ -192,7 +192,7 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
 
             const firstCall = res(1);
 
@@ -211,7 +211,7 @@ describe('Read', () => {
             const aFn = sinon.spy(() => {
                 return Promise.resolve(xOrg);
             });
-            const res = decorateRead(es, qc, e, aFn);
+            const res = decorateRead({}, es, qc, e, aFn);
 
             res().catch(e => {
                 expect(e).to.be.a('Error');

@@ -48,7 +48,7 @@ describe('Update', () => {
                 return Promise.resolve({});
             });
 
-            const res = decorateUpdate(es, qc, e, aFn);
+            const res = decorateUpdate({}, es, qc, e, aFn);
             res(xOrg).then(() => {
                 expect(get(es, e, 1).value).to.deep.equal({...xOrg, __ladda__id: 1});
                 done();

@@ -1,7 +1,7 @@
 import {invalidate} from 'query-cache';
 import {passThrough} from 'fp';
 
-export function decorateNoOperation(es, qc, e, aFn) {
+export function decorateNoOperation(c, es, qc, e, aFn) {
     const newApiFn = aFn.bind(null);
     newApiFn.operation = 'NO_OPERATION';
     return (...args) => {

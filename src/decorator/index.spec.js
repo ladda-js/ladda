@@ -31,7 +31,7 @@ describe('Decorate', () => {
     it('returns decorated function if no operation specified', () => {
         const f = (x) => x;
         const entity = {api: {getAll: f}};
-        const res = decorate(null, null, entity);
+        const res = decorate({}, null, null, entity);
         expect(res.api.getAll).not.to.equal(f);
     });
     it('decorated function invalidates if NO_OPERATION is configured', (done) => {
@@ -41,8 +41,8 @@ describe('Decorate', () => {
         const qc = createQueryCache(es);
         const eUser = config[0];
         const eCar = config[1];
-        const carsApi = decorate(es, qc, eCar, aFn);
-        put(qc, eUser, aFn, [1], addId(undefined, undefined, xOrg));
+        const carsApi = decorate({}, es, qc, eCar, aFn);
+        put(qc, eUser, aFn, [1], addId({}, undefined, undefined, xOrg));
 
         expect(contains(qc, eUser, aFn, [1])).to.be.true;
         const shouldHaveRemovedUser = () => {
