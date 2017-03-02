@@ -13,10 +13,13 @@
     "babel-preset-stage-2": "^6.5.0",
     "babel-register": "^6.9.0",
     "chai": "^3.5.0",
+    "gitbook-cli": "^2.3.0",
     "mocha": "^2.5.3",
     "sinon": "^1.17.7"
   },
   "scripts": {
+    "docs:prepare": "gitbook install",
+    "docs:watch": "npm run docs:prepare && gitbook serve",
     "test": "env NODE_PATH=$NODE_PATH:$PWD/src ./node_modules/.bin/mocha --compilers js:babel-register --reporter spec src/*.spec.js src/**/*.spec.js --require mocha.config",
     "coverage": "env NODE_PATH=$NODE_PATH:$PWD/src nyc -x '**/*.spec.js' -x '**/*.config.js' --reporter=lcov --reporter=text mocha --compilers js:babel-register --reporter spec src/*.spec.js src/**/*.spec.js --require mocha.config"
   },
