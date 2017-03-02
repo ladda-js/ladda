@@ -1,4 +1,5 @@
 import {createEntityStore, put, get, contains, remove} from './entity-store';
+import {addId} from 'id-helper';
 
 const config = [
     {
@@ -57,40 +58,40 @@ describe('EntityStore', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = { name: 'user'};
-            put(s, e, v);
+            put(s, e, addId(undefined, undefined, v));
             const r = get(s, e, v.id);
-            expect(r.value).to.equal(v);
+            expect(r.value).to.deep.equal({...v, __ladda__id: 'hello'});
         });
         it('an added value to a view is later returned when calling get for view', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = { name: 'user'};
-            put(s, e, v);
+            put(s, e, addId(undefined, undefined, v));
             const r = get(s, e, v.id);
-            expect(r.value).to.equal(v);
+            expect(r.value).to.deep.equal({...v, __ladda__id: 'hello'});
         });
         it('merges view into entity value', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = {name: 'user'};
             const eView = {name: 'userPreview', viewOf: 'user'};
-            put(s, e, {...v, name: 'kalle'});
-            put(s, eView, {...v, name: 'ingvar'});
+            put(s, e, addId(undefined, undefined, {...v, name: 'kalle'}));
+            put(s, eView, addId(undefined, undefined, {...v, name: 'ingvar'}));
             const r = get(s, eView, v.id);
-            expect(r.value).to.be.deep.equal({id: 'hello', name: 'ingvar'});
+            expect(r.value).to.be.deep.equal({__ladda__id: 'hello', id: 'hello', name: 'ingvar'});
         });
         it('writing view value without id throws error', () => {
             const s = createEntityStore(config);
             const v = {aid: 'hello'};
             const eView = {name: 'userPreview', viewOf: 'user'};
-            const write = () => put(s, eView, {...v, name: 'kalle'});
+            const write = () => put(s, eView, addId(undefined, undefined, {...v, name: 'kalle'}));
             expect(write).to.throw(Error);
         });
         it('writing entitiy value without id throws error', () => {
             const s = createEntityStore(config);
             const v = {aid: 'hello'};
             const e = {name: 'user'};
-            const write = () => put(s, e, {...v, name: 'kalle'});
+            const write = () => put(s, e, addId(undefined, undefined, {...v, name: 'kalle'}));
             expect(write).to.throw(Error);
         });
     });
@@ -99,7 +100,7 @@ describe('EntityStore', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = { name: 'user'};
-            put(s, e, v);
+            put(s, e, addId(undefined, undefined, v));
             const r = get(s, e, v.id);
             expect(r.timestamp).to.not.be.undefined;
         });
@@ -121,40 +122,40 @@ describe('EntityStore', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = {name: 'user'};
-            put(s, e, v);
+            put(s, e, addId(undefined, undefined, v));
             const eView = {name: 'userPreview', viewOf: 'user'};
             const r = get(s, eView, v.id);
-            expect(r.value).to.be.deep.equal(v);
+            expect(r.value).to.be.deep.equal({...v, __ladda__id: 'hello'});
         });
         it('gets view if only it exist', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = {name: 'user'};
             const eView = {name: 'userPreview', viewOf: 'user'};
-            put(s, eView, v);
+            put(s, eView, addId(undefined, undefined, v));
             const r = get(s, eView, v.id);
-            expect(r.value).to.be.deep.equal(v);
+            expect(r.value).to.be.deep.equal({...v, __ladda__id: 'hello'});
         });
         it('gets entity value if same timestamp as view value', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = {name: 'user'};
             const eView = {name: 'userPreview', viewOf: 'user'};
-            put(s, eView, v);
-            put(s, e, {...v, name: 'kalle'});
+            put(s, eView, addId(undefined, undefined, v));
+            put(s, e, addId(undefined, undefined, {...v, name: 'kalle'}));
             const r = get(s, eView, v.id);
-            expect(r.value).to.be.deep.equal({...v, name: 'kalle'});
+            expect(r.value).to.be.deep.equal({...v, name: 'kalle', __ladda__id: 'hello'});
         });
         it('gets entity value if newer than view value', (done) => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = {name: 'user'};
             const eView = {name: 'userPreview', viewOf: 'user'};
-            put(s, eView, v);
+            put(s, eView, addId(undefined, undefined, v));
             setTimeout(() => {
-                put(s, e, {...v, name: 'kalle'});
+                put(s, e, addId(undefined, undefined, {...v, name: 'kalle'}));
                 const r = get(s, eView, v.id);
-                expect(r.value).to.be.deep.equal({...v, name: 'kalle'});
+                expect(r.value).to.be.deep.equal({...v, name: 'kalle', __ladda__id: 'hello'});
                 done();
             }, 1);
         });
@@ -164,7 +165,7 @@ describe('EntityStore', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = { name: 'user'};
-            put(s, e, v);
+            put(s, e, addId(undefined, undefined, v));
             const r = contains(s, e, v.id);
             expect(r).to.be.true;
         });
@@ -181,7 +182,7 @@ describe('EntityStore', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
             const e = { name: 'user'};
-            put(s, e, v);
+            put(s, e, addId(undefined, undefined, v));
             remove(s, e, v.id);
             const r = contains(s, e, v.id);
             expect(r).to.be.false;

@@ -5,8 +5,8 @@ import {get as getFromQc,
         put as putInQc,
         contains as inQc,
         getValue} from 'query-cache';
-import {passThrough, curry} from 'fp';
-import {serialize} from 'serializer';
+import {passThrough, compose, prop} from 'fp';
+import {addId, removeId} from 'id-helper';
 
 const getTtl = e => (e.ttl || 0) * 1000;
 
@@ -20,38 +20,25 @@ const decorateReadSingle = (es, e, aFn) => {
         if (inEs(es, e, id) && !aFn.alwaysGetFreshData) {
             const v = getFromEs(es, e, id);
             if (!hasExpired(e, v.timestamp)) {
-                return Promise.resolve(v.value);
+                return Promise.resolve(compose(removeId, prop('value')));
             }
         }
 
-        return aFn(id).then(passThrough(putInEs(es, e)));
+        return aFn(id).then(passThrough(compose(putInEs(es, e), addId(aFn, id))));
     };
 };
-
-const addId = curry((aFn, args, o) => {
-    // TODO Add id as a special field, allowing us to remove it before returning to the user.
-    // Eg. o.__ladda__id
-    if (aFn.idFrom === 'ARGS') {
-        if (Array.isArray(o)) {
-            throw new Error('idFrom is only supported for objects');
-        }
-        o.id = serialize(args);
-        return o;
-    } else {
-        return o;
-    }
-});
 
 const decorateReadQuery = (es, qc, e, aFn) => {
     return (...args) => {
         if (inQc(qc, e, aFn, args) && !aFn.alwaysGetFreshData) {
             const v = getFromQc(qc, e, aFn, args);
             if (!hasExpired(e, v.timestamp)) {
-                return Promise.resolve(getValue(v.value));
+                return Promise.resolve(compose(removeId, getValue(v.value)));
             }
         }
 
-        return aFn(...args).then(addId(aFn, args)).then(passThrough(putInQc(qc, e, aFn, args)));
+        return aFn(...args)
+                   .then(passThrough(compose(putInQc(qc, e, aFn, args), addId(aFn, args))));
     };
 };
 

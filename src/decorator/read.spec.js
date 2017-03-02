@@ -65,7 +65,7 @@ describe('Read', () => {
             aFn.idFrom = 'ARGS';
             const res = decorateRead(es, qc, e, aFn);
             res({hello: 'hej', other: 'svej'}).then(x => {
-                expect(x).to.deep.equal({id: 'hej-svej', name: 'Kalle'});
+                expect(x).to.deep.equal({name: 'Kalle'});
                 done();
             });
         });

@@ -1,11 +1,12 @@
 import {put} from 'entity-store';
 import {invalidate} from 'query-cache';
-import {passThrough} from 'fp';
+import {passThrough, compose} from 'fp';
+import {addId} from 'id-helper';
 
 export function decorateCreate(es, qc, e, aFn) {
     return (...args) => {
         return aFn(...args)
-            .then(passThrough(put(es, e)))
+            .then(passThrough(compose(put(es, e), addId(aFn, args))))
             .then(passThrough(() => invalidate(qc, e, aFn)));
     };
 }

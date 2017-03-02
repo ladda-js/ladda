@@ -36,9 +36,9 @@ const getFromCache = (qc, e, k) => {
 export const put = curry((qc, e, aFn, args, xs) => {
     const k = createKey(e, [aFn.name, ...filter(identity, args)]);
     if (Array.isArray(xs)) {
-        qc.cache[k] = toCacheValue(map(prop('id'), xs));
+        qc.cache[k] = toCacheValue(map(prop('__ladda__id'), xs));
     } else {
-        qc.cache[k] = toCacheValue(prop('id', xs));
+        qc.cache[k] = toCacheValue(prop('__ladda__id', xs));
     }
     map_(putInEs(qc.entityStore, e), Array.isArray(xs) ? xs : [xs]);
     return xs;

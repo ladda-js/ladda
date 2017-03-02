@@ -38,12 +38,12 @@ const rmViews = ([eMap, s], e) => {
 
 // Entity -> Value -> String -> ()
 const createEntityKey = (e, v) => {
-    return getEntityType(e) + v.id;
+    return getEntityType(e) + v.__ladda__id;
 };
 
 // Entity -> Value -> String -> ()
 const createViewKey = (e, v) => {
-    return e.name + v.id;
+    return e.name + v.__ladda__id;
 };
 
 // Entity -> Bool
@@ -51,7 +51,7 @@ const isView = e => !!e.viewOf;
 
 // EntityStore -> Entity -> Value -> ()
 export const remove = (es, e, id) => {
-    rm(es, createEntityKey(e, {id}));
+    rm(es, createEntityKey(e, {__ladda__id: id}));
     rmViews(es, e);
 };
 
@@ -69,7 +69,7 @@ const entityValueExist = (s, e, v) => !!read(s, createEntityKey(e, v));
 
 // EntityStore -> Entity -> Value -> ()
 const setEntityValue = (s, e, v) => {
-    if (!v.id) {
+    if (!v.__ladda__id) {
         throw new Error(`Value is missing id, tried to add to entity ${e.name}`);
     }
     const k = createEntityKey(e, v);
@@ -79,7 +79,7 @@ const setEntityValue = (s, e, v) => {
 
 // EntityStore -> Entity -> Value -> ()
 const setViewValue = (s, e, v) => {
-    if (!v.id) {
+    if (!v.__ladda__id) {
         throw new Error(`Value is missing id, tried to add to view ${e.name}`);
     }
 
@@ -100,14 +100,14 @@ export const put = handle(setViewValue, setEntityValue);
 
 // EntityStore -> Entity -> String -> Value
 const getEntityValue = (s, e, id) => {
-    const k = createEntityKey(e, {id});
+    const k = createEntityKey(e, {__ladda__id: id});
     return read(s, k);
 };
 
 // EntityStore -> Entity -> String -> Value
 const getViewValue = (s, e, id) => {
-    const entityValue = read(s, createEntityKey(e, {id}));
-    const viewValue = read(s, createViewKey(e, {id}));
+    const entityValue = read(s, createEntityKey(e, {__ladda__id: id}));
+    const viewValue = read(s, createViewKey(e, {__ladda__id: id}));
     const onlyViewValueExist = viewValue && !entityValue;
 
     if (onlyViewValueExist) {

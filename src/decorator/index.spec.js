@@ -1,6 +1,7 @@
 import {decorate} from './index';
 import {createEntityStore} from 'entity-store';
 import {createQueryCache, put, contains} from 'query-cache';
+import {addId} from 'id-helper';
 
 const config = [
     {
@@ -41,7 +42,7 @@ describe('Decorate', () => {
         const eUser = config[0];
         const eCar = config[1];
         const carsApi = decorate(es, qc, eCar, aFn);
-        put(qc, eUser, aFn, [1], xOrg);
+        put(qc, eUser, aFn, [1], addId(undefined, undefined, xOrg));
 
         expect(contains(qc, eUser, aFn, [1])).to.be.true;
         const shouldHaveRemovedUser = () => {

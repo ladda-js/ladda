@@ -51,7 +51,7 @@ describe('Create', () => {
             const res = decorateCreate(es, qc, e, aFn);
             res(xOrg).then((newX) => {
                 expect(newX).to.equal(response);
-                expect(get(es, e, 1).value).to.equal(response);
+                expect(get(es, e, 1).value).to.deep.equal({...response, __ladda__id: 1});
                 done();
             });
         });
