@@ -12,13 +12,13 @@
  */
 
 import {merge} from './merger';
-import {curry, reduce, map_} from 'fp';
+import {curry, reduce, map_, clone} from 'fp';
 
 // Value -> StoreValue
 const toStoreValue = v => ({value: v, timestamp: Date.now()});
 
 // EntityStore -> String -> Value
-const read = ([_, s], k) => s[k];
+const read = ([_, s], k) => (s[k] ? {...s[k], value: clone(s[k].value)} : s[k]);
 
 // EntityStore -> String -> Value -> ()
 const set = ([eMap, s], k, v) => s[k] = toStoreValue(v);

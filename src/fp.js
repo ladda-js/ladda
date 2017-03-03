@@ -123,3 +123,17 @@ const takeIf = curry((p, m, x) => {
 export const filter = curry((p, xs) => {
     return reduce(takeIf(p), [], xs);
 });
+
+
+export const clone = o => {
+    if (!o) {
+        return o;
+    }
+
+    if (Array.isArray(o)) {
+        return o.slice(0);
+    }
+    if (typeof o === 'object') {
+        return {...o};
+    }
+};

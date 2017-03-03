@@ -79,7 +79,7 @@ describe('Read', () => {
             });
             aFn.byId = true;
             const res = decorateRead({}, es, qc, e, aFn);
-            res(1).then(() => {
+            res(1).then((x) => {
                 expect(aFn.callCount).to.equal(1);
                 done();
             });

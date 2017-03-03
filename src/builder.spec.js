@@ -53,7 +53,7 @@ describe('builder', () => {
                .then(() => api.user.getUsers())
                .then(expectOnlyOneApiCall);
     });
-    fit('1000 calls is not slow', (done) => {
+    it('1000 calls is not slow', (done) => {
         const myConfig = config();
         myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
         myConfig.user.api.getUsers.idFrom = 'ARGS';

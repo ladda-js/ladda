@@ -104,6 +104,16 @@ describe('EntityStore', () => {
             const r = get(s, e, v.id);
             expect(r.timestamp).to.not.be.undefined;
         });
+        it('altering retrieved value does not alter the stored value', () => {
+            const s = createEntityStore(config);
+            const v = {id: 'hello', name: 'kalle'};
+            const e = { name: 'user'};
+            put(s, e, addId({}, undefined, undefined, v));
+            const r = get(s, e, v.id);
+            r.value.name = 'ingvar';
+            const r2 = get(s, e, v.id);
+            expect(r2.value.name).to.equal(v.name);
+        });
         it('gets undefined if value does not exist', () => {
             const s = createEntityStore(config);
             const v = {id: 'hello'};
