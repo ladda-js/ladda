@@ -1,5 +1,3 @@
-import {map} from 'fp';
-
 const serializeObject = (o) => {
     return Object.keys(o).map(x => {
         if (o[x] && typeof o[x] === 'object') {
