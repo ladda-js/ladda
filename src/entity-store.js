@@ -21,7 +21,7 @@ const toStoreValue = v => ({value: v, timestamp: Date.now()});
 const read = ([_, s], k) => (s[k] ? {...s[k], value: clone(s[k].value)} : s[k]);
 
 // EntityStore -> String -> Value -> ()
-const set = ([eMap, s], k, v) => s[k] = toStoreValue(v);
+const set = ([eMap, s], k, v) => s[k] = toStoreValue(clone(v));
 
 // EntityStore -> String -> ()
 const rm = curry(([_, s], k) => delete s[k]);
