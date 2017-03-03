@@ -10,7 +10,7 @@ In its implementation Ladda uses functional programming principles. Therefore th
 
 ## Independent
 
-Apart from being independent from any dependencies internally, Ladda is framework and library agnostic in its usage. It doesn't depend on the latest single page application solution. It doesn't reinvent the wheel of caching every time a new framework comes around. You can use it in your evolving application as your caching solution.
+Apart from being independent from any dependencies internally, Ladda is library and framework agnostic in its usage. It doesn't depend on the latest single page application solution. It doesn't reinvent the wheel of caching every time a new framework comes around. You can use it in your evolving application as your caching solution.
 
 ## Low Buy-In
 
@@ -46,11 +46,10 @@ return result;
 In contrast, Ladda shields away the cache layer for you:
 
 ```
-result = apiService.getList();
-return result;
+result apiService.getList();
 ```
 
-The `getList()` request would look the same form the outside. You only reach out to your API service to handle the request. At the place where you define the API service, Ladda would be a thin decorator for your `getList()` functionality.
+The `getList()` request would look the same form the outside. You only reach out to your API layer to handle the request. At the place where you define the API layer, Ladda would be a thin decorator for your `getList()` functionality.
 
 ```
 getList.operation = 'READ';
