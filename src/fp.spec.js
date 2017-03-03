@@ -2,7 +2,7 @@ import {debug, identity, curry, passThrough,
         startsWith, join, on, isEqual,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
-        mapObject, mapValues, toObject, filter} from './fp';
+        mapObject, mapValues, toObject, filter, clone} from './fp';
 import sinon from 'sinon';
 
 describe('fp', () => {
@@ -208,6 +208,23 @@ describe('fp', () => {
             expect(filter(largerThan3, xs)).to.deep.equal(
                 [4,5,6]
             );
+        });
+    });
+    describe('clone', () => {
+        it('returns object if falsy', () => {
+            expect(clone(undefined)).to.equal(undefined);
+        });
+        it('clones array', () => {
+            const o = [1,2,3];
+            const cloned = clone(o);
+            o.push(1);
+            expect(cloned).to.not.deep.equal(o);
+        });
+        it('clones object', () => {
+            const o = {name: 'kalle'};
+            const cloned = clone(o);
+            o.name = 'ingvar';
+            expect(cloned).to.not.deep.equal(o);
         });
     });
 });
