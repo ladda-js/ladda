@@ -73,7 +73,7 @@ Most options are optional. Typically you need to specify at least "api" on the e
 
 * invalidates: [ApiFunction] where ApiFunction is any other function in the same api (see EntitiyConfig). By default this is the empty list [].
 
-* idFrom: "ENTITY" | "ARGS" | Function. Where "ARGS" is a string telling Ladda to generate an id for you by serializing the ARGS the ApiFunction is called with. "ARGS" will also tell Ladda to treat the value as a BlobValue. Function is a function (EntitiyValue -> ID). By default ENTITY.
+* idFrom: "ENTITY" | "ARGS" | Function. Where "ARGS" is a string telling Ladda to generate an id for you by serializing the ARGS the ApiFunction is called with. "ARGS" will also tell Ladda to treat the value as a BlobValue. Function is a function (EntitiyValue -> ID). By default "ENTITY".
 
 * byId: true | false. This is an optimization that tells Ladda that the first argument is an id. This allows Ladda to directly try to fetch the data from the cache, even if it was acquired by another call. This is useful if you previously called for example "getAllUsers" and now want to fetch one user directly from the cache. By default false.
 
