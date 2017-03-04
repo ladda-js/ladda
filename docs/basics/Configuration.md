@@ -2,7 +2,7 @@
 Most options are optional. Typically you need to specify at least "api" on the entity and "operation" on the method. 
 
 ## Entity Configuration
-* **ttl**: How long to cache in seconds. Default is 300 seconds.
+* **ttl**: How long to cache in seconds. Default is `300` seconds.
 
 * **invalidatesOn**: [Operation] where `Operation := "CREATE" | "READ" | "UPDATE" | "DELETE" | "NO_OPERATION"`. Default is `["CREATE", "UPDATE", "DELETE"]`.
 
