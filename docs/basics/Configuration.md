@@ -4,7 +4,7 @@ Most options are optional. Typically you need to specify at least "api" on the e
 ## Entity Configuration
 * **ttl**: How long to cache in seconds. Default is `300` seconds.
 
-* **invalidatesOn**: [Operation] where `Operation := "CREATE" | "READ" | "UPDATE" | "DELETE" | "NO_OPERATION"`. Default is `["CREATE", "UPDATE", "DELETE"]`.
+* **invalidatesOn**: `[Operation]` where `Operation := "CREATE" | "READ" | "UPDATE" | "DELETE" | "NO_OPERATION"`. Default is `["CREATE", "UPDATE", "DELETE"]`.
 
 * **invalidates**: `[EntityName]` where EntitiyName is the key of your EntitiyConfig. By default an empty list `[]`.
 
