@@ -60,7 +60,7 @@ Most options are optional. Typically you need to specify at least "api" on the e
 ## Entity Configuration
 * ttl: How long to cache in seconds. Default is 300 seconds.
 
-* invalidatesOn: [Operation] where Operation := CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is [CREATE, UPDATE, DELETE].
+* invalidatesOn: [Operation] where Operation := "CREATE" | "READ" | "UPDATE" | "DELETE" | "NO_OPERATION". Default is ["CREATE", "UPDATE", "DELETE"].
 
 * invalidates: [EntityName] where EntitiyName is the key of your EntitiyConfig. By default an empty list [].
 
@@ -69,7 +69,7 @@ Most options are optional. Typically you need to specify at least "api" on the e
 * api (required): A collection of ApiFunctions, functions that communciate with an external service and return a Promise.
 
 ## Method Configuration
-* operation: CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is NO_OPERATION.
+* operation: "CREATE" | "READ" | "UPDATE" | "DELETE" | "NO_OPERATION". Default is "NO_OPERATION".
 
 * invalidates: [ApiFunction] where ApiFunction is any other function in the same api (see EntitiyConfig). By default this is the empty list [].
 
