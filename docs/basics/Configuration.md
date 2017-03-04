@@ -10,7 +10,7 @@ Most options are optional. Typically you need to specify at least "api" on the e
 
 * **viewOf**: `EntitiyName`. Only specify if this is a subset for another entitiy (all fields must exist in the other entity).
 
-* **api** (required): A collection of ApiFunctions, functions that communciate with an external service and return a Promise.
+* **api** (required): An object of ApiFunctions, functions that communciate with an external service and return a Promise. The function name as key and function as value.
 
 ## Method Configuration
 * **operation**: `"CREATE" | "READ" | "UPDATE" | "DELETE" | "NO_OPERATION"`. Default is `"NO_OPERATION"`.
