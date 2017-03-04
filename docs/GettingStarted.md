@@ -22,7 +22,7 @@ export function getProjectsCreatedAfter(date) {
     return get(resource, {date}); // Returns a list of projects (where each project has an ID)
 }
 ```
-where get is a function preforming a HTTP-requests and returning a promise. You will need to create an API for your own application using your own method for creating get requests (for example Axios). When you call `getProjectsCreatedAfter` the results will be cached. So if you call it more than once within 300s (default time to life for the cache), only one HTTP-request will be made per date. Eg. 
+where `get` is a function preforming a HTTP-requests and returning a promise. You will need to create an API for your own application using your own method for creating get requests (for example Axios). When you call `getProjectsCreatedAfter` the results will be cached. So if you call it more than once within 300s (default time to life for the cache), only one HTTP-request will be made per date. Eg. 
 
 ```
 getProjectsCreatedAfter('2000-01-01');
