@@ -5,7 +5,7 @@ Ladda is a library that helps you with caching, invalidation of caches and to ha
 Ladda is not meant to cover all possible use cases. You should use Ladda when you have clear entities. The entities need to be well-defined, for example, you might have a User entity, which contains an id, name, email and contact details. Then you might have a ListUser which only contains an id and a name. The important bit is that these concepts exist and that you refer to them as User and ListUser rather than "A user might have an id, name, email and contact details, but sometimes only id and name". Of course, if you come up with creative ways of using Ladda, and they provide you with a benefit, go ahead!  
 
 # Get Started
-Do a `npm install ladda-cache` in your project. Now, to use Ladda you need to configure it and export a API built from the configuration. You might create a file "api/index.js":
+Do a `npm install ladda-cache` in your project. Now, to use Ladda you need to configure it and export an API built from the configuration. You might create a file "api/index.js":
 
 ```javascript
 import * as project from './project';
