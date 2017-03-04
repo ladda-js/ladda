@@ -26,7 +26,7 @@ where project is a bunch of api-methods returning promises, eg:
 ```javascript
 createProject.operation = 'CREATE';
 export function createProject(project) {
-    return post(resource, { postData: project });
+    return post(resource, { postData: project }); // Must return a project (with ID).
 }
 
 getProjects.operation = 'READ';
@@ -54,8 +54,10 @@ export function getProjects() {
 
 * NO_OPERATION : When no operation is specified Ladda will not do anything by default. However, you can still use the invalidation logic of Ladda, see EntityConfig. No assumptions on what is returned by the server are made.
 
+# Configuration
+Most options are optional. Typically you need to specify at least "api" on the entity and "operation" on the method. 
 
-# Entity Configuration
+## Entity Configuration
 * ttl: How long to cache in seconds. Default is 300 seconds.
 
 * invalidatesOn: [Operation] where Operation := CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is [CREATE, UPDATE, DELETE].
@@ -66,7 +68,7 @@ export function getProjects() {
 
 * api (required): A collection of ApiFunctions, functions that communciate with an external service and return a Promise.
 
-# Method Configuration
+## Method Configuration
 * operation: CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is NO_OPERATION.
 
 * invalidates: [ApiFunction] where ApiFunction is any other function in the same api (see EntitiyConfig). By default this is the empty list [].
@@ -76,7 +78,7 @@ export function getProjects() {
 * byId: true | false. This is an optimization that tells Ladda that the first argument is an id. Hence Ladda can directly try to fetch the data from the cache, even if it was acquired by another call. This is useful if you previously called for example "getAllUsers" and now want to fetch one user directly from the cache. By default false.
 
 
-# Ladda Configuration
+## Ladda Configuration
 * idField: Specify the default property that contains the ID. By default this is "id".
 
 # Contribute
