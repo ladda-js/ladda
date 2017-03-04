@@ -7,7 +7,7 @@ You can expect a **significant performance boost** (if you didn't have any cachi
 
 When developing your application you shouldn't care about Ladda nor caching. You should just assume that backend calls are for free, that they will be cached if possible and data will be refetched if it has to. This can **simplify you application code**.
 
-If you get bored of Ladda you can easily get rid of it. Ladda is designed to influence your application code **as little as possible**. We want you to get hooked, but not because of the cost of getting rid of Ladda.
+If you get bored of Ladda you can easily get rid of it. Ladda is designed to influence your application code as little as possible. We want you to get hooked, but not because of the cost of getting rid of Ladda.
 
 # When to Use Ladda
 Ladda is not meant to cover all possible use cases. To get the full power of Ladda you need to have entities that are well-defined. For example, you might have an entity User, which contains an id, name, email and contact details. Then you might have an entity ListUser, which only contains an id and a name. The important bit is that these concepts exist and that you refer to them as User and ListUser rather than "A user might have an id, name, email and contact details, but sometimes only id and name".
