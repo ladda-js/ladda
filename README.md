@@ -43,7 +43,7 @@ export function getProjects() {
 * BlobValue: Does not require an ID. Can be either a list, an object or just a single value. Suitable when you just want to cache an API call.
 
 
-# Operations
+## Operations
 * CREATE: An API call which returns an EntitiyValue.
 
 * READ: An API call which returns an EntityValue, or a list of EntityValues.
