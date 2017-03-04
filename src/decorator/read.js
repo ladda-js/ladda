@@ -2,6 +2,7 @@ import {get as getFromEs,
         put as putInEs,
         contains as inEs} from 'entity-store';
 import {get as getFromQc,
+        invalidate,
         put as putInQc,
         contains as inQc,
         getValue} from 'query-cache';
@@ -15,7 +16,7 @@ const hasExpired = (e, timestamp) => {
     return (Date.now() - timestamp) > getTtl(e);
 };
 
-const decorateReadSingle = (c, es, e, aFn) => {
+const decorateReadSingle = (c, es, qc, e, aFn) => {
     return (id) => {
         if (inEs(es, e, id) && !aFn.alwaysGetFreshData) {
             const v = getFromEs(es, e, id);
@@ -24,7 +25,8 @@ const decorateReadSingle = (c, es, e, aFn) => {
             }
         }
 
-        return aFn(id).then(passThrough(compose(putInEs(es, e), addId(c, aFn, id))));
+        return aFn(id).then(passThrough(compose(putInEs(es, e), addId(c, aFn, id))))
+                      .then(passThrough(() => invalidate(qc, e, aFn)));
     };
 };
 
@@ -38,13 +40,14 @@ const decorateReadQuery = (c, es, qc, e, aFn) => {
         }
 
         return aFn(...args)
-                   .then(passThrough(compose(putInQc(qc, e, aFn, args), addId(c, aFn, args))));
+                   .then(passThrough(compose(putInQc(qc, e, aFn, args), addId(c, aFn, args))))
+                   .then(passThrough(() => invalidate(qc, e, aFn)));
     };
 };
 
 export function decorateRead(c, es, qc, e, aFn) {
     if (aFn.byId) {
-        return decorateReadSingle(c, es, e, aFn);
+        return decorateReadSingle(c, es, qc, e, aFn);
     } else {
         return decorateReadQuery(c, es, qc, e, aFn);
     }
