@@ -7,25 +7,6 @@ Ladda is not meant to cover all possible use cases. To get the full power of Lad
 # Get Started
 Check out the [guide](/docs/GettingStarted.md) for getting started. And have a look in the [examples folder](https://github.com/petercrona/ladda/tree/master/examples). 
 
-# Concepts
-* ID: Unique identifier for a EntitiyValue. By default assumed to be the property "id" of an object. But can be overriden (see Ladda Config).
-
-* EntityValue: An object with an ID
-
-* BlobValue: Does not require an ID. Can be either a list, an object or just a single value. Suitable when you just want to cache an API call.
-
-
-## Operations
-* CREATE: An API call which returns an EntitiyValue.
-
-* READ: An API call which returns an EntityValue, or a list of EntityValues.
-
-* UPDATE: Takes the updated EntitiyValue as the first argument. No assumptions on what is returned by the server are made.
-
-* DELETE: Takes an ID as the first argument. Server must return 200, or the delete will be reverted. No assumptions on what is returned by the server are made.
-
-* NO_OPERATION : When no operation is specified Ladda will not do anything by default. However, you can still use the invalidation logic of Ladda, see EntityConfig. No assumptions on what is returned by the server are made.
-
 # Configuration
 Most options are optional. Typically you need to specify at least "api" on the entity and "operation" on the method. 
 
