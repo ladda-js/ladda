@@ -1,21 +1,11 @@
 # Ladda
-Ladda is a tool that moves caching logic, in particular invalidation logic, out from our application code. It allows us to easily model what should be invalidated when an entity is created, updated or deleted. For example, when a user is deleted you might want to invalidate blog posts, since you know that deleting a user also delets all blog posts by the user. Rather than tainting application code with this we can observe that a user was deleted and do what is necessary.
+Ladda is a library that helps you with caching, invalidation of caches and to handle different representations of the same data in a performant and memory efficient way. The main goal with Ladda is to make it easy for you to add sophisticated caching without making your application code more complex. Ladda will take care of logic that would otherwise increase the complexity of your application code, and it will do so in a corner outside of your application. You can expect a significant performance boost (if you didn't have any caching already) with possibly no changes to you application code. Ladda is designed to be something you can ignore. When developing your application you shouldn't care about Ladda nor caching. You should just assume that backend calls are for free, that they will be cached if possible and data will be refetched if it has to. If you get bored of Ladda you can easily get rid of it. Ladda is designed to influence your application code as little as possible. We want you to get hooked, but not because of the cost of getting rid of Ladda.
 
 # When to Use Ladda
-Ladda is not meant to cover all cases. This is very intentional. Bad libraries are often the result of trying to do too much. You should only use Ladda when you have or intend to follow REST to a high extent. This means:
-
-* Define an entity E such that E.id uniquely identifies the entity.
-* Define create, read, update and delete such that:
-  * **create: { E  \ {id} }** where E \ {id} means E without id.
-  * **update: { E }**
-  * **delete: { id }**
-  * **read: { id }** where the backend responds with E
-  * **readMultiple: { … }** where the backend responds with [E] and “…” is an unique query.
-
-Ladda can be used in more cases. It is very flexible and often allows you to work around issues. But you need to think about how you are using it then. If you want to do some custom solution, where E don’t have an id or call it something else, then you need to use something else or be creative.
+Ladda is not meant to cover all possible use cases. You should use Ladda when you have clear entities. The entities need to be well-defined, for example, you might have a User entity, which contains an id, name, email and contact details. Then you might have a ListUser which only contains an id and a name. The important bit is that these concepts exist and that you refer to them as User and ListUser rather than "A user might have an id, name, email and contact details, but sometimes only id and name". Of course, if you come up with creative ways of using Ladda, and they provide you with a benefit, go ahead!  
 
 # Get Started
-To use Ladda you need to configure it and export a API built from the configuration. You might create a file "api/index.js":
+Do a `npm install ladda-cache` in your project. Now, to use Ladda you need to configure it and export a API built from the configuration. You might create a file "api/index.js":
 
 ```javascript
 import * as project from './project';
@@ -40,143 +30,55 @@ export function createProject(project) {
 }
 
 getProjects.operation = 'READ';
-getProjects.plural = true;
-export function getProjects(foo) {
+export function getProjects() {
     return get(resource);
 }
 ```
 
-# Main Concepts
-**Type**
+# Concepts
+* ID: Unique identifier for a EntitiyValue. By default assumed to be the property "id" of an object. But can be overriden (see Ladda Config).
 
-For example “User” can be a type. API-methods are associated with a type. So for example a method `deleteById(id)` will automatically delete the entry from the cache for “User”. You can think of a type as defining a namespace for the cache.
+* EntityValue: An object with an ID
 
-To define the type user:
-```
-User: {
-    api: userApi
-}
-```
-**Item**
-
-An instance of a type. For example userA and userB are items of type User. Could look like `{ id: “randomId”, name: “Kalle” }`. Always have “id” specified except for when you create a new one.
-
-**Operation**
-
-Ladda follows the CRUD-model. Operations are:
-* CREATE: Create a new item, for example a new User, given an item without id specified.
-* READ: Get one or multiple items given a query or id.
-* UPDATE: Update an item given an item with id specified.
-* DELETE: Remove an item given a id.
-
-**ID**
-
-Ladda relies on IDs being available. These are assumed to uniquely identify an entity of a certain type. For example “user.id”, where user is an entity in the type User, is assumed to uniquely identify a specific user. The main assumptions, per operations, are:
-
-*CREATE*:
-
-A function declared with “operation = CREATE” is expected to as its only parameter get an item without the “id” being set. For example:
-```
-{ name: “Peter”, from: “Sweden”, livingIn: “Germany” }
-```
-The server is required to respond with `{ id: <uniqueIdForItem> }`. The response can contain more data, but only the id will be used. Note the assumption that the server will not manipulate the entity saved.
-
-*READ - Singular:*
-
-An id is expected to be provided as the only argument. The response from the server is expected to be an item with “id” set.
-
-*READ - Plural:*
-
-An query, which is just an object, is expected to be provided as the only argument. The response from the server is expected to be a list of item. Each item must have an ID specified. Eg. if `[userA, userB]` is returned, userA.id and userB.id are required to be set.
-
-**Singular**
-
-This is defined by setting for example `getUserById.plural = false;`. This is only important for READ. See example above under “READ - Singular”.
-
-**Plural**
-
-This is defined by setting for example `getUserById.plural = true;`. This is only important for READ. See example above under “READ - Plural”.
-
-**Query**
-
-This is only important for “READ - Plural”. Consider an endpoint that gives you all the users born in 1989 and that have names starting with A. A query might look like: `{ nameStartsWith: “A”, born: 1989 }`.
+* BlobValue: Does not require an ID. Can be either a list, an object or just a single value. Suitable when you just want to cache an API call.
 
 
-**API**
+# Operations
+* CREATE: An API call which returns an EntitiyValue.
 
-Every type is associated with an API, which is simply an object with functions. For instance `{ getById: fetchFromDBFunction }`. Each function in the API needs to be decorated with at least “operation”. For example:
-```
-getById.operation = “READ”;
-function getById(id) { return fetchFromDBFunction(id); }
-```
-It has to return a Promise. As mentioned about, depending on the operation certain requirements are made:
+* READ: An API call which returns an EntityValue, or a list of EntityValues.
 
-CREATE: An object with id set is returned: { id }
-READ - Singular: Single item is returned
-READ - Plural: A list of items
-UPDATE: No requirements
-DELETE: No requirements
+* UPDATE: Takes the updated EntitiyValue as the first argument. Server must return 200, or the update will be reverted.
 
-# Type Configuration
-Example:
-```
-   projects: {
-        ttl: 300,
-        invalidates: ['projects', 'projectPreview'],
-        invalidatesOn: ['CREATE'],
-        api: project
-    }
-```
+* DELETE: Takes an ID as the first argument. Server must return 200, or the delete will be reverted.
 
-**viewOf**
-
-Specifies that the current type is a view of another entity. The super type will influence the cache of the view and vice versa. Eg. if a UserPreview is a view of User, then updating a user's name calling `User.updateName({ id, name })` will update UserPreview.name and vice versa. Default is no super type.
-
-**ttl**
-
-How long the cache is valid in seconds. After the number of seconds specified Ladda will pretend the cached entity don't exist. Default is no TTL (meaning no caching at all).
-
-**invalidates**
-
-Other entities to invalidate on operations specified in "invalidatesOn". Default is none.
-
-**invalidatesOn**
-
-Operations to invalidate on, where operations can be CREATE, READ, UPDATE, DELETE. Default is CREATE.
+* NO_OPERATION : When no operation is specified Ladda will not do anything by default. However, you can still use the invalidation logic of Ladda, see EntityConfig.
 
 
-# API Function Configuration
-Example:
-```
-getAll.operation = 'READ';
-getAll.plural = true;
-export function getAll(query) {
-    return get('/api/v2/downloadable-file', { getData: query });
-}
+# Entity Configuration
+* ttl: How long to cache in seconds. Default is 300 seconds.
 
-poll.operation = 'READ';
-poll.plural = true;
-poll.alwaysGetFreshData = true;
-poll.invalidates = ['getAll(*)'];
-export function poll(query) {
-    return get('/api/v2/downloadable-file', { getData: query });
-}
-```
-**alwaysGetFreshData**
+* invalidatesOn: [Operation] where Operation := CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is [CREATE, UPDATE, DELETE]
 
-Always fetch data (even if it exists in the cache) and save in cache. Default is false.
+* invalidates: [EntityName] where EntitiyName is the key of your EntitiyConfig. 
 
-**plural**
+* viewOf: [EntitiyName]
 
-Used when operation is set to READ. Informs Ladda that a list of multiple entities is expected. Default is false.
+* api: A collection of ApiFunctions, functions that communciate with an external service and return a Promise.
 
-**invalidates**
 
-Invalidates the query cache for the specified api function in the same type. If suffixed with (*) all caching for the specified api function will be cleared (regardless of which arguments it was called with). Otherwise only api function called without parameters. Default is none.
+# Method Configuration
+* operation: Operation where operation is: CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is NO_OPERATION.
 
-**operation**
+* invalidates: [ApiFunction] where ApiFunction is any other function in the same api (see EntitiyConfig). 
 
-CREATE | READ | UPDATE | DELETE - necessary for Ladda to handle caching correclty. Always has to be specified.
+* idFrom: "ARGS" | Function. Where "ARGS" is a string telling Ladda to generate an id for you by serializing the ARGS the ApiFunction is called with. Function is a function (EntitiyValue -> ID).
 
-# Try it out
-Do a "npm install ladda-cache" in your project. Stay tuned for an example project.
+* byId: true | false. By default false. This is an optimization that tells Ladda that the first argument is an id. Hence Ladda can directly try to fetch the data from the cache, even if it was acquired by another call. This is useful if you previously called for example "getAllUsers" and now want to fetch one user directly from the cache.
+
+
+# Ladda Configuration
+* idField: Specify the default property that contains the ID. By default this is "id".
+
+# Contribute
+Please let me know if you have any feedback. Fork the repo, create PRs and create issues! For PRs with code, don't forget to write tests.
