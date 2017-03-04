@@ -48,33 +48,32 @@ export function getProjects() {
 
 * READ: An API call which returns an EntityValue, or a list of EntityValues.
 
-* UPDATE: Takes the updated EntitiyValue as the first argument. Server must return 200, or the update will be reverted.
+* UPDATE: Takes the updated EntitiyValue as the first argument. No assumptions on what is returned by the server are made.
 
-* DELETE: Takes an ID as the first argument. Server must return 200, or the delete will be reverted.
+* DELETE: Takes an ID as the first argument. Server must return 200, or the delete will be reverted. No assumptions on what is returned by the server are made.
 
-* NO_OPERATION : When no operation is specified Ladda will not do anything by default. However, you can still use the invalidation logic of Ladda, see EntityConfig.
+* NO_OPERATION : When no operation is specified Ladda will not do anything by default. However, you can still use the invalidation logic of Ladda, see EntityConfig. No assumptions on what is returned by the server are made.
 
 
 # Entity Configuration
 * ttl: How long to cache in seconds. Default is 300 seconds.
 
-* invalidatesOn: [Operation] where Operation := CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is [CREATE, UPDATE, DELETE]
+* invalidatesOn: [Operation] where Operation := CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is [CREATE, UPDATE, DELETE].
 
-* invalidates: [EntityName] where EntitiyName is the key of your EntitiyConfig. 
+* invalidates: [EntityName] where EntitiyName is the key of your EntitiyConfig. By default an empty list [].
 
-* viewOf: [EntitiyName]
+* viewOf: EntitiyName. Only specify if this is a subset for another entitiy (all fields must exist in the other entity).
 
-* api: A collection of ApiFunctions, functions that communciate with an external service and return a Promise.
-
+* api (required): A collection of ApiFunctions, functions that communciate with an external service and return a Promise.
 
 # Method Configuration
-* operation: Operation where operation is: CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is NO_OPERATION.
+* operation: CREATE | READ | UPDATE | DELETE | NO_OPERATION. Default is NO_OPERATION.
 
-* invalidates: [ApiFunction] where ApiFunction is any other function in the same api (see EntitiyConfig). 
+* invalidates: [ApiFunction] where ApiFunction is any other function in the same api (see EntitiyConfig). By default this is the empty list [].
 
-* idFrom: "ARGS" | Function. Where "ARGS" is a string telling Ladda to generate an id for you by serializing the ARGS the ApiFunction is called with. Function is a function (EntitiyValue -> ID).
+* idFrom: "ENTITY" | "ARGS" | Function. Where "ARGS" is a string telling Ladda to generate an id for you by serializing the ARGS the ApiFunction is called with. "ARGS" will also tell Ladda to treat the value as a BlobValue. Function is a function (EntitiyValue -> ID). By default ENTITY.
 
-* byId: true | false. By default false. This is an optimization that tells Ladda that the first argument is an id. Hence Ladda can directly try to fetch the data from the cache, even if it was acquired by another call. This is useful if you previously called for example "getAllUsers" and now want to fetch one user directly from the cache.
+* byId: true | false. This is an optimization that tells Ladda that the first argument is an id. Hence Ladda can directly try to fetch the data from the cache, even if it was acquired by another call. This is useful if you previously called for example "getAllUsers" and now want to fetch one user directly from the cache. By default false.
 
 
 # Ladda Configuration
