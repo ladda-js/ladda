@@ -57,6 +57,6 @@ Ladda is not meant to cover all possible use cases. To get the full power of Lad
 Of course, if you come up with creative ways of using Ladda, go ahead! You can quite easily use Ladda just as a simple cache for external calls, in which case you don't need a well-defined entity. But to leverge the more advanced parts, well-defined entities are necessary.
 
 ## Next Steps
-You should convince yourself by trying the [Demo](/docs/Demo.md). Keep in mind that Ladda comes with more advantages than being a simple `READ` operation cache. It supports all the CRUD operations. Ladda keeps your cache in sync and minimizes the number of requests made to the backend. Data is only refetched if it has to be.
+You should convince yourself by trying the [Demos](/docs/Demos.md). Keep in mind that Ladda comes with more advantages than being a simple `READ` operation cache. It supports all the CRUD operations. Ladda keeps your cache in sync and minimizes the number of requests made to the backend. Data is only refetched if it has to be.
 
 If you already want to get started, checkout the [Getting Started](/docs/GettingStarted.md) section.
