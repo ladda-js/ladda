@@ -23,11 +23,13 @@ Now, if you update a miniUser, the corresponding user will be updated and vice v
 In order for this to work, there's one strong rule. The view must be a subset of the entitiy of which it is a view. This means that all properties on the view must also exist on the other entitiy. For example: 
 
 `User { id, name, email, dateOfBith, phoneNumber, gender }`
+
 `MiniUser {id, name}`
 
 works just fine. But
 
 `User { id, name, email, dateOfBith, phoneNumber, gender }`
+
 `MiniUser {id, name, nickname}`
 
 will not work. Since nickname only exists in MiniUser and not User.
