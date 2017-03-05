@@ -10,7 +10,9 @@ Please consider this a glossary, it introduces concepts that are important in La
 
 * **EntitiyConfig**: Configuration of an entity.
 
-* **ApiFunction**: A function returning a Promise and is registered in the EntitiyConfig.
+* **Api**: Registered in the EntitiyConfig. Technically it is an object with keys corresponding to function names and values to ApiFunctions.
+
+* **ApiFunction**: A function returning a Promise and that is part of an Api.
 
 * **EntityValue**: An object fullfilling the specification of an Entity. This is the main type used and required for all the advanced features of Ladda. Eg. *{ id, name, email, phoneNumber}* which is the EntitityValue for the entitiy user (specified in the Entitiy definition).
 
