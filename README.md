@@ -24,7 +24,7 @@ Ladda is a lightweight and comes with no additional dependencies. The library ha
 ## Quality
 Ladda has a high test coverage (**100%** line coverage) with tests constantly being added. And yes, we know that high test coverage is a "feel good" number, our focus is still on meaningful and good tests. It has a reasonably simple architecture and often tries to stay [tacit](https://www.youtube.com/watch?v=seVSlKazsNk&feature=youtu.be) and concise by taking inspiration from [functional programming](https://drboolean.gitbooks.io/mostly-adequate-guide/content/). We urge you to check out the [source code](https://github.com/petercrona/ladda/tree/master/src). Help us to improve it further, or just enjoy reading JavaScript that looks a bit different from what you are used to.
 
-## Independent
+## Standalone
 Apart from being independent from any dependencies, Ladda is library and framework agnostic. It doesn't depend on the latest single page application framework out there. It doesn't reinvent the wheel of caching every time a new framework comes around. You can use it in your evolving application as your caching solution.
 
 ## Low Buy-In
