@@ -1,7 +1,2 @@
 # Basics
-
-The basic knowledge on how to use Ladda for your application.
-
-* [Operations](Operations.md)
-* [Time To Live](TimeToLive.md)
-* [Configuration](Configuration.md)
+We'll try to cover everything you need to get going with Ladda here. We'll start with a quick get started, go through the most important configuration options and finally provide you with a complete reference. You might give the reference a shot directly if you are already familiar with caching solutions. It's a very concise description of what is supported and most things are self-explanatory. 
