@@ -2,10 +2,10 @@
 
 * [Read Me](/README.md)
 * [Introduction](/docs/Introduction.md)
+* [Concepts](/docs/Concepts.md)
 * [Demos](/docs/Demos.md)
 * [Basics](/docs/basics/README.md)
   * [Getting Started](/docs/GettingStarted.md)
-  * [Concepts](/docs/Concepts.md)
   * [Operations](/docs/basics/Operations.md)
   * [Time To Live](/docs/basics/TimeToLive.md)
 * [Advanced](/docs/advanced/README.md)
