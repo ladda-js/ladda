@@ -1,6 +1,6 @@
 # Concepts
 
-Please consider this a glossary, it introduces concepts that are important in Ladda and will help you to better understand the documentation.
+Please consider this a glossary, it introduces concepts that are important in Ladda and will help you to better understand the documentation and the code.
 
 * **ID**: Unique identifier for a EntitiyValue. By default assumed to be the property "id" of an object. But can be overriden (see Ladda Config).
 
