@@ -1,5 +1,5 @@
 # Views
-As more and more people use wireless connections with limited data plans, we need to care about what we send over the wire. A common solution to this is to send only what the user needs. For example, if we are listing a 1000 users, we can save quite a lot of KB by sending only what is needed rather than a full-blown user.
+As more and more people use wireless connections with limited data plans, we need to care about what we send over the wire. A common solution to this is to send only what the user needs. For example, if we are listing a 1000 users, we can save quite many KBs by sending only what is needed rather than a full-blown user.
 
 However, if it means that we need to refetch the users all the time, we didn't gain much. Let's call the representation shown when listing 1000 users for `MiniUser`. And let's call the full-blown user for `User`. If MiniUser shows the name of a user, and we update the name on a User, then we would normally need to invalidate the MiniUser or manually update the name of the MiniUser corresponding to the User. Either we make our code more complicated, or we need to send more bytes over the wire than necessary.
 
