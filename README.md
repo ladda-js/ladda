@@ -1,7 +1,7 @@
 # Ladda
 Ladda is a library that helps you with caching, invalidation of caches and to handle different representations of the same data in a **performant** and **memory efficient** way. 
 
-The main goal with Ladda is to make it easy for you to add **sophisticated caching** without making your application code more complex. Ladda will take care of logic that would otherwise increase the complexity of your application code, and it will do so in a corner outside of your application. 
+The main goal with Ladda is to make it easy for you to add sophisticated caching **without making your application code more complex**. Ladda will take care of logic that would otherwise increase the complexity of your application code, and it will do so in a corner outside of your application. 
 
 You can expect a **significant performance boost** (if you didn't have any caching already) with possibly no changes to you application code. Ladda is designed to be something you can ignore once you set it up. 
 
