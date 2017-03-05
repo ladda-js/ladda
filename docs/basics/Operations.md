@@ -20,3 +20,4 @@ function createUser(user) {
     return performPostRequst('/api/user', user);
 }
 ```
+Note that the backend must return a User, which must have an ID, by default as the property "id" (eg. user.id).
