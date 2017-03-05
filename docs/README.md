@@ -13,7 +13,7 @@
   * [Views](/docs/advanced/ViewOf.md)
   * [Custom ID](/docs/advanced/CustomId.md)
 * [Recipes](/docs/Recipes.md)
-  * [Separate API folder](/docs/recipes/SeparateApiFolder.md)
+  * [Separate API Folder](/docs/recipes/SeparateApiFolder.md)
   * [Polling](/docs/recipes/Polling.md)
 * [Configuration Reference](/docs/basics/Configuration.md)
 * [Design Decisions](/docs/designDecisions/README.md)
