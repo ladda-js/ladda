@@ -18,7 +18,7 @@ Check out the [guide](/docs/GettingStarted.md) for getting started. And have a l
 # When to Use Ladda
 Ladda is not meant to cover all possible use cases. To get the full power of Ladda you need to have **well-defined entities**. For example, you might have an entity User, which contains an id, name, email and contact details. Then you might have an entity ListUser, which only contains an id and a name. The important bit is that these concepts exist and that you refer to them as User and ListUser rather than "A user might have an id, name, email and contact details, but sometimes only id and name".
 
-Of course, if you come up with creative ways of using Ladda, go ahead! You can quite easily use Ladda just as a simple cache for external calls, in which case you don't need a clear entity. But to leverge the more advanced parts, well-defined entities are necessary.
+Of course, if you come up with creative ways of using Ladda, go ahead! You can quite easily use Ladda just as a simple cache for external calls, in which case you don't need a well-defined entity. But to leverge the more advanced parts, well-defined entities are necessary.
 
 # Why Use Ladda?
 The sales pitch, here's a bunch of things that we are proud of:
