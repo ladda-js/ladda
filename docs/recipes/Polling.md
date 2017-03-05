@@ -13,4 +13,4 @@ export function poll(query) {
 }
 ```
 
-Everytime you call poll, it will get the latest data. It won't cache it. But it will invalidate getAll, ensuring that a subsequent call to getAll won't show older data than you just retrieved by calling poll. When you are not polling, getAll will be cached as specified in your entity configuration.
+Everytime you call poll, it will get the latest data. It won't cache it (since no operation is specified). But it will invalidate getAll, ensuring that a subsequent call to getAll won't show older data than you just retrieved by calling poll. When you are not polling, getAll will be cached as specified in your entity configuration.
