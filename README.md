@@ -16,7 +16,7 @@ The easiest way to get a glimpse of what Ladda can do is checking out our [demos
 Check out the [guide](/docs/GettingStarted.md) for getting started. And have a look in the [examples folder](https://github.com/petercrona/ladda/tree/master/examples). For a minimal example (everything in one file) that you can clone and run, check out [ladda-example-mini-project](https://github.com/petercrona/ladda-example-mini-project) ([code](https://github.com/petercrona/ladda-example-mini-project/blob/master/script.js)).
 
 # Documentation
-You'll find our [documentation](https://petercrona.gitbooks.io/ladda/content/) over at Gitbooks.
+You'll find the [documentation](https://petercrona.gitbooks.io/ladda/content/) over at Gitbooks.
 
 # Why Use Ladda?
 The sales pitch, here's a bunch of things that we are proud of:
