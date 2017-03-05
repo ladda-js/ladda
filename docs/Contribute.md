@@ -1,5 +1,5 @@
 # Contribute
-We'd love to see other help out with Ladda. There's definitely room for improvement everywhere. Testing, documentation, coding, thinking about new features and refining existing. Some things that are important to us:
+We'd love to see others help out with Ladda. There's definitely room for improvement everywhere. Testing, documentation, coding, thinking about new features and refining existing. Some things that are important to us:
 
 - The core API needs to be stable - try to not change it or have good reasons for changing it.
 
