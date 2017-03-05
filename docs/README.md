@@ -2,7 +2,7 @@
 
 * [Read Me](/README.md)
 * [Introduction](/docs/Introduction.md)
-* [Demo](/docs/Demo.md)
+* [Demos](/docs/Demos.md)
 * [Basics](/docs/basics/README.md)
   * [Getting Started](/docs/GettingStarted.md)
   * [Concepts](/docs/Concepts.md)
