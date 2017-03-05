@@ -1,6 +1,7 @@
 # Table of Contents
 
 * [Read Me](/README.md)
+* [Background](/docs/Background.md)
 * [Introduction](/docs/Introduction.md)
 * [Concepts](/docs/Concepts.md)
 * [Demos](/docs/Demos.md)
