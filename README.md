@@ -15,7 +15,7 @@ Ladda is not meant to cover all possible use cases. To get the full power of Lad
 Of course, if you come up with creative ways of using Ladda, go ahead! You can quite easily use Ladda just as a simple cache for external calls, in which case you don't need a clear entity. But to leverge the more advanced parts, well-defined entities are necessary.
 
 # Get Started
-Check out the [guide](/docs/GettingStarted.md) for getting started. And have a look in the [examples folder](https://github.com/petercrona/ladda/tree/master/examples). For a minimal example (everything in one file) that you can clone and run, check out https://github.com/petercrona/ladda-example-mini-project (code: https://github.com/petercrona/ladda-example-mini-project/blob/master/script.js).
+Check out the [guide](/docs/GettingStarted.md) for getting started. And have a look in the [examples folder](https://github.com/petercrona/ladda/tree/master/examples). For a minimal example (everything in one file) that you can clone and run, check out [ladda-example-mini-project](https://github.com/petercrona/ladda-example-mini-project) ([code](https://github.com/petercrona/ladda-example-mini-project/blob/master/script.js)).
 
 # Contribute
 Please let me know if you have any feedback. Fork the repo, create PRs and create issues! For PRs with code, don't forget to write tests.
