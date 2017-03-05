@@ -8,7 +8,7 @@ We'd love to see other help out with Ladda. There's definitely room for improvem
 - Keep Ladda simple - think about how to allow for a plugin that does what you think of rather than extending Ladda unless it is obviously something that belongs in Ladda's core code.
 
 ## Feature Ideas
-- Expose when an entity has been manipulated with the goal to make it easy to extend Ladda.
+- Expose when an entity has been manipulated with the goal to make it easy to extend Ladda outside of the core code (eg. to build framework integrations).
 
 - Optimistic Updates
 
