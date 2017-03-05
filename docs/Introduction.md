@@ -52,6 +52,6 @@ That's only the `READ` operation in CRUD though. A simple ad-hoc caching solutio
 [Ladda does support those operations](/docs/basics/Operations.md). When you update the list, by using a `CREATE`, `UPDATE` or `DELETE` operation, the requests are made to the API as usual. However, Ladda will also update your cache. Once you request the list of items again from the API, you will get the updated result from the cache without making a new API-request. For example, if you changed the name of a user, there's no need to refetch all users from you backend. Ladda ensures that you get up to date data if you would for example call "getAllUsers" again, without an API-request being made.
 
 ## Next Steps
-You should convince yourself by trying the [Demo](/docs/Demo.md). But keep in mind that Ladda comes with more advantages than being a simple `READ` operation cache. It supports all the CRUD operations. Even though you make all the different operations as requests to your API, Ladda keeps the cache in sync.
+You should convince yourself by trying the [Demo](/docs/Demo.md). Keep in mind that Ladda comes with more advantages than being a simple `READ` operation cache. It supports all the CRUD operations. Ladda keeps your cache in sync and minimizes the number of requests made to the backend. Data is only refetched if it has to be.
 
 If you already want to get started, checkout the [Getting Started](/docs/GettingStarted.md) section.
