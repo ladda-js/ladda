@@ -1,7 +1,7 @@
 # Demos
 Check out some of our demos, designed to show some of the benefits of Ladda.
 
-## Searching Hackernews
+## Searching Hacker News
 This is an example to see Ladda in action solely for the `READ` operation. It interacts with an API and shows how you would benefit from the cache. The example shows you the time to live (TTL) for every cached result, which has been configured to 15 seconds. It also shows you how many cache hits and misses you had, and an estimation of time saved by using the cache. [Check it out](https://rwieruch.github.io/ladda-react-example/).
 
 ## Examples in the Ladda Repository
