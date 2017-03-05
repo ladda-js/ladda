@@ -22,7 +22,7 @@ There are always exceptions. Maybe most of your API use `objectID` as the ID pro
 
 ```
 getUser.operation = 'READ';
-getUser.idFrom = user => u._id;
+getUser.idFrom = user => user._id;
 function getUser(id) {
     return performGetRequest('/api/user', id);
 }
