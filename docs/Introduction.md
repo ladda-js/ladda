@@ -1,30 +1,20 @@
 # Introduction
+Ladda is an independent, lightweight caching solution for your JavaScript application. It is a library simple to get started with yet supports sophisticated cache management. Let's start by looking at the background of Ladda and then look at how it can be useful for you and how to proceeed if you want to give Ladda a shot.
 
-Ladda is an independent, lightweight cache solution in a JavaScript application. It is a library simple to opt-in yet designed for sophisticated cache management.
+## Background
+Ladda was created to solve a real problem at Small Improvements. At Small Improvements we are developing an application to manage and facilitate feedback within a company. Both more formal, such as the yearly performance appraisals many companies have, but also less formal such as an employee wanting to praise another employee or request feedback from a couple employees, for example after having a presentation or after finishing a project. In addition to this we handle many more things, such as goals or objectives and a vast number of integrations and customizations. The main point is that it is a fairly complex piece of software, and it is built as a single page application.
 
-## Lightweight
+The issue we started to encounter was that loading all the data took quite a while, especially for large companies. First step was to ensure that we only loaded the data that is needed. However, even this was quite a lot of data. We started to explorer different solutions, we invested quite a lot in evaluating GraphQL and Relay. However, we didn't find anything that made us happy. We previously switched from Angular 1 to React and we wanted a solution that would make it easier, rather than harder, to jump single page application framework when the time comes. In addition to this, we didn't want our application code to get more complex, but if anything, we would like it to get less complex. We didn't feel that any existing solution fullfilled all our wishes.
 
-Ladda is a lightweight and independent of third party dependencies solution for caching. The library has only a size of **TODO** KB. No third party libraries are included thus it comes without any dependencies.
+We were a couple of guys at Small Improvements that started to look around more for other existing solutions and experiment with our own solutions, and finally we met and discussed a couple of solutions. We picked Ladda because of its simplicity, it living outside of the application code and it promoting something that we thought is a good idea in general: well-defined entities. We also realized that using something that is not aware of the framework would help us to use it between React and Angular (we are still using both frameworks). Ladda doesn't care if the request comes from React or Angular, and the cache works regardless of where the request originated. Hence we could synchronize data between Angular and React without doing anything more than using Ladda. This is how Ladda was born. 
 
-In its implementation Ladda uses functional programming principles. Therefore the source code is concise and deterministic yet great to reason about. You can convince yourself by looking into the [source code of the repository](https://github.com/petercrona/ladda/tree/master/src).
+## How Does It Help Me?
 
-## Independent
+Nowadays applications often follow the Create, Read, Update and Delete ([CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)) principle. You get a list of items from an API, want to update and delete an item or maybe create a new item.
 
-Apart from being independent from any dependencies internally, Ladda is library and framework agnostic in its usage. It doesn't depend on the latest single page application solution. It doesn't reinvent the wheel of caching every time a new framework comes around. You can use it in your evolving application as your caching solution.
+Ladda caches your CRUD operations. When you get the list of items, it will cache the result. Every subsequent time you get the list of items, the cached result will be used. You don't perform the request.
 
-## Low Buy-In
-
-Because Ladda is independent and lightweight, it is already a low buy in to use the library as your caching solution. You can exchange your main libraries without the need to adjust or exchange the Ladda cache.
-
-Ladda is a thin envelope around your [API](https://en.wikipedia.org/wiki/Application_programming_interface) layer. Somewhere in your application you might have defined all your outgoing API requests. Ladda will envelope these requests and act as your personal cache. The API requests themselves doesn't change, but Ladda opts in as your cache. You can easily remove the envelope to get rid of Ladda.
-
-## How does it help me?
-
-Nowadays applications often follow the Create, Read, Update and Delete ([CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)) principle. You get a list of items from an API, want to update and delete an item yet also create new items.
-
-Ladda caches your CRUD operations. When you get the list of items, it will cache the result. Every other time you get the list of items, the cached result will be used. You don't perform the request.
-
-In pseudo code the usage of an own cache solution would look like the following:
+In pseudo code, an ad-hoc caching solution often looks like the following:
 
 ```
 var result;
@@ -43,13 +33,13 @@ if (/* check if result is cached */) {
 return result;
 ```
 
-In contrast, Ladda shields away the cache layer for you:
+In contrast to this, Ladda shields away the cache layer for you and you end up with:
 
 ```
-result apiService.getList();
+return apiService.getList();
 ```
 
-The `getList()` request would look the same form the outside. You only reach out to your API layer to handle the request. At the place where you define the API layer, Ladda would be a thin decorator for your `getList()` functionality.
+The `getList()` request would look the same from the outside. You only reach out to your API layer to handle the request. At the place where you define the API layer, Ladda would be a thin decorator for your `getList()` functionality.
 
 ```
 getList.operation = 'READ';
@@ -58,20 +48,11 @@ function getList() {
 }
 ```
 
-That's only the `READ` operation in CRUD though. Your own cache solution wouldn't respect the `CREATE`, `UPDATE` or `DELETE` operations. That would be more difficult to implement and that's where Ladda comes in as your cache solution.
+That's only the `READ` operation in CRUD though. A simple ad-hoc caching solution (as above) doesn't support the `CREATE`, `UPDATE` or `DELETE` operations. Those are a bit more difficult to implement and that's where Ladda will help you. 
 
-[Ladda does respect those operations](/docs/basics/Operations.md). When you update the list, by using a `CREATE`, `UPDATE` or `DELETE` operation with the Ladda cache layer, the requests are still made to the API. However, Ladda will take care of updating your cache. Once you request the list of items again from the API, you will get the updated result from the cache.
-
-## When should I use it?
-
-Ladda is not meant to cover all cases. This is very intentional. Bad libraries are often the result of trying to do too much. You should only use Ladda when you have or intend to follow [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) to a high extent.
-
-Ladda follows the CRUD principle. Imagine your entitity supports the `READ` operation on single and multiple entities yet you can `UPDATE`, `DELETE` and `CREATE` entities. Ladda offers you a thin cache solution with a low-buy in for these operations.
-
-Ladda acts as your cache management in advanced scenarios too. It cannot only be used for single CRUD entities. When you use multiple entities, there are options for [invalidation](/docs/advanced/Invalidation.md) or [entitiy composition](/docs/advanced/ViewOf.md).
+[Ladda does support those operations](/docs/basics/Operations.md). When you update the list, by using a `CREATE`, `UPDATE` or `DELETE` operation, the requests are made to the API as usual. However, Ladda will also update your cache. Once you request the list of items again from the API, you will get the updated result from the cache without making a new API-request. For example, if you changed the name of a user, there's no need to refetch all users from you backend. Ladda ensures that you get up to date data if you would for example call "getAllUsers" again, without an API-request being made.
 
 ## Next Steps
-
 You should convince yourself by trying the [Demo](/docs/Demo.md). But keep in mind that Ladda comes with more advantages than being a simple `READ` operation cache. It supports all the CRUD operations. Even though you make all the different operations as requests to your API, Ladda keeps the cache in sync.
 
 If you already want to get started, checkout the [Getting Started](/docs/GettingStarted.md) section.
