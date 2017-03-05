@@ -1,4 +1,4 @@
-# ID
+# Custom ID
 Ladda needs a unique identifier for every EntitiyValue to cache it. By default Ladda assumes that every EntitiyValue has this identifier as a property `id`. Of course, we realize that this is not always true, so you can configure what to use as a identifier in a couple of ways.
 
 ## Default ID Property
