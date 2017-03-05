@@ -35,7 +35,7 @@ const config = {
 ```
 In addition to the normal CRUD operations, you can specify `invalidatesOn: ['NO_OPERATION']` which allows you to invalidate other entities' caches even if you don't use Ladda to cache the ApiFunction (If no operation is specified on a ApiFunction, Ladda will leave the function alone and not cache it nor update any cache). If necessary, you can also specify invalidation directly on ApiFunctions.
 
-# Cache Invalidation on ApiFunction
+## Cache Invalidation on ApiFunction
 Sometimes you will need to invalidate just another ApiFunction's cache. This can be achieved by specifying `invalidates` on a ApiFunction. It might look like this:
 
 ```
