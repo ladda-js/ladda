@@ -10,7 +10,7 @@ When developing your application you shouldn't care about Ladda nor caching. You
 If you get bored of Ladda you can easily get rid of it. Ladda is designed to influence your application code as little as possible. We want you to get hooked, but not because of the cost of getting rid of Ladda.
 
 # Demo
-The easiest way to get a glimpse of what Ladda can do is checking out our [demos](/docs/Demo.md).
+The easiest way to get a glimpse of what Ladda can do is checking out our [demos](/docs/Demos.md).
 
 # Get Started
 Check out the [guide](/docs/GettingStarted.md) for getting started. And have a look in the [examples folder](https://github.com/petercrona/ladda/tree/master/examples). For a minimal example (everything in one file) that you can clone and run, check out [ladda-example-mini-project](https://github.com/petercrona/ladda-example-mini-project) ([code](https://github.com/petercrona/ladda-example-mini-project/blob/master/script.js)).
