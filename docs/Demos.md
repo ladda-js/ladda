@@ -1,4 +1,4 @@
-# Demo
+# Demos
 Check out some of our demos, designed to make benefits of Ladda clear. 
 
 ## Searching Hackernews
