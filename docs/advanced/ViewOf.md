@@ -35,4 +35,4 @@ works just fine. But
 will not work. Since nickname only exists in MiniUser and not User.
 
 ## One Caveat
-In order to save memory and increase performance, Ladda will always prefer the real entitiy if it exists. This means that if you ask for MiniUsers you can get Users. Since MiniUser is a subset of User, this should not be a problem. But, you can't for example iterate over the keys of a MiniUser, since the keys might vary depending on if Ladda had a newer User or MiniUser. The only assumption you can make is that you will get *at least* the properties that constitute an MiniUser.
+In order to save memory and increase performance, Ladda will always prefer the real entitiy if it exists. This means that if you ask for MiniUsers you can get Users. Since MiniUser is a subset of User, this should not be a problem. But, you can't for example iterate over the keys of a MiniUser, since the keys might vary depending on if Ladda had a newer User or MiniUser. The only assumption you can make is that you will get *at least* the properties that constitute a MiniUser.
