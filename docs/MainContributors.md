@@ -2,7 +2,7 @@
 Many people are involved in Ladda in one way or another. Might be by just saying something giving us an idea, by ad-hoc feedback on Facebook or whathever. Thanks to all of you!
 
 Some people and organizations that contributed a lot:
-- [**Small Improvements**](https://www.small-improvements.com): The first user of Ladda and also allowed us to work on Ladda at work during our Slack time! Being a place full of highly skilled developers, and being a feedback company, has resulted in plenty of constructive feedback for Ladda!
+- [**Small Improvements**](https://www.small-improvements.com): The first user of Ladda and also allowed us to work on Ladda at work during our slack time! Being a place full of highly skilled developers, and being a feedback company, has resulted in plenty of constructive feedback for Ladda!
 
 - [**Robin Wieruch**](https://github.com/rwieruch): Pushed Ladda from being "Peter friendly" to being "Human friendly" (or well, at least "Developer friendly"). Kicked off the work with docs and examples. Proposed new features and discussed existing.
 
