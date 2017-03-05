@@ -33,7 +33,7 @@ Ladda has a high test coverage (**100%** line coverage) with tests constantly be
 Apart from being independent from any dependencies, Ladda is library and framework agnostic. It doesn't depend on the latest single page application framework out there. It doesn't reinvent the wheel of caching every time a new framework comes around. You can use it in your evolving application as your caching solution.
 
 ## Low Buy-In
-Ladda is just a wrapper around your client-side API layer. Somewhere in your application you might have defined all your outgoing API requests. Ladda will wrap these requests and act as your client-side cache. The API requests themselves don't change, but Ladda enhances them with caching capabilities. To get rid of Ladda, you can just remove the wrapping, and your API functions return to just being themselves. We believe that it is equally important to make it easy to add Ladda to your application as it is to make it easy to remove Ladda from your application.
+Ladda is just a wrapper around your client-side API layer. Somewhere in your application you might have defined all your outgoing API requests. Ladda will wrap these requests and act as your client-side cache. The API requests themselves don't change, but Ladda enhances them with caching capabilities. To get rid of Ladda, you can just remove the wrapping, and your API functions return to just being themselves. We believe that it is equally important to make it easy to add Ladda to your application, as it is to make it easy to remove Ladda from your application.
 
 # Contribute
 Please let me know if you have any feedback. Fork the repo, create PRs and create issues! For PRs with code, don't forget to write tests.
