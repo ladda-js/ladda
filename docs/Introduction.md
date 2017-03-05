@@ -51,7 +51,7 @@ That's only the `READ` operation in CRUD though. A simple ad-hoc caching solutio
 
 [Ladda does support those operations](/docs/basics/Operations.md). When you update the list, by using a `CREATE`, `UPDATE` or `DELETE` operation, the requests are made to the API as usual. However, Ladda will also update your cache. Once you request the list of items again from the API, you will get the updated result from the cache without making a new API-request. For example, if you changed the name of a user, there's no need to refetch all users from you backend. Ladda ensures that you get up to date data if you would for example call "getAllUsers" again, without an API-request being made.
 
-# When to Use Ladda
+## When to Use Ladda
 Ladda is not meant to cover all possible use cases. To get the full power of Ladda you need to have **well-defined entities**. For example, you might have an entity User, which contains an id, name, email and contact details. Then you might have an entity ListUser, which only contains an id and a name. The important bit is that these concepts exist and that you refer to them as User and ListUser rather than "A user might have an id, name, email and contact details, but sometimes only id and name".
 
 Of course, if you come up with creative ways of using Ladda, go ahead! You can quite easily use Ladda just as a simple cache for external calls, in which case you don't need a well-defined entity. But to leverge the more advanced parts, well-defined entities are necessary.
