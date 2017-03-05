@@ -1,5 +1,5 @@
 # Invalidation
-Ladda caches ApiFunctions with the operation `READ`. By default the cache lives as long as specified as TTL (default 300 seconds). But sometimes you will need to clear the caches before the TTL has expired. This is called invalidation. There are two places where you can configure invalidation. On an entitiy and on a ApiFunction. Normally you will only need to specify it on the entitiy.
+Ladda caches the value returned by ApiFunctions with the operation `READ`. By default the cache lives as long as specified as TTL (default 300 seconds). But sometimes you will need to clear the caches before the TTL has expired. This is called invalidation. There are two places where you can configure invalidation. On an entitiy and on a ApiFunction. Normally you will only need to specify it on the entitiy.
 
 ## Cache Invalidation on Entitiy
 It is not uncommon that entities are related in some way. For example, if you are developing a game you might have a top list. After finishing a game you know that this top list will be updated. Not directly by you, but by your backend as a consequence of you finishing a game. In this case you want to invalidate the currently cached top list, because you know it might have changed. Ladda makes this easy, the configuration would look something like this:
