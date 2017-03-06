@@ -23,7 +23,7 @@ where you put your configuration in `index.js` and define your ApiFunctions in t
 
 index.js:
 
-```
+```javascript
 import * as userApi from './user';
 import * as miniUserApi from './mini-user';
 import { build } from 'ladda-cache';
@@ -42,7 +42,7 @@ export default build(config);
 ```
 
 user.js:
-```
+```javascript
 getUsers.operation = 'READ';
 export function getUsers() {
     return get('/users');
@@ -50,7 +50,7 @@ export function getUsers() {
 ```
 
 mini-user.js:
-```
+```javascript
 getMiniUsers.operation = 'READ';
 export function getMiniUsers() {
     return get('/mini-users');
@@ -59,7 +59,7 @@ export function getMiniUsers() {
 
 Your application code will now use Ladda as:
 
-```
+```javascript
 import api from 'api';
 
 api.miniUser.getMiniUsers().then(miniUsers => console.log(miniUsers);
@@ -68,7 +68,7 @@ api.user.getUsers().then(users => console.log(users));
 
 If you would like to remove Ladda, you would simply update your `api/index.js` as:
 
-```
+```javascript
 import * as user from './user';
 import * as miniUser from './mini-user';
 

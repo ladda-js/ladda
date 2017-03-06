@@ -4,7 +4,7 @@ Ladda needs a unique identifier for every EntitiyValue to cache it. By default L
 ## Default ID Property
 Sometimes you have ids, but they are called `_id` or `objectID` or something else. In this case you will need to tell Ladda about this, for example, if your default ID property is `objectID`, you could configure this as:
 
-```
+```javascript
 const config = {
     user: {
         ttl: 60,
@@ -20,7 +20,7 @@ This will tell Ladda to always pick `objectID` rather than `id` as the ID for th
 ## Override ID Property for ApiFunction
 There are always exceptions. Maybe most of your API use `objectID` as the ID property. But a few parts of your API use `_id`. This can easily be handled by configuring your ApiFunctions as:
 
-```
+```javascript
 getUser.operation = 'READ';
 getUser.idFrom = user => user._id;
 function getUser(id) {

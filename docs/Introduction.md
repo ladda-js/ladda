@@ -8,7 +8,7 @@ Ladda caches your CRUD operations. When you get the list of items, it will cache
 
 In pseudo code, an ad-hoc caching solution often looks like the following:
 
-```
+```javascript
 var result;
 
 if (/* check if result is cached */) {
@@ -27,13 +27,13 @@ return result;
 
 In contrast to this, Ladda shields away the cache layer for you and you end up with:
 
-```
+```javascript
 return apiService.getList();
 ```
 
 The `getList()` request would look the same from the outside. You only reach out to your API layer to handle the request. At the place where you define the API layer, Ladda would be a thin decorator for your `getList()` functionality.
 
-```
+```javascript
 getList.operation = 'READ';
 function getList() {
   // API request

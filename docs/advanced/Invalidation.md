@@ -4,7 +4,7 @@ Ladda caches the value returned by ApiFunctions with the operation `READ`. By de
 ## Cache Invalidation on Entitiy
 It is not uncommon that entities are related in some way. For example, if you are developing a game you might have a top list. After finishing a game you know that this top list will be updated. Not directly by you, but by your backend as a consequence of you finishing a game. In this case you want to invalidate the currently cached top list, because you know it might have changed. Ladda makes this easy, the configuration would look something like this:
 
-```
+```javascript
 const config = {
     topList: {
         ttl: 3600,
@@ -19,7 +19,7 @@ const config = {
 
 when you would call for example `api.game.reportFinished(finishedGame)` Ladda would automatically invalidate the topList for you. You also have the ability to make you invalidation a bit more fine-grained. There's a `invalidatesOn` option which allows you to specify on which operation to invalidate the specified entities. For example, it could look like:
 
-```
+```javascript
 const config = {
     topList: {
         ttl: 3600,
@@ -38,7 +38,7 @@ In addition to the normal CRUD operations, you can specify `invalidatesOn: ['NO_
 ## Cache Invalidation on ApiFunction
 Sometimes you will need to invalidate just another ApiFunction's cache. This can be achieved by specifying `invalidates` on a ApiFunction. It might look like this:
 
-```
+```javascript
 recalculateTopPlayers.invalidates = ['getTopPlayers'];
 function recalculateTopPlayers() {
     return performPostRequst('/api/players/top/recalculate');

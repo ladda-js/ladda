@@ -14,7 +14,7 @@ Ladda shows its whole potential in a create, read, update & delete application. 
 
 An example of how a function of operation CREATE might look is:
 
-```
+```javascript
 createUser.operation = 'CREATE';
 function createUser(user) {
     return performPostRequst('/api/user', user);

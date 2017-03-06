@@ -5,7 +5,7 @@ However, if it means that we need to refetch the users all the time, we didn't g
 
 Ladda allows you to specify that an entity is a view of another entitiy. For our example, it would look like:
 
-```
+```javascript
 const config = {
     user: {
         api: userApi

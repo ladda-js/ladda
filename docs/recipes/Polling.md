@@ -1,7 +1,7 @@
 # Polling
 Caching and polling are not natural friends. We still didn't find a very nice way to make it work, but we did find a way to make it work. In the future you might get (or create a PR!) something fancy like the possibility to specify a cache alias (making poll write into the cache of getAll).
 
-```
+```javascript
 getAll.operation = 'READ';
 export function getAll(query) {
     return get('/downloads', query);

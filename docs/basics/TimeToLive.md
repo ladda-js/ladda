@@ -8,7 +8,7 @@ It might be tempting to set the TTL to forever (a very high number). In theory, 
 
 A simple example of TTL being set to 60 seconds:
 
-```
+```javascript
 const config = {
     user: {
         ttl: 60,
