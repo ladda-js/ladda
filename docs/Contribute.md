@@ -12,7 +12,7 @@ Just a collection of ideas, might happen but might also not happen.
 
 - Expose when an entity has been manipulated with the goal to make it easy to extend Ladda outside of the core code (eg. to build framework integrations).
 
-- Optimistic Updates
+- Optimistic updates
 
 - Framework integrations (for example a React HOC that rerenders on changes to entities)
 
