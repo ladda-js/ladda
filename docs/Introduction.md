@@ -1,5 +1,5 @@
 # Introduction
-Ladda is an independent, lightweight caching solution for your JavaScript application. It is a library simple to get started with yet supports sophisticated cache management. Let's start by looking at the background of Ladda and then look at how it can be useful for you and how to proceeed if you want to give Ladda a shot.
+Ladda is an independent, lightweight caching solution for your JavaScript application. It is a library simple to get started with yet supports sophisticated cache management. In this section we will to explain how it can be useful for you and how to proceeed if you want to give Ladda a shot.
 
 ## How Does It Help Me?
 Nowadays applications often are centered around the Create, Read, Update and Delete ([CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)) operations. You get a list of items from an API, want to update and delete an item or maybe create a new item.
