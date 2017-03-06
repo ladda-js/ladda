@@ -6,6 +6,6 @@ Some people and organizations that contributed a lot:
 
 - [**Robin Wieruch**](https://github.com/rwieruch): Pushed Ladda from being "Peter friendly" to being "Human friendly" (or well, at least "Developer friendly"). Kicked off the work with docs and examples. Proposed new features and discussed existing.
 
-- [**Gernot Höflechner**](https://github.com/LFDM/): Pushed Peter to work on Ladda. Kept bringing it up until it happened. Also involved in the [initial discussions](./Introduction.md#background) and discussions about the future of Ladda.
+- [**Gernot Höflechner**](https://github.com/LFDM/): Pushed Peter to work on Ladda. Kept bringing it up until it happened. Also involved in the [initial discussions](./Background.md) and discussions about the future of Ladda.
 
 - [**Peter Crona**](https://github.com/petercrona): Started the project and have worked hard to keep it nice and tidy. Focusing on the code, but also tried writing some documentation.
