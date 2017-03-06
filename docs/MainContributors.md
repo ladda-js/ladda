@@ -8,4 +8,4 @@ Some people and organizations that contributed a lot:
 
 - [**Gernot Höflechner**](https://github.com/LFDM/): Pushed Peter to work on Ladda. Kept bringing it up until it happened. Also involved in the [initial discussions](./Background.md) and discussions about the future of Ladda.
 
-- [**Peter Crona**](https://github.com/petercrona): Started the project and have worked hard to keep it nice and tidy. Focusing on the code, but also tried writing some documentation.
+- [**Peter Crona**](https://github.com/petercrona): Started the project and has worked hard to keep it nice and tidy. Focusing on the code, but also tried writing some documentation.

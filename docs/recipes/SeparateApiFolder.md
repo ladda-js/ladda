@@ -63,7 +63,7 @@ Your application code will now use Ladda as:
 import api from 'api';
 
 api.miniUser.getMiniUsers().then(miniUsers => console.log(miniUsers);
-api.user.getUsers(users => console.log(users));
+api.user.getUsers().then(users => console.log(users));
 ```
 
 If you would like to remove Ladda, you would simply update your `api/index.js` as:
