@@ -6,10 +6,10 @@ import {get as getFromQc,
         put as putInQc,
         contains as inQc,
         getValue} from 'query-cache';
-import {passThrough, compose, prop} from 'fp';
+import {passThrough, compose} from 'fp';
 import {addId, removeId} from 'id-helper';
 
-const getTtl = e => (e.ttl || 0) * 1000;
+const getTtl = e => (e.ttl || 300) * 1000;
 
 // Entity -> Int -> Bool
 const hasExpired = (e, timestamp) => {
