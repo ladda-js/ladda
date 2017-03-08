@@ -23,8 +23,9 @@ const inCache = (qc, k) => !!qc.cache[k];
 // QueryCache -> Entity -> String -> CacheValue
 const getFromCache = (qc, e, k) => {
     const rawValue = toValue(qc.cache[k]);
+    const getValuesFromEs = compose(filter(identity), map(getFromEs(qc.entityStore, e)));
     const value = Array.isArray(rawValue)
-        ? map(getFromEs(qc.entityStore, e), rawValue)
+        ? getValuesFromEs(rawValue)
         : getFromEs(qc.entityStore, e, rawValue);
     return {
         ...qc.cache[k],

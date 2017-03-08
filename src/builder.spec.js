@@ -88,4 +88,21 @@ describe('builder', () => {
                .then(() => api.user.getUsers())
                .then(expectOnlyOneApiCall);
     });
+    it('Delete removes value for query cache in array', (done) => {
+        const myConfig = config();
+        myConfig.user.api.getUsers = sinon.spy(() =>
+            Promise.resolve([{id: 1}, {id: 2}]));
+        myConfig.user.api.getUsers.operation = 'READ';
+        const api = build(myConfig);
+        const expectOnlyOneApiCall = (xs) => {
+            expect(xs).to.be.deep.equal([{id: 2}]);
+            done();
+        };
+
+        Promise.resolve()
+               .then(() => api.user.getUsers())
+               .then(() => api.user.deleteUser(1))
+               .then(() => api.user.getUsers())
+               .then(expectOnlyOneApiCall);
+    });
 });
