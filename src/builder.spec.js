@@ -94,7 +94,7 @@ describe('builder', () => {
             Promise.resolve([{id: 1}, {id: 2}]));
         myConfig.user.api.getUsers.operation = 'READ';
         const api = build(myConfig);
-        const expectOnlyOneApiCall = (xs) => {
+        const expectUserToBeRemoved = (xs) => {
             expect(xs).to.be.deep.equal([{id: 2}]);
             done();
         };
@@ -103,6 +103,6 @@ describe('builder', () => {
                .then(() => api.user.getUsers())
                .then(() => api.user.deleteUser(1))
                .then(() => api.user.getUsers())
-               .then(expectOnlyOneApiCall);
+               .then(expectUserToBeRemoved);
     });
 });
