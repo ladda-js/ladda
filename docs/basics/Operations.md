@@ -2,11 +2,11 @@
 
 Ladda shows its whole potential in a create, read, update & delete application. The four pillars are the basic functions for a persistent storage. These are used in most RESTful APIs yet Ladda can opt-in to benefit from the paradigm. Below is a list of Ladda's requirements on API-functions of each type.
 
-* **CREATE**: An API call which returns an EntitiyValue (object with an ID, eg. a user).
+* **CREATE**: An API call which returns an EntityValue (object with an ID, eg. a user).
 
 * **READ**: An API call which returns an EntityValue, or a list of EntityValues (eg. a user or list of users).
 
-* **UPDATE**: Takes the updated EntitiyValue as the first argument (eg. a user). No assumptions on what is returned by the server are made.
+* **UPDATE**: Takes the updated EntityValue as the first argument (eg. a user). No assumptions on what is returned by the server are made.
 
 * **DELETE**: Takes an ID as the first argument. No assumptions on what is returned by the server are made.
 
@@ -20,4 +20,5 @@ function createUser(user) {
     return performPostRequst('/api/user', user);
 }
 ```
+
 Note that the backend must return a User in the example above. The user must have an ID, by default as the property "id" (eg. user.id).

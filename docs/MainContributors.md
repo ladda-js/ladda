@@ -1,4 +1,5 @@
 # Main Contributors
+
 Many people are involved in Ladda in one way or another. Might be by just saying something giving us an idea, by ad-hoc feedback on Facebook or whathever. Thanks to all of you!
 
 Some people and organizations that contributed a lot:
