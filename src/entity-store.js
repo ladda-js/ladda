@@ -7,7 +7,7 @@
  * Note that a view will always return at least what constitutes the view.
  * It can return the full entity too. This means the client code needs to take this into account
  * by not depending on only a certain set of values being there.
- * This is done to save memory and to simplify always providing the latest data.
+ * This is done to save memory and to simplify data synchronization.
  * Of course, this also requiers the view to truly be a subset of the entity.
  */
 
@@ -26,7 +26,7 @@ const set = ([eMap, s], k, v) => s[k] = toStoreValue(clone(v));
 // EntityStore -> String -> ()
 const rm = curry(([_, s], k) => delete s[k]);
 
-// Entity -> Type
+// Entity -> String
 const getEntityType = e => e.viewOf || e.name;
 
 // EntityStore -> Entity -> ()
@@ -36,12 +36,12 @@ const rmViews = ([eMap, s], e) => {
     map_(rm([eMap, s]), toRemove);
 };
 
-// Entity -> Value -> String -> ()
+// Entity -> Value -> String
 const createEntityKey = (e, v) => {
     return getEntityType(e) + v.__ladda__id;
 };
 
-// Entity -> Value -> String -> ()
+// Entity -> Value -> String
 const createViewKey = (e, v) => {
     return e.name + v.__ladda__id;
 };
@@ -49,13 +49,13 @@ const createViewKey = (e, v) => {
 // Entity -> Bool
 const isView = e => !!e.viewOf;
 
-// EntityStore -> Entity -> Value -> ()
+// EntityStore -> Entity -> String -> ()
 export const remove = (es, e, id) => {
     rm(es, createEntityKey(e, {__ladda__id: id}));
     rmViews(es, e);
 };
 
-// EntityStore -> Entity -> Value
+// Function -> Function -> EntityStore -> Entity -> Value -> a
 const handle = curry((viewHandler, entityHandler, s, e, v) => {
     if (isView(e)) {
         return viewHandler(s, e, v);
@@ -117,12 +117,13 @@ const getViewValue = (s, e, id) => {
     }
 };
 
-// EntityStore -> Entity -> id -> ()
+// EntityStore -> Entity -> String -> ()
 export const get = handle(getViewValue, getEntityValue);
 
+// EntityStore -> Entity -> String -> Bool
 export const contains = (es, e, id) => !!handle(getViewValue, getEntityValue)(es, e, id);
 
-// [Object, Object] -> Entity -> [Object, Object]
+// EntityStore -> Entity -> EntityStore
 const registerView = ([eMap, store], e) => {
     if (!eMap[e.viewOf]) {
         eMap[e.viewOf] = [];
@@ -131,7 +132,7 @@ const registerView = ([eMap, store], e) => {
     return [eMap, store];
 };
 
-// [Object, Object] -> Entity -> [Object, Object]
+// EntityStore -> Entity -> EntityStore
 const registerEntity = ([eMap, store], e) => {
     if (!eMap[e.name]) {
         eMap[e.name] = [];
@@ -139,7 +140,7 @@ const registerEntity = ([eMap, store], e) => {
     return [eMap, store];
 };
 
-// [a] -> [Object, Object]
+// EntityStore -> Entity -> EntityStore
 const updateIndex = (m, e) => isView(e) ? registerView(m, e) : registerEntity(m, e);
 
 // [Entity] -> EntityStore

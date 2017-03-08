@@ -44,7 +44,7 @@ export const put = curry((qc, e, aFn, args, xs) => {
     return xs;
 });
 
-// Value -> Promise
+// (CacheValue | [CacheValue]) -> Promise
 export const getValue = (v) => {
     return Array.isArray(v)
         ? map(toValue, v) : toValue(v);
@@ -88,24 +88,24 @@ const invalidateEntity = curry((qc, entityName) => {
     map_(removeIfEntity, keys);
 });
 
-// Object -> a
+// Object -> [String]
 const getInvalidates = x => x.invalidates || [];
 
-// QueryCache -> Entity -> Operation -> ()
+// QueryCache -> Entity -> ApiFunction -> ()
 const invalidateBasedOnEntity = (qc, e, aFn) => {
     if (shouldInvalidateEntity(e, aFn.operation)) {
         map_(invalidateEntity(qc), getInvalidates(e));
     }
 };
 
-// QueryCache -> Entity -> ApiFunction -> Operation -> ()
+// QueryCache -> Entity -> ApiFunction -> ()
 const invalidateBasedOnApiFn = (qc, e, aFn) => {
     const prependEntity = x => `${e.name}-${x}`;
     const invalidateEntityByApiFn = compose(invalidateEntity(qc), prependEntity);
     map_(invalidateEntityByApiFn, getInvalidates(aFn));
 };
 
-// QueryCache -> Entity -> ApiFunction -> Operation -> ()
+// QueryCache -> Entity -> ApiFunction -> ()
 export const invalidate = (qc, e, aFn) => {
     invalidateBasedOnEntity(qc, e, aFn);
     invalidateBasedOnApiFn(qc, e, aFn);
