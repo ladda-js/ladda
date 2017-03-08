@@ -1,4 +1,5 @@
 # Separate API Folder
+
 For many people one of the big benefits of using Ladda is in fact not related to Ladda itself. Something that we believe in is a layered architecture where the API is a separate layer. In essence, this means that there's one place, eg. one folder, where all API-requests are performed. Your application structure might look like:
 
 ```
@@ -21,8 +22,7 @@ By putting the client-side API-layer in a separate folder you can easily move it
 
 where you put your configuration in `index.js` and define your ApiFunctions in the other files named after the entities they are for. It might look like:
 
-index.js:
-
+*index.js*:
 ```javascript
 import * as userApi from './user';
 import * as miniUserApi from './mini-user';
@@ -41,7 +41,7 @@ const config = {
 export default build(config);
 ```
 
-user.js:
+*user.js*:
 ```javascript
 getUsers.operation = 'READ';
 export function getUsers() {
@@ -49,7 +49,7 @@ export function getUsers() {
 }
 ```
 
-mini-user.js:
+*mini-user.js*:
 ```javascript
 getMiniUsers.operation = 'READ';
 export function getMiniUsers() {
@@ -77,4 +77,5 @@ return {
     miniUser
 };
 ```
-And enjoy your working, but slower, application.
+
+And enjoy your still operating application (without having a cache).
