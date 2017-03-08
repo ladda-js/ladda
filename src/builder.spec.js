@@ -88,7 +88,7 @@ describe('builder', () => {
                .then(() => api.user.getUsers())
                .then(expectOnlyOneApiCall);
     });
-    it('Delete removes value for query cache in array', (done) => {
+    it('Delete removes value from cached array', (done) => {
         const myConfig = config();
         myConfig.user.api.getUsers = sinon.spy(() =>
             Promise.resolve([{id: 1}, {id: 2}]));
