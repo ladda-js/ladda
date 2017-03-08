@@ -3,10 +3,8 @@ export const debug = (x) => {
     return x;
 };
 
-// a -> a
 export const identity = x => x;
 
-// VarFn -> VarFn
 export const curry = (f) => (...args) => {
     const nrArgsRequired = f.length;
     if (args.length < nrArgsRequired) {
@@ -30,7 +28,6 @@ export const on = curry((f, g, h, x) => f(g(x), h(x)));
 // a -> a -> bool
 export const isEqual = curry((x, y) => x === y);
 
-// UnFn -> UnFn -> UnFn -> Value -> Value -> BiFn
 export const on2 = curry((f, g, h, x, y) => f(g(x), h(y)));
 
 export const init = xs => xs.slice(0, xs.length - 1);
@@ -41,15 +38,12 @@ export const last = xs => xs[xs.length - 1];
 
 export const head = xs => xs[0];
 
-// Function -> [a] -> [b]
 export const map = curry((fn, xs) => xs.map(fn));
 
-// Function -> [a] -> ()
 export const map_ = curry((fn, xs) => { map(fn, xs); });
 
 export const reverse = xs => xs.slice().reverse();
 
-// (a -> b -> a) -> a -> [b] -> c
 export const reduce = curry((f, currResult, xs) => {
     map_((x) => {
         currResult = f(currResult, x);
@@ -60,7 +54,6 @@ export const reduce = curry((f, currResult, xs) => {
 export const compose = (...fns) => (...args) =>
     reduce((m, f) => f(m), last(fns)(...args), tail(reverse(fns)));
 
-// String -> Object -> Value
 export const prop = curry((key, x) => x[key]);
 
 // [a] -> [b] -> [[a, b]]
@@ -73,7 +66,7 @@ export const zip = (xs, ys) => {
     return zs;
 };
 
-// BiFn -> BiFn
+// BinaryFn -> BinaryFn
 export const flip = fn => curry((x, y) => fn(y, x));
 
 // Object -> [[key, val]]
@@ -97,7 +90,7 @@ const writeToObject = curry((o, k, v) => {
     return o;
 });
 
-// (a -> b) -> o -> o
+// (a -> b) -> Object -> Object
 export const mapValues = curry((fn, o) => {
     const keys = Object.keys(o);
     return reduce((m, x) => {
@@ -106,7 +99,7 @@ export const mapValues = curry((fn, o) => {
     }, {}, keys);
 });
 
-// [Object] -> Object
+// (a -> b) -> [Object] -> Object<b, a>
 export const toObject = curry((getK, xs) => reduce(
     (m, x) => writeToObject(m, getK(x), x),
     {},
