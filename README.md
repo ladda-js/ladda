@@ -43,7 +43,7 @@ Apart from being independent from any dependencies, Ladda is library and framewo
 Ladda is just a wrapper around your client-side API layer. Somewhere in your application you might have defined all your outgoing API requests. Ladda will wrap these requests and act as your client-side cache. The API requests themselves don't change, but Ladda enhances them with caching capabilities. To get rid of Ladda, you can just remove the wrapping, and your API functions return to just being themselves. We believe that it is equally important to make it easy to add Ladda to your application, as it is to make it easy to remove Ladda from your application.
 
 ## Browser Support
-All the major modern browsers are supported. However, note that for old browsers, such as Internet Explorer 11, *you will need a polyfill* since Ladda is using promises.
+All the major modern browsers are supported. However, note that for old browsers, such as Internet Explorer 11, **you will need a polyfill** since Ladda is using promises.
 
 # Contribute
 
