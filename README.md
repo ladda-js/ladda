@@ -1,5 +1,8 @@
 # Ladda
 
+![Build status](https://api.travis-ci.org/petercrona/ladda.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/petercrona/ladda/badge.svg?branch=master)](https://coveralls.io/github/petercrona/ladda?branch=master)
+
 Ladda is a library that helps you with caching, invalidation of caches and to handle different representations of the same data in a **performant** and **memory efficient** way.
 
 The main goal with Ladda is to make it easy for you to add sophisticated caching **without making your application code more complex**. Ladda will take care of logic that would otherwise increase the complexity of your application code, and it will do so in a corner outside of your application.
