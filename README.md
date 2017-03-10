@@ -1,4 +1,4 @@
-# Ladda
+![Ladda](https://smallimprovementstech.files.wordpress.com/2017/03/laddalogo-horiz-color-21.png)
 
 ![Build status](https://api.travis-ci.org/petercrona/ladda.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/petercrona/ladda/badge.svg?branch=master)](https://coveralls.io/github/petercrona/ladda?branch=master)
