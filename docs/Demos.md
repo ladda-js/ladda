@@ -6,7 +6,7 @@ Check out some of our demos, designed to show some of the benefits of Ladda.
 
 This application showcases Ladda's CRUD caching capabilities, including
 updating Entities, as well as invalidation across different Entities.
-[Check it out](http://http://opensource.small-improvements.com/ladda-example-crud/) and make sure you also take a look at the [source code](https://github.com/SmallImprovements/ladda-example-crud), which contains a more detailed description.
+[Check it out](http://opensource.small-improvements.com/ladda-example-crud/) and make sure you also take a look at the [source code](https://github.com/SmallImprovements/ladda-example-crud), which contains a more detailed description.
 
 ## Searching Hacker News
 
