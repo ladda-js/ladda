@@ -8,8 +8,10 @@ new Vue({
     <div>
       <h1>Search Hacker News with Ladda</h1>
       <p>There shouldn't be a second network request, when you search for something twice.</p>
-      <input v-model="query">
-      <button v-on:click="onSearch">Search</button>
+      <form type="submit" v-on:submit.prevent="onSearch">
+        <input type="text" v-model="query"/>
+        <button type="text">Search</button>
+      </form>
       <div v-for="item in list">
         {{item.title}}
       </div>
