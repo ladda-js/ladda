@@ -25,4 +25,10 @@ describe('Merger', () => {
         const res = merge(src, dest);
         expect(Object.keys(res.a.b)).to.not.deep.equal(['c']);
     });
+    it('do not write anything that does not exist in destination object (object)', () => {
+        const src = {a: {foo: 'bar'}};
+        const dest = {};
+        const res = merge(src, dest);
+        expect(res).to.deep.equal(dest);
+    });
 });
