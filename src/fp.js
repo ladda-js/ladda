@@ -101,6 +101,9 @@ export const mapValues = curry((fn, o) => {
   }, {}, keys);
 });
 
+// Object<a, b> -> [b]
+export const values = mapObject((pair) => pair[1]);
+
 // (a -> b) -> [Object] -> Object<b, a>
 export const toObject = curry((getK, xs) => reduce(
   (m, x) => writeToObject(m, getK(x), x),

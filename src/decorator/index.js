@@ -5,7 +5,7 @@ import {decorateUpdate} from './update';
 import {decorateDelete} from './delete';
 import {decorateNoOperation} from './no-operation';
 
-const decorateApi = curry((config, entityStore, queryCache, entity, apiFn) => {
+export const decorateApi = curry((config, entityStore, queryCache, entity, apiFn) => {
   const handler = {
     CREATE: decorateCreate,
     READ: decorateRead,
@@ -26,3 +26,17 @@ export const decorate = curry((config, entityStore, queryCache, entity) => {
     api: decoratedApi
   };
 });
+
+export const decorate2 = curry(
+  (entityStore, queryCache, config, entityConfigs, entity, apiFnName, apiFn) => {
+    const handler = {
+      CREATE: decorateCreate,
+      READ: decorateRead,
+      UPDATE: decorateUpdate,
+      DELETE: decorateDelete,
+      NO_OPERATION: decorateNoOperation
+    }[apiFn.operation];
+    return handler(config, entityStore, queryCache, entity, apiFn);
+  }
+);
+

@@ -1,8 +1,8 @@
-import {mapObject, mapValues, compose, map, toObject, reduce, toPairs,
-        prop, filterObject, isEqual, not, curry, copyFunction} from './fp';
+import {map, mapObject, mapValues, values, compose, toObject, reduce, toPairs,
+        flip, prop, filterObject, isEqual, not, curry, copyFunction} from './fp';
 import {createEntityStore} from './entity-store';
 import {createQueryCache} from './query-cache';
-import {decorate} from './decorator';
+import {decorate2} from './decorator';
 
 // [[EntityName, EntityConfig]] -> Entity
 const toEntity = ([name, c]) => ({
@@ -30,22 +30,23 @@ const hoistMetaData = (a, b) => {
   return b;
 };
 
-const hoistApiMetaData = (configs, nextConfigs) => {
+export const mapApiFunctions = (fn, entityConfigs) => {
   return mapValues((entity) => {
     return {
       ...entity,
-      api: reduce((apiM, [fnName, fn]) => {
-        const getFn = compose(prop(fnName), prop('api'), prop(entity.name));
-        apiM[fnName] = hoistMetaData(getFn(configs), fn);
-        return apiM;
-      }, {}, toPairs(entity.api))
+      api: reduce(
+        (apiM, [apiFnName, apiFn]) => {
+          const getFn = compose(prop(apiFnName), prop('api'));
+          const nextFn = fn(entityConfigs, entity, apiFnName, apiFn);
+          apiM[apiFnName] = hoistMetaData(getFn(entity), nextFn);
+          return apiM;
+        },
+        {},
+        toPairs(entity.api)
+      )
     };
-  }, nextConfigs);
+  }, entityConfigs);
 };
-
-const applyPlugin = curry((config, entityConfigs, plugin) => {
-  return hoistApiMetaData(entityConfigs, plugin(config, entityConfigs));
-});
 
 const stripMetaData = (fn) => (...args) => fn(...args);
 
@@ -90,26 +91,27 @@ const setApiConfigDefaults = ec => {
 
 // Config -> Map String EntityConfig
 const getEntityConfigs = compose(
+  toObject(prop('name')),
+  mapObject(toEntity),
   mapValues(setApiConfigDefaults),
   mapValues(setEntityConfigDefaults),
   filterObject(compose(not, isEqual('__config')))
 );
 
-const corePlugin = (config, entityConfigs) => {
-  const entities = mapObject(toEntity, entityConfigs);
-  const entityStore = createEntityStore(entities);
+const createCorePlugin = (config, entityConfigs) => {
+  const entityStore = compose(createEntityStore, values)(entityConfigs);
   const queryCache = createQueryCache(entityStore);
-  return compose(
-    toObject(prop('name')),
-    map(decorate(config, entityStore, queryCache))
-  )(entities);
+  return decorate2(entityStore, queryCache, config);
 };
 
 // Config -> Api
 export const build = (c, ps = []) => {
   const config = c.__config || {idField: 'id'};
   const entityConfigs = getEntityConfigs(c);
-  const plugins = [corePlugin, ...ps];
-  const createApi = compose(toApi, reduce(applyPlugin(config), entityConfigs));
+  const plugins = [
+    createCorePlugin(config, entityConfigs),
+    ...map((p) => curry(p)(config), ps)
+  ];
+  const createApi = compose(toApi, reduce(flip(mapApiFunctions), entityConfigs));
   return createApi(plugins);
 };
