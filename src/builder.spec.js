@@ -126,4 +126,24 @@ describe('builder', () => {
       .then(() => api.user.getUsers())
       .then(expectOnlyOneApiCall);
   });
+
+  it('takes plugins as second argument', (done) => {
+    const myConfig = config();
+    const pluginTracker = {};
+    const plugin = (pConfig) => {
+      const pName = pConfig.name;
+      pluginTracker[pName] = {};
+      return (c, entityConfigs, entity, apiFnName, apiFn) => {
+        pluginTracker[pName][apiFnName] = true;
+        return apiFn;
+      };
+    };
+    const pluginName = 'X';
+    const expectACall = () => expect(pluginTracker[pluginName].getUsers).to.be.true;
+
+    const api = build(myConfig, [plugin({ name: pluginName })]);
+    api.user.getUsers()
+      .then(expectACall)
+      .then(() => done());
+  });
 });
