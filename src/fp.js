@@ -120,17 +120,14 @@ export const filter = curry((p, xs) => {
     return reduce(takeIf(p), [], xs);
 });
 
-
+// Object -> Object
 export const clone = o => {
-    if (!o) {
-        return o;
-    }
-
     if (Array.isArray(o)) {
         return o.slice(0);
-    }
-    if (typeof o === 'object') {
+    } else if (typeof o === 'object') {
         return {...o};
+    } else {
+        throw new TypeError('Called with something else than an object/array');
     }
 };
 

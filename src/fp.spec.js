@@ -212,8 +212,8 @@ describe('fp', () => {
         });
     });
     describe('clone', () => {
-        it('returns object if falsy', () => {
-            expect(clone(undefined)).to.equal(undefined);
+        it('throws if called with undefined value', () => {
+            expect(clone.bind(null, undefined)).to.throw(TypeError);
         });
         it('clones array', () => {
             const o = [1,2,3];
