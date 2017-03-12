@@ -1,5 +1,5 @@
 import { build } from '../builder';
-import denormalizer from '.';
+import { denormalizer } from '.';
 import { curry, prop, toObject, values } from '../fp';
 
 const toIdMap = toObject(prop('id'));
