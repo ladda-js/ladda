@@ -2,6 +2,7 @@
 
 import sinon from 'sinon';
 import {build} from './builder';
+import {curry} from './fp';
 
 const getUsers = () => Promise.resolve([{id: 1}, {id: 2}]);
 getUsers.operation = 'READ';
@@ -61,7 +62,7 @@ describe('builder', () => {
     myConfig.user.api.getUsers.idFrom = 'ARGS';
     const api = build(myConfig);
     const start = Date.now();
-    const checkTimeConstraint = () => {
+    const checkTimeConstraint = (xs) => {
       expect(Date.now() - start < 1000).to.be.true;
       done();
     };
@@ -75,9 +76,7 @@ describe('builder', () => {
   it('Works with non default id set', (done) => {
     const myConfig = config();
     myConfig.__config = {idField: 'mySecretId'};
-    myConfig.user.api.getUsers = sinon.spy(
-      () => Promise.resolve([{mySecretId: 1}, {mySecretId: 2}])
-    );
+    myConfig.user.api.getUsers = sinon.spy(() => Promise.resolve([{mySecretId: 1}, {mySecretId: 2}]));
     myConfig.user.api.getUsers.operation = 'READ';
     const api = build(myConfig);
     const expectOnlyOneApiCall = (xs) => {
@@ -124,7 +123,8 @@ describe('builder', () => {
       .then(() => api.user.getUsers())
       .then(delay)
       .then(() => api.user.getUsers())
-      .then(expectOnlyOneApiCall);
+      .then(expectOnlyOneApiCall)
+      .catch(e => console.log(e));
   });
 
   it('takes plugins as second argument', (done) => {
@@ -133,10 +133,10 @@ describe('builder', () => {
     const plugin = (pConfig) => {
       const pName = pConfig.name;
       pluginTracker[pName] = {};
-      return (c, entityConfigs, entity, apiFnName, apiFn) => {
+      return curry((c, entityConfigs, entity, apiFnName, apiFn) => {
         pluginTracker[pName][apiFnName] = true;
         return apiFn;
-      };
+      });
     };
     const pluginName = 'X';
     const expectACall = () => expect(pluginTracker[pluginName].getUsers).to.be.true;
