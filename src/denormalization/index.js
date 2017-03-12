@@ -78,7 +78,7 @@ const resolve = curry((entityConfigs, schema, items) => {
   );
 });
 
-export const denormalizer = () => (c, entityConfigs, entity, name, fn) => {
+export const denormalizer = curry((c, entityConfigs, entity, name, fn) => {
   const schema = getSchema(entityConfigs, entity.name);
   if (!schema) {
     return fn;
@@ -92,4 +92,4 @@ export const denormalizer = () => (c, entityConfigs, entity, name, fn) => {
       return isArray ? resolved : resolved.then(head);
     });
   };
-};
+});
