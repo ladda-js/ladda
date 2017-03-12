@@ -2,7 +2,8 @@ import {debug, identity, curry, passThrough,
         startsWith, join, on, isEqual,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
-        mapObject, mapValues, toObject, filter, clone} from './fp';
+        mapObject, mapValues, toObject, filter, clone,
+        filterObject} from './fp';
 import sinon from 'sinon';
 
 describe('fp', () => {
@@ -225,6 +226,18 @@ describe('fp', () => {
             const cloned = clone(o);
             o.name = 'ingvar';
             expect(cloned).to.not.deep.equal(o);
+        });
+    });
+    describe('filterObject', () => {
+        it('crash if second parameter is not object', () => {
+            const fnUnderTest = filterObject.bind(null, () => false, undefined);
+            expect(fnUnderTest).to.throw(Error);
+        });
+        it('entries for which the predicate returns false are removed', () => {
+            const input = {1: 'a', 2: 'b', 3: 'c', 4: 'd'};
+            const expected = {2: 'b', 4: 'd'};
+            const keepEven = filterObject(x => x % 2 === 0);
+            expect(keepEven(input)).to.deep.equal(expected);
         });
     });
 });

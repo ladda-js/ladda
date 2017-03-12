@@ -1,4 +1,4 @@
-import {mapObject, mapValues, compose, map, toObject, prop} from './fp';
+import {mapObject, mapValues, compose, map, toObject, prop, filterObject, isEqual, not} from './fp';
 import {createEntityStore} from './entity-store';
 import {createQueryCache} from './query-cache';
 import {decorate} from './decorator';
@@ -12,11 +12,8 @@ const toEntity = ([name, c]) => ({
 // [Entity] -> Api
 const toApi = compose(mapValues(prop('api')), toObject(prop('name')));
 
-const getEntityConfigs = c => {
-    const cCopy = {...c};
-    delete cCopy.__config;
-    return cCopy;
-};
+// Config -> Map String EntityConfig
+const getEntityConfigs = filterObject(compose(not, isEqual('__config')));
 
 // Config -> Api
 export const build = (c) => {

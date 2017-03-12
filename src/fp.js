@@ -28,6 +28,9 @@ export const on = curry((f, g, h, x) => f(g(x), h(x)));
 // a -> a -> bool
 export const isEqual = curry((x, y) => x === y);
 
+// bool -> bool
+export const not = x => !x;
+
 export const on2 = curry((f, g, h, x, y) => f(g(x), h(y)));
 
 export const init = xs => xs.slice(0, xs.length - 1);
@@ -57,14 +60,14 @@ export const compose = (...fns) => (...args) =>
 export const prop = curry((key, x) => x[key]);
 
 // [a] -> [b] -> [[a, b]]
-export const zip = (xs, ys) => {
+export const zip = curry((xs, ys) => {
     const toTake = Math.min(xs.length, ys.length);
     const zs = [];
     for (let i = 0; i < toTake; i++) {
         zs.push([xs[i], ys[i]]);
     }
     return zs;
-};
+});
 
 // BinaryFn -> BinaryFn
 export const flip = fn => curry((x, y) => fn(y, x));
@@ -82,7 +85,7 @@ export const fromPairs = xs => {
     return reduce(addToObj, {}, xs);
 };
 
-// ([a, b] -> c) -> Object<a, b> -> [c]
+// ([a, b] -> c) -> Map a b -> [c]
 export const mapObject = on2(map, identity, toPairs);
 
 const writeToObject = curry((o, k, v) => {
@@ -130,3 +133,13 @@ export const clone = o => {
         return {...o};
     }
 };
+
+// (a -> bool) -> Object -> Object
+export const filterObject = curry((p, o) => {
+    const getKeys = compose(filter(p), Object.keys);
+    const getProperty = flip(prop);
+    const keys = getKeys(o);
+    const createObject = compose(fromPairs, zip(keys), map(getProperty(o)));
+
+    return createObject(keys);
+});
