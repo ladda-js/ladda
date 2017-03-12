@@ -9,7 +9,7 @@ const serializeObject = (o) => {
 };
 
 export const serialize = (x) => {
-    if (x && typeof x === 'object') {
+    if (x instanceof Object) {
         return serializeObject(x);
     } else {
         return x;
