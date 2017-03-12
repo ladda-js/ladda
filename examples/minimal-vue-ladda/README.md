@@ -1,4 +1,4 @@
-# Ladda in React
+# Ladda in Vue
 
 * `git clone git@github.com:petercrona/ladda.git`
 * cd examples/minimal-vue-ladda
