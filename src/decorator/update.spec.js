@@ -49,7 +49,7 @@ describe('Update', () => {
             const aFn = sinon.spy(aFnWithoutSpy);
 
             const res = decorateUpdate({}, es, qc, e, aFn);
-            res(xOrg).then(() => {
+            res(xOrg, 'other args').then(() => {
                 expect(get(es, e, 1).value).to.deep.equal({...xOrg, __ladda__id: 1});
                 done();
             });
