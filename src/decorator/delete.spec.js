@@ -3,6 +3,7 @@ import {createEntityStore, get, put} from 'entity-store';
 import {createQueryCache} from 'query-cache';
 import {addId} from 'id-helper';
 import sinon from 'sinon';
+import {createApiFunction} from 'test-helper';
 
 const config = [
     {
@@ -45,9 +46,8 @@ describe('Delete', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = {id: 1, name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve({});
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve({}));
+            const aFn = sinon.spy(aFnWithoutSpy);
             put(es, e, addId({}, undefined, undefined, xOrg));
             const res = decorateDelete({}, es, qc, e, aFn);
             res(1).then(() => {

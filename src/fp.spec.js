@@ -3,7 +3,7 @@ import {debug, identity, curry, passThrough,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
         mapObject, mapValues, toObject, filter, clone,
-        filterObject} from './fp';
+        filterObject, copyFunction} from './fp';
 import sinon from 'sinon';
 
 describe('fp', () => {
@@ -238,6 +238,21 @@ describe('fp', () => {
             const expected = {2: 'b', 4: 'd'};
             const keepEven = filterObject(x => x % 2 === 0);
             expect(keepEven(input)).to.deep.equal(expected);
+        });
+    });
+    describe('copyFunction', () => {
+        it('does not take inherited properties', () => {
+            const input = () => 1;
+            input.aProp = 'hej';
+            input.hasOwnProperty = () => false;
+            expect(copyFunction(input).aProp).to.be.undefined;
+        });
+        it('mutations on copied function does not cause original to change', () => {
+            const input = () => 1;
+            input.aProp = 'hej';
+            const res = copyFunction(input);
+            res.aProp = 'hello';
+            expect(input.aProp).to.not.be.equal(res.aProp);
         });
     });
 });

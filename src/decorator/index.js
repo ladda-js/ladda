@@ -12,7 +12,7 @@ const decorateApi = curry((config, entityStore, queryCache, entity, apiFn) => {
         UPDATE: decorateUpdate,
         DELETE: decorateDelete,
         NO_OPERATION: decorateNoOperation
-    }[apiFn.operation || 'NO_OPERATION'];
+    }[apiFn.operation];
     return handler(config, entityStore, queryCache, entity, apiFn);
 });
 

@@ -1,48 +1,9 @@
 import {createEntityStore} from './entity-store';
 import {createQueryCache, getValue, put, contains, get, invalidate} from './query-cache';
 import {addId} from 'id-helper';
+import {createSampleConfig, createApiFunction} from 'test-helper';
 
-const config = [
-    {
-        name: 'user',
-        ttl: 300,
-        api: {
-            getUsers: (x) => x,
-            getUsers2: (x) => x,
-            deleteUser: (x) => x,
-        },
-        invalidates: ['user'],
-        invalidatesOn: ['READ']
-    },
-    {
-        name: 'userPreview',
-        ttl: 200,
-        api: {
-            getPreviews: (x) => x,
-            updatePreview: (x) => x,
-        },
-        invalidates: ['fds'],
-        viewOf: 'user'
-    },
-    {
-        name: 'cars',
-        ttl: 200,
-        api: {
-            getCars: (x) => x,
-            updateCar: (x) => x,
-        },
-        invalidates: ['user'],
-        viewOf: 'user'
-    },
-    {
-        name: 'bikes',
-        ttl: 200,
-        api: {
-            getCars: (x) => x,
-            updateCar: (x) => x,
-        }
-    }
-];
+const config = createSampleConfig();
 
 describe('QueryCache', () => {
     describe('createQueryCache', () => {
@@ -132,8 +93,7 @@ describe('QueryCache', () => {
             const qc = createQueryCache(es);
             const eUser = config[0];
             const eCars = config[2];
-            const aFn = (x) => x;
-            aFn.operation = 'CREATE';
+            const aFn = createApiFunction(x => x, {operation: 'CREATE'});
             const args = [1, 2, 3];
             const xs = [{id: 1}, {id: 2}, {id: 3}];
             put(qc, eUser, aFn, args, addId({}, undefined, undefined, xs));
@@ -145,7 +105,7 @@ describe('QueryCache', () => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
             const eBikes = config[3];
-            const aFn = (x) => x;
+            const aFn = createApiFunction(x => x, {operation: 'CREATE'});
             aFn.operation = 'CREATE';
             const fn = () => invalidate(qc, eBikes, aFn);
             expect(fn).to.not.throw();

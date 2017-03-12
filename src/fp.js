@@ -140,3 +140,13 @@ export const filterObject = curry((p, o) => {
 
     return createObject(keys);
 });
+
+export const copyFunction = f => {
+    const newF = f.bind(null);
+    for (let x in f) {
+        if (f.hasOwnProperty(x)) {
+            newF[x] = f[x];
+        }
+    }
+    return newF;
+};

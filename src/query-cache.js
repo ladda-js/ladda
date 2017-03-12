@@ -69,12 +69,9 @@ export const get = (qc, e, aFn, args) => {
     return getFromCache(qc, e, k);
 };
 
-// Entity -> [String]
-const getInvalidatesOn = e => e.invalidatesOn || ['CREATE', 'UPDATE', 'DELETE'];
-
 // Entity -> Operation -> Bool
 const shouldInvalidateEntity = (e, op) => {
-    const invalidatesOn = getInvalidatesOn(e);
+    const invalidatesOn = e.invalidatesOn;
     return invalidatesOn && invalidatesOn.indexOf(op) > -1;
 };
 
@@ -90,7 +87,7 @@ const invalidateEntity = curry((qc, entityName) => {
 });
 
 // Object -> [String]
-const getInvalidates = x => x.invalidates || [];
+const getInvalidates = x => x.invalidates;
 
 // QueryCache -> Entity -> ApiFunction -> ()
 const invalidateBasedOnEntity = (qc, e, aFn) => {

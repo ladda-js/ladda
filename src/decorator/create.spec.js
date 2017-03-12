@@ -2,6 +2,7 @@ import {decorateCreate} from './create';
 import {createEntityStore, get, put} from 'entity-store';
 import {createQueryCache} from 'query-cache';
 import sinon from 'sinon';
+import {createApiFunction} from 'test-helper';
 
 const config = [
     {
@@ -45,9 +46,8 @@ describe('Create', () => {
             const e = config[0];
             const xOrg = {name: 'Kalle'};
             const response = {...xOrg, id: 1};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(response);
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(response));
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateCreate({}, es, qc, e, aFn);
             res(xOrg).then((newX) => {
                 expect(newX).to.equal(response);

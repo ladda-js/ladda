@@ -2,6 +2,7 @@ import {decorate} from './index';
 import {createEntityStore} from 'entity-store';
 import {createQueryCache, put, contains} from 'query-cache';
 import {addId} from 'id-helper';
+import {createApiFunction} from 'test-helper';
 
 const config = [
     {
@@ -19,7 +20,7 @@ const config = [
         name: 'cars',
         ttl: 200,
         api: {
-            triggerCarValueCalculation: (x) => Promise.resolve([x])
+            triggerCarValueCalculation: createApiFunction((x) => Promise.resolve([x]))
         },
         invalidates: ['user'],
         invalidatesOn: ['NO_OPERATION']
@@ -28,14 +29,8 @@ const config = [
 
 
 describe('Decorate', () => {
-    it('returns decorated function if no operation specified', () => {
-        const f = (x) => x;
-        const entity = {api: {getAll: f}};
-        const res = decorate({}, null, null, entity);
-        expect(res.api.getAll).not.to.equal(f);
-    });
     it('decorated function invalidates if NO_OPERATION is configured', (done) => {
-        const aFn = () => Promise.resolve('hej');
+        const aFn = createApiFunction(() => Promise.resolve('hej'));
         const xOrg = [{id: 1, name: 'Kalle'}];
         const es = createEntityStore(config);
         const qc = createQueryCache(es);

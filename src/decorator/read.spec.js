@@ -2,40 +2,9 @@ import {decorateRead} from './read';
 import {createEntityStore} from 'entity-store';
 import {createQueryCache} from 'query-cache';
 import sinon from 'sinon';
+import {createSampleConfig, createApiFunction} from 'test-helper';
 
-const config = [
-    {
-        name: 'user',
-        ttl: 300,
-        api: {
-            getUsers: (x) => x,
-            getUsers2: (x) => x,
-            deleteUser: (x) => x,
-        },
-        invalidates: ['user'],
-        invalidatesOn: ['GET']
-    },
-    {
-        name: 'userPreview',
-        ttl: 200,
-        api: {
-            getPreviews: (x) => x,
-            updatePreview: (x) => x,
-        },
-        invalidates: ['fda'],
-        viewOf: 'user'
-    },
-    {
-        name: 'listUser',
-        ttl: 200,
-        api: {
-            getPreviews: (x) => x,
-            updatePreview: (x) => x,
-        },
-        invalidates: ['fda'],
-        viewOf: 'user'
-    }
-];
+const config = createSampleConfig();
 
 describe('Read', () => {
     describe('decorateRead', () => {
@@ -44,10 +13,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = [{name: 'Kalle'}, {name: 'Anka'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-            aFn.idFrom = 'ARGS';
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {idFrom: 'ARGS'});
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
             res(1).then(x => {
                 expect(x).to.deep.equal(xOrg);
@@ -59,10 +26,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = {name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-            aFn.idFrom = 'ARGS';
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {idFrom: 'ARGS'});
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
             res({hello: 'hej', other: 'svej'}).then(x => {
                 expect(x).to.deep.equal({name: 'Kalle'});
@@ -74,10 +39,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = {id: 1, name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-            aFn.byId = true;
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
             res(1).then((x) => {
                 expect(aFn.callCount).to.equal(1);
@@ -89,10 +52,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = {id: 1, name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
-            aFn.byId = true;
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
             res(1).then(res.bind(null, 1)).then(() => {
                 expect(aFn.callCount).to.equal(1);
@@ -104,9 +65,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = {id: 1, name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
             res(1).then(() => {
                 expect(aFn.callCount).to.equal(1);
@@ -118,9 +78,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = {id: 1, name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
 
             const firstCall = res(1);
@@ -137,9 +96,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = {...config[0], ttl: -1};
             const xOrg = {id: 1, name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
 
             const firstCall = res(1);
@@ -156,9 +114,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
             res(1).then((x) => {
                 expect(x).to.equal(xOrg);
@@ -170,9 +127,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
 
             const firstCall = res(1);
@@ -189,9 +145,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = {...config[0], ttl: -1};
             const xOrg = [{id: 1, name: 'Kalle'}];
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
 
             const firstCall = res(1);
@@ -208,9 +163,8 @@ describe('Read', () => {
             const qc = createQueryCache(es);
             const e = {...config[0], ttl: 300};
             const xOrg = {name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve(xOrg);
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+            const aFn = sinon.spy(aFnWithoutSpy);
             const res = decorateRead({}, es, qc, e, aFn);
 
             res().catch(e => {

@@ -9,7 +9,7 @@ import {get as getFromQc,
 import {passThrough, compose} from 'fp';
 import {addId, removeId} from 'id-helper';
 
-const getTtl = e => (e.ttl || 300) * 1000;
+const getTtl = e => e.ttl * 1000;
 
 // Entity -> Int -> Bool
 const hasExpired = (e, timestamp) => {

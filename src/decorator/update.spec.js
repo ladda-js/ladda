@@ -2,6 +2,7 @@ import {decorateUpdate} from './update';
 import {createEntityStore, get} from 'entity-store';
 import {createQueryCache} from 'query-cache';
 import sinon from 'sinon';
+import {createApiFunction} from 'test-helper';
 
 const config = [
     {
@@ -44,9 +45,8 @@ describe('Update', () => {
             const qc = createQueryCache(es);
             const e = config[0];
             const xOrg = {id: 1, name: 'Kalle'};
-            const aFn = sinon.spy(() => {
-                return Promise.resolve({});
-            });
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+            const aFn = sinon.spy(aFnWithoutSpy);
 
             const res = decorateUpdate({}, es, qc, e, aFn);
             res(xOrg).then(() => {

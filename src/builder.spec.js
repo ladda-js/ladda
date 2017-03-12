@@ -105,4 +105,26 @@ describe('builder', () => {
                .then(() => api.user.getUsers())
                .then(expectUserToBeRemoved);
     });
+    it('TTL set to zero means we never get a cache hit', (done) => {
+        const myConfig = config();
+        myConfig.user.ttl = 0;
+        myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
+        const api = build(myConfig);
+
+        const expectOnlyOneApiCall = () => {
+            expect(myConfig.user.api.getUsers.callCount).to.equal(2);
+            done();
+        };
+
+        const delay = () => new Promise(res => {
+            setTimeout(() => res(), 1);
+        });
+
+        Promise.resolve()
+               .then(() => api.user.getUsers())
+               .then(delay)
+               .then(() => api.user.getUsers())
+               .then(expectOnlyOneApiCall)
+               .catch(e => console.log(e));
+    });
 });
