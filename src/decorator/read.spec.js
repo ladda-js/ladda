@@ -47,6 +47,24 @@ describe('Read', () => {
                 done();
             });
         });
+        it('calls api fn if in cache, but expired, with byId set', (done) => {
+            const myConfig = createSampleConfig();
+            myConfig[0].ttl = 0;
+            const es = createEntityStore(myConfig);
+            const qc = createQueryCache(es);
+            const e = myConfig[0];
+            const xOrg = {id: 1, name: 'Kalle'};
+            const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+            const aFn = sinon.spy(aFnWithoutSpy);
+            const res = decorateRead({}, es, qc, e, aFn);
+            const delay = () => new Promise((resolve) => {
+                setTimeout(resolve, 1);
+            });
+            res(1).then(delay).then(res.bind(null, 1)).then((x) => {
+                expect(aFn.callCount).to.equal(2);
+                done();
+            });
+        });
         it('does not call api fn if in cache with byId set', (done) => {
             const es = createEntityStore(config);
             const qc = createQueryCache(es);
