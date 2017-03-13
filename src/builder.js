@@ -37,7 +37,7 @@ export const mapApiFunctions = (fn, entityConfigs) => {
       api: reduce(
         (apiM, [apiFnName, apiFn]) => {
           const getFn = compose(prop(apiFnName), prop('api'));
-          const nextFn = fn(entity, apiFnName, apiFn);
+          const nextFn = fn({ entity, apiFnName, apiFn });
           apiM[apiFnName] = hoistMetaData(getFn(entity), nextFn);
           return apiM;
         },
@@ -98,14 +98,14 @@ const getEntityConfigs = compose(
   filterObject(compose(not, isEqual('__config')))
 );
 
-const corePlugin = (config, entityConfigs) => {
+const corePlugin = ({ config, entityConfigs }) => {
   const entityStore = compose(createEntityStore, values)(entityConfigs);
   const queryCache = createQueryCache(entityStore);
-  return decorate2(entityStore, queryCache, config, entityConfigs);
+  return decorate2(entityStore, queryCache, { config, entityConfigs });
 };
 
 const applyPlugin = curry((config, entityConfigs, plugin) => {
-  const pluginDecorator = plugin(config, entityConfigs);
+  const pluginDecorator = plugin({ config, entityConfigs });
   return mapApiFunctions(pluginDecorator, entityConfigs);
 });
 

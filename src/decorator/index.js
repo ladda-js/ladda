@@ -27,16 +27,19 @@ export const decorate = curry((config, entityStore, queryCache, entity) => {
   };
 });
 
-export const decorate2 = curry(
-  (entityStore, queryCache, config, entityConfigs, entity, apiFnName, apiFn) => {
-    const handler = {
-      CREATE: decorateCreate,
-      READ: decorateRead,
-      UPDATE: decorateUpdate,
-      DELETE: decorateDelete,
-      NO_OPERATION: decorateNoOperation
-    }[apiFn.operation];
-    return handler(config, entityStore, queryCache, entity, apiFn);
-  }
-);
+export const decorate2 = curry((
+  entityStore,
+  queryCache,
+  { config, entityConfigs },
+  { entity, apiFnName, apiFn }
+) => {
+  const handler = {
+    CREATE: decorateCreate,
+    READ: decorateRead,
+    UPDATE: decorateUpdate,
+    DELETE: decorateDelete,
+    NO_OPERATION: decorateNoOperation
+  }[apiFn.operation];
+  return handler(config, entityStore, queryCache, entity, apiFn);
+});
 
