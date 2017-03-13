@@ -152,3 +152,17 @@ export const copyFunction = f => {
   }
   return newF;
 };
+
+export const get = curry((props, o) => {
+  return reduce((m, p) => {
+    if (!m) { return m; }
+    return prop(p, m);
+  }, o, props);
+});
+
+export const set = curry((props, val, o) => {
+  if (!props.length) { return o; }
+  const nestedObj = get(init(props), o);
+  nestedObj[last(props)] = val;
+  return o;
+});
