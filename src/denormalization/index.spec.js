@@ -6,11 +6,12 @@ const toIdMap = toObject(prop('id'));
 
 const peter = { id: 'peter' };
 const gernot = { id: 'gernot' };
+const robin = { id: 'robin' };
 
-const users = toIdMap([peter, gernot]);
+const users = toIdMap([peter, gernot, robin]);
 
-const m1 = { id: 'x', author: peter.id, recipient: gernot.id };
-const m2 = { id: 'y', author: gernot.id, recipient: peter.id };
+const m1 = { id: 'x', author: peter.id, recipient: gernot.id, visibleTo: [robin.id] };
+const m2 = { id: 'y', author: gernot.id, recipient: peter.id, visibleTo: [] };
 
 const messages = toIdMap([m1, m2]);
 
@@ -47,7 +48,8 @@ const config = () => ({
       denormalizer: {
         schema: {
           author: 'user',
-          recipient: 'user'
+          recipient: 'user',
+          visibleTo: ['user']
         }
       }
     }
@@ -60,11 +62,18 @@ const expectResolved = curry((k, val, obj) => {
 });
 
 describe('with a fn, that returns one object', () => {
-  it('resolves all references', (done) => {
+  it('resolves references to simple id fields', (done) => {
     const api = build(config(), [denormalizer()]);
     api.message.getMessage(m1.id)
       .then(expectResolved('author', users[m1.author]))
       .then(expectResolved('recipient', users[m1.recipient]))
+      .then(() => done());
+  });
+
+  it('resolves references to lists of ids', (done) => {
+    const api = build(config(), [denormalizer()]);
+    api.message.getMessage(m1.id)
+      .then(expectResolved('visibleTo', [users[m1.visibleTo[0]]]))
       .then(() => done());
   });
 });
