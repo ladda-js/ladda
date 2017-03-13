@@ -6,7 +6,7 @@ import {debug, identity, curry, passThrough,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
         mapObject, mapValues, toObject, filter, clone,
-        filterObject, copyFunction} from './fp';
+        filterObject, copyFunction, get, set} from './fp';
 
 describe('fp', () => {
   describe('debug', () => {
@@ -255,6 +255,36 @@ describe('fp', () => {
       const res = copyFunction(input);
       res.aProp = 'hello';
       expect(input.aProp).to.not.be.equal(res.aProp);
+    });
+  });
+
+  describe('get', () => {
+    it('allows to access deep nested data by a list of keys', () => {
+      const x = { a: { b: { c: 1 } } };
+      const actual = get(['a', 'b', 'c'], x);
+      expect(actual).to.equal(1);
+    });
+
+    it('returns undefined when a too deep path is given', () => {
+      const x = { a: 1 };
+      const actual = get(['a', 'b', 'c'], x);
+      expect(actual).to.be.undefined;
+    });
+  });
+
+  describe('set', () => {
+    it('allows to access set nested data by a list of keys and a new value', () => {
+      const keys = ['a', 'b', 'c'];
+      const x = { a: { b: { c: 1 } } };
+      const nextX = set(keys, 2, x);
+      expect(get(keys, nextX)).to.equal(2);
+    });
+
+    it('returns an mutated copy of the original object', () => {
+      const keys = ['a', 'b', 'c'];
+      const x = { a: { b: { c: 1 } } };
+      const nextX = set(keys, 2, x); // set to same value for easier testing
+      expect(nextX).to.equal(x);
     });
   });
 });
