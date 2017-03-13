@@ -61,19 +61,22 @@ const expectResolved = curry((k, val, obj) => {
   return obj;
 });
 
-describe('with a fn, that returns one object', () => {
-  it('resolves references to simple id fields', (done) => {
-    const api = build(config(), [denormalizer()]);
-    api.message.getMessage(m1.id)
-      .then(expectResolved('author', users[m1.author]))
-      .then(expectResolved('recipient', users[m1.recipient]))
-      .then(() => done());
-  });
+describe('denormalizer', () => {
+  describe('with a fn, that returns one object', () => {
+    it('resolves references to simple id fields', (done) => {
+      const api = build(config(), [denormalizer()]);
+      api.message.getMessage(m1.id)
+        .then(expectResolved('author', users[m1.author]))
+        .then(expectResolved('recipient', users[m1.recipient]))
+        .then(() => done());
+    });
 
-  it('resolves references to lists of ids', (done) => {
-    const api = build(config(), [denormalizer()]);
-    api.message.getMessage(m1.id)
-      .then(expectResolved('visibleTo', [users[m1.visibleTo[0]]]))
-      .then(() => done());
+    it('resolves references to lists of ids', (done) => {
+      const api = build(config(), [denormalizer()]);
+      api.message.getMessage(m1.id)
+        .then(expectResolved('visibleTo', [users[m1.visibleTo[0]]]))
+        .then(() => done());
+    });
   });
 });
+
