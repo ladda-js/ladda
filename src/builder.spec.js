@@ -133,7 +133,7 @@ describe('builder', () => {
     const plugin = (pConfig) => {
       const pName = pConfig.name;
       pluginTracker[pName] = {};
-      return curry((c, entityConfigs, entity, apiFnName, apiFn) => {
+      return curry(({ config: c, entityConfigs }, { entity, apiFnName, apiFn }) => {
         pluginTracker[pName][apiFnName] = true;
         return apiFn;
       });

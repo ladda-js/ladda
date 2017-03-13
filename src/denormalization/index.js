@@ -93,7 +93,10 @@ const resolve = curry((entityConfigs, schema, items) => {
 // - We can prepare a data structure which makes handling of nested data easy
 // - We can validate if all necessary configuration is in place and fail fast if that's not the case
 
-export const denormalizer = curry((c, entityConfigs, entity, name, fn) => {
+export const denormalizer = curry((
+  { entityConfigs },
+  { entity, apiFnName: name, apiFn: fn }
+) => {
   const schema = getSchema(entityConfigs, entity.name);
   if (!schema) {
     return fn;
