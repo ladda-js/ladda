@@ -1,6 +1,6 @@
 import { build } from '../builder';
 import { denormalizer } from '.';
-import { curry, prop, toObject, values } from '../fp';
+import { curry, prop, head, last, toObject, values } from '../fp';
 
 const toIdMap = toObject(prop('id'));
 
@@ -75,6 +75,23 @@ describe('denormalizer', () => {
       const api = build(config(), [denormalizer()]);
       api.message.getMessage(m1.id)
         .then(expectResolved('visibleTo', [users[m1.visibleTo[0]]]))
+        .then(() => done());
+    });
+  });
+
+  describe('with a fn, that returns a list of objects', () => {
+    it('resolves references to simple id fields', (done) => {
+      const api = build(config(), [denormalizer()]);
+      api.message.getMessages()
+        .then((msgs) => {
+          const fst = head(msgs);
+          const snd = last(msgs);
+          expectResolved('author', users[m1.author])(fst);
+          expectResolved('recipient', users[m1.recipient])(fst);
+
+          expectResolved('author', users[m2.author])(snd);
+          expectResolved('recipient', users[m2.recipient])(snd);
+        })
         .then(() => done());
     });
   });
