@@ -1,4 +1,4 @@
-import {map, mapObject, mapValues, values, compose, toObject, reduce, toPairs,
+import {mapObject, mapValues, values, compose, toObject, reduce, toPairs,
         prop, filterObject, isEqual, not, curry, copyFunction} from './fp';
 import {createEntityStore} from './entity-store';
 import {createQueryCache} from './query-cache';
