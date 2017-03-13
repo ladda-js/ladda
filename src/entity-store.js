@@ -12,7 +12,7 @@
  */
 
 import {merge} from './merger';
-import {curry, reduce, map_, clone} from 'fp';
+import {curry, reduce, map_, clone} from './fp';
 
 // Value -> StoreValue
 const toStoreValue = v => ({value: v, timestamp: Date.now()});
@@ -21,7 +21,7 @@ const toStoreValue = v => ({value: v, timestamp: Date.now()});
 const read = ([_, s], k) => (s[k] ? {...s[k], value: clone(s[k].value)} : s[k]);
 
 // EntityStore -> String -> Value -> ()
-const set = ([eMap, s], k, v) => s[k] = toStoreValue(clone(v));
+const set = ([eMap, s], k, v) => { s[k] = toStoreValue(clone(v)); };
 
 // EntityStore -> String -> ()
 const rm = curry(([_, s], k) => delete s[k]);
@@ -31,19 +31,19 @@ const getEntityType = e => e.viewOf || e.name;
 
 // EntityStore -> Entity -> ()
 const rmViews = ([eMap, s], e) => {
-    const entityType = getEntityType(e);
-    const toRemove = [...eMap[entityType]];
-    map_(rm([eMap, s]), toRemove);
+  const entityType = getEntityType(e);
+  const toRemove = [...eMap[entityType]];
+  map_(rm([eMap, s]), toRemove);
 };
 
 // Entity -> Value -> String
 const createEntityKey = (e, v) => {
-    return getEntityType(e) + v.__ladda__id;
+  return getEntityType(e) + v.__ladda__id;
 };
 
 // Entity -> Value -> String
 const createViewKey = (e, v) => {
-    return e.name + v.__ladda__id;
+  return e.name + v.__ladda__id;
 };
 
 // Entity -> Bool
@@ -51,17 +51,16 @@ const isView = e => !!e.viewOf;
 
 // EntityStore -> Entity -> String -> ()
 export const remove = (es, e, id) => {
-    rm(es, createEntityKey(e, {__ladda__id: id}));
-    rmViews(es, e);
+  rm(es, createEntityKey(e, {__ladda__id: id}));
+  rmViews(es, e);
 };
 
 // Function -> Function -> EntityStore -> Entity -> Value -> a
 const handle = curry((viewHandler, entityHandler, s, e, v) => {
-    if (isView(e)) {
-        return viewHandler(s, e, v);
-    } else {
-        return entityHandler(s, e, v);
-    }
+  if (isView(e)) {
+    return viewHandler(s, e, v);
+  }
+  return entityHandler(s, e, v);
 });
 
 // EntityStore -> Entity -> Value -> Bool
@@ -69,30 +68,30 @@ const entityValueExist = (s, e, v) => !!read(s, createEntityKey(e, v));
 
 // EntityStore -> Entity -> Value -> ()
 const setEntityValue = (s, e, v) => {
-    if (!v.__ladda__id) {
-        throw new Error(`Value is missing id, tried to add to entity ${e.name}`);
-    }
-    const k = createEntityKey(e, v);
-    set(s, k, v);
-    return v;
+  if (!v.__ladda__id) {
+    throw new Error(`Value is missing id, tried to add to entity ${e.name}`);
+  }
+  const k = createEntityKey(e, v);
+  set(s, k, v);
+  return v;
 };
 
 // EntityStore -> Entity -> Value -> ()
 const setViewValue = (s, e, v) => {
-    if (!v.__ladda__id) {
-        throw new Error(`Value is missing id, tried to add to view ${e.name}`);
-    }
+  if (!v.__ladda__id) {
+    throw new Error(`Value is missing id, tried to add to view ${e.name}`);
+  }
 
-    if (entityValueExist(s, e, v)) {
-        const eValue = read(s, createEntityKey(e, v)).value;
-        setEntityValue(s, e, merge(v, eValue));
-        rmViews(s, e); // all views will prefer entity cache since it is newer
-    } else {
-        const k = createViewKey(e, v);
-        set(s, k, v);
-    }
+  if (entityValueExist(s, e, v)) {
+    const eValue = read(s, createEntityKey(e, v)).value;
+    setEntityValue(s, e, merge(v, eValue));
+    rmViews(s, e); // all views will prefer entity cache since it is newer
+  } else {
+    const k = createViewKey(e, v);
+    set(s, k, v);
+  }
 
-    return v;
+  return v;
 };
 
 // EntityStore -> Entity -> Value -> ()
@@ -100,21 +99,20 @@ export const put = handle(setViewValue, setEntityValue);
 
 // EntityStore -> Entity -> String -> Value
 const getEntityValue = (s, e, id) => {
-    const k = createEntityKey(e, {__ladda__id: id});
-    return read(s, k);
+  const k = createEntityKey(e, {__ladda__id: id});
+  return read(s, k);
 };
 
 // EntityStore -> Entity -> String -> Value
 const getViewValue = (s, e, id) => {
-    const entityValue = read(s, createEntityKey(e, {__ladda__id: id}));
-    const viewValue = read(s, createViewKey(e, {__ladda__id: id}));
-    const onlyViewValueExist = viewValue && !entityValue;
+  const entityValue = read(s, createEntityKey(e, {__ladda__id: id}));
+  const viewValue = read(s, createViewKey(e, {__ladda__id: id}));
+  const onlyViewValueExist = viewValue && !entityValue;
 
-    if (onlyViewValueExist) {
-        return viewValue;
-    } else {
-        return entityValue;
-    }
+  if (onlyViewValueExist) {
+    return viewValue;
+  }
+  return entityValue;
 };
 
 // EntityStore -> Entity -> String -> ()
@@ -125,23 +123,23 @@ export const contains = (es, e, id) => !!handle(getViewValue, getEntityValue)(es
 
 // EntityStore -> Entity -> EntityStore
 const registerView = ([eMap, store], e) => {
-    if (!eMap[e.viewOf]) {
-        eMap[e.viewOf] = [];
-    }
-    eMap[e.viewOf].push(e.name);
-    return [eMap, store];
+  if (!eMap[e.viewOf]) {
+    eMap[e.viewOf] = [];
+  }
+  eMap[e.viewOf].push(e.name);
+  return [eMap, store];
 };
 
 // EntityStore -> Entity -> EntityStore
 const registerEntity = ([eMap, store], e) => {
-    if (!eMap[e.name]) {
-        eMap[e.name] = [];
-    }
-    return [eMap, store];
+  if (!eMap[e.name]) {
+    eMap[e.name] = [];
+  }
+  return [eMap, store];
 };
 
 // EntityStore -> Entity -> EntityStore
-const updateIndex = (m, e) => isView(e) ? registerView(m, e) : registerEntity(m, e);
+const updateIndex = (m, e) => { return isView(e) ? registerView(m, e) : registerEntity(m, e); };
 
 // [Entity] -> EntityStore
 export const createEntityStore = c => reduce(updateIndex, [{}, {}], c);

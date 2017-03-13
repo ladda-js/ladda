@@ -1,22 +1,21 @@
 export const debug = (x) => {
-    console.log(x);
-    return x;
+  console.log(x); // eslint-disable-line no-console
+  return x;
 };
 
 export const identity = x => x;
 
 export const curry = (f) => (...args) => {
-    const nrArgsRequired = f.length;
-    if (args.length < nrArgsRequired) {
-        return curry(f.bind(null, ...args));
-    } else {
-        return f(...args);
-    }
+  const nrArgsRequired = f.length;
+  if (args.length < nrArgsRequired) {
+    return curry(f.bind(null, ...args));
+  }
+  return f(...args);
 };
 
 export const passThrough = curry((f, x) => {
-    f(x);
-    return x;
+  f(x);
+  return x;
 });
 
 export const startsWith = curry((x, xs) => xs.indexOf(x) === 0);
@@ -48,10 +47,10 @@ export const map_ = curry((fn, xs) => { map(fn, xs); });
 export const reverse = xs => xs.slice().reverse();
 
 export const reduce = curry((f, currResult, xs) => {
-    map_((x) => {
-        currResult = f(currResult, x);
-    }, xs);
-    return currResult;
+  map_((x) => {
+    currResult = f(currResult, x);
+  }, xs);
+  return currResult;
 });
 
 export const compose = (...fns) => (...args) =>
@@ -61,12 +60,12 @@ export const prop = curry((key, x) => x[key]);
 
 // [a] -> [b] -> [[a, b]]
 export const zip = curry((xs, ys) => {
-    const toTake = Math.min(xs.length, ys.length);
-    const zs = [];
-    for (let i = 0; i < toTake; i++) {
-        zs.push([xs[i], ys[i]]);
-    }
-    return zs;
+  const toTake = Math.min(xs.length, ys.length);
+  const zs = [];
+  for (let i = 0; i < toTake; i++) {
+    zs.push([xs[i], ys[i]]);
+  }
+  return zs;
 });
 
 // BinaryFn -> BinaryFn
@@ -74,79 +73,79 @@ export const flip = fn => curry((x, y) => fn(y, x));
 
 // Object -> [[key, val]]
 export const toPairs = x => {
-    const keys = Object.keys(x);
-    const getValue = flip(prop)(x);
-    return zip(keys, map(getValue, keys));
+  const keys = Object.keys(x);
+  const getValue = flip(prop)(x);
+  return zip(keys, map(getValue, keys));
 };
 
 // [[key, val]] -> Object<Key, Val>
 export const fromPairs = xs => {
-    const addToObj = (o, [k, v]) => passThrough(() => o[k] = v, o);
-    return reduce(addToObj, {}, xs);
+  const addToObj = (o, [k, v]) => passThrough(() => { o[k] = v; }, o);
+  return reduce(addToObj, {}, xs);
 };
 
 // ([a, b] -> c) -> Map a b -> [c]
 export const mapObject = on2(map, identity, toPairs);
 
 const writeToObject = curry((o, k, v) => {
-    o[k] = v;
-    return o;
+  o[k] = v;
+  return o;
 });
 
 // (a -> b) -> Object -> Object
 export const mapValues = curry((fn, o) => {
-    const keys = Object.keys(o);
-    return reduce((m, x) => {
-        m[x] = fn(o[x]);
-        return m;
-    }, {}, keys);
+  const keys = Object.keys(o);
+  return reduce((m, x) => {
+    m[x] = fn(o[x]);
+    return m;
+  }, {}, keys);
 });
 
 // (a -> b) -> [Object] -> Object<b, a>
 export const toObject = curry((getK, xs) => reduce(
-    (m, x) => writeToObject(m, getK(x), x),
-    {},
-    xs
+  (m, x) => writeToObject(m, getK(x), x),
+  {},
+  xs
 ));
 
 const takeIf = curry((p, m, x) => {
-    if (p(x)) {
-        m.push(x);
-    }
-    return m;
+  if (p(x)) {
+    m.push(x);
+  }
+  return m;
 });
 
 export const filter = curry((p, xs) => {
-    return reduce(takeIf(p), [], xs);
+  return reduce(takeIf(p), [], xs);
 });
 
 // Object -> Object
 export const clone = o => {
-    if (Array.isArray(o)) {
-        return o.slice(0);
-    } else if (typeof o === 'object') {
-        return {...o};
-    } else {
-        throw new TypeError('Called with something else than an object/array');
-    }
+  if (Array.isArray(o)) {
+    return o.slice(0);
+  }
+  if (typeof o === 'object') {
+    return {...o};
+  }
+  throw new TypeError('Called with something else than an object/array');
 };
 
 // (a -> bool) -> Object -> Object
 export const filterObject = curry((p, o) => {
-    const getKeys = compose(filter(p), Object.keys);
-    const getProperty = flip(prop);
-    const keys = getKeys(o);
-    const createObject = compose(fromPairs, zip(keys), map(getProperty(o)));
+  const getKeys = compose(filter(p), Object.keys);
+  const getProperty = flip(prop);
+  const keys = getKeys(o);
+  const createObject = compose(fromPairs, zip(keys), map(getProperty(o)));
 
-    return createObject(keys);
+  return createObject(keys);
 });
 
 export const copyFunction = f => {
-    const newF = f.bind(null);
-    for (let x in f) {
-        if (f.hasOwnProperty(x)) {
-            newF[x] = f[x];
-        }
+  const newF = f.bind(null);
+  for (const x in f) {
+    if (f.hasOwnProperty(x)) {
+      newF[x] = f[x];
     }
-    return newF;
+  }
+  return newF;
 };

@@ -1,258 +1,260 @@
+/* eslint-disable no-unused-expressions */
+
+import sinon from 'sinon';
 import {debug, identity, curry, passThrough,
         startsWith, join, on, isEqual,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
         mapObject, mapValues, toObject, filter, clone,
         filterObject, copyFunction} from './fp';
-import sinon from 'sinon';
 
 describe('fp', () => {
-    describe('debug', () => {
-        it('returns the value it is invoked with', () => {
-            expect(debug('hello')).to.equal('hello');
-        });
+  describe('debug', () => {
+    it('returns the value it is invoked with', () => {
+      expect(debug('hello')).to.equal('hello');
     });
-    describe('identity', () => {
-        it('returns the value it is invoked with', () => {
-            expect(identity('hello')).to.equal('hello');
-        });
+  });
+  describe('identity', () => {
+    it('returns the value it is invoked with', () => {
+      expect(identity('hello')).to.equal('hello');
     });
-    describe('curry', () => {
-        it('returns a function if one of 3 args are provided', () => {
-            const fn = curry((x, y, z) => x);
-            expect(fn('hej')).to.be.a('function');
-        });
-        it('returns a function if two of 3 args are provided', () => {
-            const fn = curry((x, y, z) => x);
-            expect(fn('hej', 1)).to.be.a('function');
-        });
-        it('returns a value if all args are provided', () => {
-            const fn = curry((x, y, z) => x);
-            expect(fn('hej', 1, 2)).to.be.equal('hej');
-        });
+  });
+  describe('curry', () => {
+    it('returns a function if one of 3 args are provided', () => {
+      const fn = curry((x, y, z) => x); // eslint-disable-line no-unused-vars
+      expect(fn('hej')).to.be.a('function');
     });
-    describe('passThrough', () => {
-        it('invoke function and return second arg', () => {
-            const f = sinon.spy();
-            expect(passThrough(f, 'hello')).to.equal('hello');
-            expect(f.callCount).to.equal(1);
-        });
+    it('returns a function if two of 3 args are provided', () => {
+      const fn = curry((x, y, z) => x); // eslint-disable-line no-unused-vars
+      expect(fn('hej', 1)).to.be.a('function');
     });
-    describe('startsWith', () => {
-        it('return true if first string is prefix of second string', () => {
-            expect(startsWith('hello', 'hello world')).to.be.true;
-        });
-        it('return false if first string is not prefix of second string', () => {
-            expect(startsWith('hej', 'hello world')).to.be.false;
-        });
-        it('return true if first arg is first element list', () => {
-            expect(startsWith(1, [1,2,3,4,5])).to.be.true;
-        });
+    it('returns a value if all args are provided', () => {
+      const fn = curry((x, y, z) => x); // eslint-disable-line no-unused-vars
+      expect(fn('hej', 1, 2)).to.be.equal('hej');
     });
-    describe('join', () => {
-        it('merge two strings with specified separator', () => {
-            expect(join('-', 'hello', 'world')).to.be.equal('hello-world');
-        });
+  });
+  describe('passThrough', () => {
+    it('invoke function and return second arg', () => {
+      const f = sinon.spy();
+      expect(passThrough(f, 'hello')).to.equal('hello');
+      expect(f.callCount).to.equal(1);
     });
-    describe('on', () => {
-        it('pass final arg thorugh second and thrid function and pass into first function', () => {
-            const f = (x, y) => x + y;
-            const g = x => x.toUpperCase();
-            const h = x => x.toLowerCase();
-            expect(on(f, g, h, 'hello')).to.be.equal('HELLOhello');
-        });
+  });
+  describe('startsWith', () => {
+    it('return true if first string is prefix of second string', () => {
+      expect(startsWith('hello', 'hello world')).to.be.true;
     });
-    describe('isEqual', () => {
-        it('two elements are equal if same type and same value', () => {
-            expect(isEqual('hello', 'hello')).to.be.true;
-        });
-        it('two elements are not equal if different type even if same value', () => {
-            expect(isEqual(1, '1')).to.be.false;
-        });
+    it('return false if first string is not prefix of second string', () => {
+      expect(startsWith('hej', 'hello world')).to.be.false;
     });
-    describe('on2', () => {
-        it('passes two final values through 2nd and 3rd fn to 1st fn', () => {
-            const f = (x, y) => x + y;
-            const g = x => x.toUpperCase();
-            const h = x => x.toLowerCase();
-            expect(on2(f, g, h, 'hello', 'WORLD')).to.be.equal('HELLOworld');
-        });
+    it('return true if first arg is first element list', () => {
+      expect(startsWith(1, [1, 2, 3, 4, 5])).to.be.true;
     });
-    describe('init', () => {
-        it('returns all but the last element', () => {
-            const xs = [1,2,3,4];
-            const expected = [1,2,3];
-            expect(init(xs)).to.deep.equal(expected);
-        });
+  });
+  describe('join', () => {
+    it('merge two strings with specified separator', () => {
+      expect(join('-', 'hello', 'world')).to.be.equal('hello-world');
     });
-    describe('tail', () => {
-        it('returns all but the first element', () => {
-            const xs = [1,2,3,4];
-            const expected = [2,3,4];
-            expect(tail(xs)).to.deep.equal(expected);
-        });
+  });
+  describe('on', () => {
+    it('pass final arg thorugh second and thrid fn and pass into first fn', () => {
+      const f = (x, y) => x + y;
+      const g = x => x.toUpperCase();
+      const h = x => x.toLowerCase();
+      expect(on(f, g, h, 'hello')).to.be.equal('HELLOhello');
     });
-    describe('last', () => {
-        it('returns the last element', () => {
-            const xs = [1,2,3,4];
-            const expected = 4;
-            expect(last(xs)).to.equal(expected);
-        });
+  });
+  describe('isEqual', () => {
+    it('two elements are equal if same type and same value', () => {
+      expect(isEqual('hello', 'hello')).to.be.true;
     });
-    describe('head', () => {
-        it('returns the first element', () => {
-            const xs = [1,2,3,4];
-            const expected = 1;
-            expect(head(xs)).to.equal(expected);
-        });
+    it('two elements are not equal if different type even if same value', () => {
+      expect(isEqual(1, '1')).to.be.false;
     });
-    describe('map', () => {
-        it('applies fn to all elements in array', () => {
-            const xs = [1,2,3,4];
-            const add1 = x => x + 1;
-            const expected = [2,3,4,5];
-            expect(map(add1, xs)).to.deep.equal(expected);
-        });
+  });
+  describe('on2', () => {
+    it('passes two final values through 2nd and 3rd fn to 1st fn', () => {
+      const f = (x, y) => x + y;
+      const g = x => x.toUpperCase();
+      const h = x => x.toLowerCase();
+      expect(on2(f, g, h, 'hello', 'WORLD')).to.be.equal('HELLOworld');
     });
-    describe('map_', () => {
-        it('applies fn to all elements in array but returns nothing', () => {
-            const xs = [1,2,3,4];
-            const fn = sinon.spy();
-            map_(fn, xs);
-            expect(fn.callCount).to.equal(xs.length);
-        });
+  });
+  describe('init', () => {
+    it('returns all but the last element', () => {
+      const xs = [1, 2, 3, 4];
+      const expected = [1, 2, 3];
+      expect(init(xs)).to.deep.equal(expected);
     });
-    describe('reverse', () => {
-        it('reverses elements in array', () => {
-            const xs = [1,2,3,4];
-            const expected = [4,3,2,1];
-            expect(reverse(xs)).to.deep.equal(expected);
-        });
+  });
+  describe('tail', () => {
+    it('returns all but the first element', () => {
+      const xs = [1, 2, 3, 4];
+      const expected = [2, 3, 4];
+      expect(tail(xs)).to.deep.equal(expected);
     });
-    describe('reduce', () => {
-        it('joins element with specified base case and operator', () => {
-            const xs = [1,2,3,4];
-            const base = 0;
-            const add = (x, y) => x + y;
-            const expected = 10;
-            expect(reduce(add, base, xs)).to.deep.equal(expected);
-        });
+  });
+  describe('last', () => {
+    it('returns the last element', () => {
+      const xs = [1, 2, 3, 4];
+      const expected = 4;
+      expect(last(xs)).to.equal(expected);
     });
-    describe('compose', () => {
-        it('passes output from last fn to first after calling last with provided args', () => {
-            const f = x => x + 1;
-            const g = x => x + 1;
-            const fog = compose(f, g);
-            expect(fog(1)).to.equal(3);
-        });
+  });
+  describe('head', () => {
+    it('returns the first element', () => {
+      const xs = [1, 2, 3, 4];
+      const expected = 1;
+      expect(head(xs)).to.equal(expected);
     });
-    describe('prop', () => {
-        it('returns the property of an object', () => {
-            expect(prop('hej', {hej: 'hello'})).to.equal('hello');
-        });
+  });
+  describe('map', () => {
+    it('applies fn to all elements in array', () => {
+      const xs = [1, 2, 3, 4];
+      const add1 = x => x + 1;
+      const expected = [2, 3, 4, 5];
+      expect(map(add1, xs)).to.deep.equal(expected);
     });
-    describe('zip', () => {
-        it('form pairs where indices are equal', () => {
-            expect(zip([1,2,3], [2,3,4])).to.deep.equal([[1,2], [2,3], [3,4]]);
-        });
-        it('resulting array shall have same size as first arg array', () => {
-            expect(zip([1,2], [2,3,4])).to.deep.equal([[1,2], [2,3]]);
-        });
+  });
+  describe('map_', () => {
+    it('applies fn to all elements in array but returns nothing', () => {
+      const xs = [1, 2, 3, 4];
+      const fn = sinon.spy();
+      map_(fn, xs);
+      expect(fn.callCount).to.equal(xs.length);
     });
-    describe('flip', () => {
-        it('switch argument order of fn', () => {
-            const f = flip(prop);
-            expect(f({hej: 'hello'}, 'hej')).to.equal('hello');
-        });
+  });
+  describe('reverse', () => {
+    it('reverses elements in array', () => {
+      const xs = [1, 2, 3, 4];
+      const expected = [4, 3, 2, 1];
+      expect(reverse(xs)).to.deep.equal(expected);
     });
-    describe('toPairs', () => {
-        it('Given an object form pairs with keys and values', () => {
-            const o = {hello: 'hej', fish: 'fisk'};
-            expect(toPairs(o)).to.deep.equal([['hello', 'hej'], ['fish', 'fisk']]);
-        });
+  });
+  describe('reduce', () => {
+    it('joins element with specified base case and operator', () => {
+      const xs = [1, 2, 3, 4];
+      const base = 0;
+      const add = (x, y) => x + y;
+      const expected = 10;
+      expect(reduce(add, base, xs)).to.deep.equal(expected);
     });
-    describe('fromPairs', () => {
-        it('Given an array of pairs, create an object where first element is key send second value', () => {
-            const xs = [['hello', 'hej'], ['fish', 'fisk']];
-            expect(fromPairs(xs)).to.deep.equal({hello: 'hej', fish: 'fisk'});
-        });
+  });
+  describe('compose', () => {
+    it('passes output from last fn to first after calling last with provided args', () => {
+      const f = x => x + 1;
+      const g = x => x + 1;
+      const fog = compose(f, g);
+      expect(fog(1)).to.equal(3);
     });
-    describe('mapObject', () => {
-        it('invokes fn with pairs [key, value] from the object', () => {
-            const xs = {'hello': 'hej', 'fish': 'fisk', 'cheese': 'ost'};
-            expect(mapObject(x => x.join('-'), xs)).to.deep.equal(
-                ['hello-hej', 'fish-fisk', 'cheese-ost']
-            );
-        });
+  });
+  describe('prop', () => {
+    it('returns the property of an object', () => {
+      expect(prop('hej', {hej: 'hello'})).to.equal('hello');
     });
-    describe('mapValues', () => {
-        it('only transforms values of object', () => {
-            const xs = {'hello': 'hej', 'fish': 'fisk', 'cheese': 'ost'};
-            const toUpperCase = x => x.toUpperCase();
-            expect(mapValues(toUpperCase, xs)).to.deep.equal(
-                {'hello': 'HEJ', 'fish': 'FISK', 'cheese': 'OST'}
-            );
-        });
+  });
+  describe('zip', () => {
+    it('form pairs where indices are equal', () => {
+      expect(zip([1, 2, 3], [2, 3, 4])).to.deep.equal([[1, 2], [2, 3], [3, 4]]);
     });
-    describe('toObject', () => {
-        it('takes a list of objects and transforms to an object where keys are given by provided function', () => {
-            const xs = [{id: 1, name: 'kalle'}, {id: 2, name: 'Erik Ponti'}];
-            expect(toObject(prop('id'), xs)).to.deep.equal(
-                {1: {id: 1, name: 'kalle'}, 2: {id: 2, name: 'Erik Ponti'}}
-            );
-        });
+    it('resulting array shall have same size as first arg array', () => {
+      expect(zip([1, 2], [2, 3, 4])).to.deep.equal([[1, 2], [2, 3]]);
     });
-    describe('filter', () => {
-        it('Only keeps elements for which the predicate returns true', () => {
-            const xs = [1,2,3,4,5,6];
-            const largerThan3 = x => x > 3;
-            expect(filter(largerThan3, xs)).to.deep.equal(
-                [4,5,6]
-            );
-        });
+  });
+  describe('flip', () => {
+    it('switch argument order of fn', () => {
+      const f = flip(prop);
+      expect(f({hej: 'hello'}, 'hej')).to.equal('hello');
     });
-    describe('clone', () => {
-        it('throws if called with undefined value', () => {
-            expect(clone.bind(null, undefined)).to.throw(TypeError);
-        });
-        it('clones array', () => {
-            const o = [1,2,3];
-            const cloned = clone(o);
-            o.push(1);
-            expect(cloned).to.not.deep.equal(o);
-        });
-        it('clones object', () => {
-            const o = {name: 'kalle'};
-            const cloned = clone(o);
-            o.name = 'ingvar';
-            expect(cloned).to.not.deep.equal(o);
-        });
+  });
+  describe('toPairs', () => {
+    it('Given an object form pairs with keys and values', () => {
+      const o = {hello: 'hej', fish: 'fisk'};
+      expect(toPairs(o)).to.deep.equal([['hello', 'hej'], ['fish', 'fisk']]);
     });
-    describe('filterObject', () => {
-        it('crash if second parameter is not object', () => {
-            const fnUnderTest = filterObject.bind(null, () => false, undefined);
-            expect(fnUnderTest).to.throw(Error);
-        });
-        it('entries for which the predicate returns false are removed', () => {
-            const input = {1: 'a', 2: 'b', 3: 'c', 4: 'd'};
-            const expected = {2: 'b', 4: 'd'};
-            const keepEven = filterObject(x => x % 2 === 0);
-            expect(keepEven(input)).to.deep.equal(expected);
-        });
+  });
+  describe('fromPairs', () => {
+    it('Given an array of pairs, create an obj where first el is key and second value', () => {
+      const xs = [['hello', 'hej'], ['fish', 'fisk']];
+      expect(fromPairs(xs)).to.deep.equal({hello: 'hej', fish: 'fisk'});
     });
-    describe('copyFunction', () => {
-        it('does not take inherited properties', () => {
-            const input = () => 1;
-            input.aProp = 'hej';
-            input.hasOwnProperty = () => false;
-            expect(copyFunction(input).aProp).to.be.undefined;
-        });
-        it('mutations on copied function does not cause original to change', () => {
-            const input = () => 1;
-            input.aProp = 'hej';
-            const res = copyFunction(input);
-            res.aProp = 'hello';
-            expect(input.aProp).to.not.be.equal(res.aProp);
-        });
+  });
+  describe('mapObject', () => {
+    it('invokes fn with pairs [key, value] from the object', () => {
+      const xs = { hello: 'hej', fish: 'fisk', cheese: 'ost' };
+      expect(mapObject(x => x.join('-'), xs)).to.deep.equal(
+        ['hello-hej', 'fish-fisk', 'cheese-ost']
+      );
     });
+  });
+  describe('mapValues', () => {
+    it('only transforms values of object', () => {
+      const xs = { hello: 'hej', fish: 'fisk', cheese: 'ost' };
+      const toUpperCase = x => x.toUpperCase();
+      expect(mapValues(toUpperCase, xs)).to.deep.equal(
+        { hello: 'HEJ', fish: 'FISK', cheese: 'OST' }
+      );
+    });
+  });
+  describe('toObject', () => {
+    it('takes a list of objs and transforms to an obj where keys are given by provided fn', () => {
+      const xs = [{id: 1, name: 'kalle'}, {id: 2, name: 'Erik Ponti'}];
+      expect(toObject(prop('id'), xs)).to.deep.equal(
+        {1: {id: 1, name: 'kalle'}, 2: {id: 2, name: 'Erik Ponti'}}
+      );
+    });
+  });
+  describe('filter', () => {
+    it('Only keeps elements for which the predicate returns true', () => {
+      const xs = [1, 2, 3, 4, 5, 6];
+      const largerThan3 = x => x > 3;
+      expect(filter(largerThan3, xs)).to.deep.equal(
+        [4, 5, 6]
+      );
+    });
+  });
+  describe('clone', () => {
+    it('throws if called with undefined value', () => {
+      expect(clone.bind(null, undefined)).to.throw(TypeError);
+    });
+    it('clones array', () => {
+      const o = [1, 2, 3];
+      const cloned = clone(o);
+      o.push(1);
+      expect(cloned).to.not.deep.equal(o);
+    });
+    it('clones object', () => {
+      const o = {name: 'kalle'};
+      const cloned = clone(o);
+      o.name = 'ingvar';
+      expect(cloned).to.not.deep.equal(o);
+    });
+  });
+  describe('filterObject', () => {
+    it('crash if second parameter is not object', () => {
+      const fnUnderTest = filterObject.bind(null, () => false, undefined);
+      expect(fnUnderTest).to.throw(Error);
+    });
+    it('entries for which the predicate returns false are removed', () => {
+      const input = {1: 'a', 2: 'b', 3: 'c', 4: 'd'};
+      const expected = {2: 'b', 4: 'd'};
+      const keepEven = filterObject(x => x % 2 === 0);
+      expect(keepEven(input)).to.deep.equal(expected);
+    });
+  });
+  describe('copyFunction', () => {
+    it('does not take inherited properties', () => {
+      const input = () => 1;
+      input.aProp = 'hej';
+      input.hasOwnProperty = () => false;
+      expect(copyFunction(input).aProp).to.be.undefined;
+    });
+    it('mutations on copied function does not cause original to change', () => {
+      const input = () => 1;
+      input.aProp = 'hej';
+      const res = copyFunction(input);
+      res.aProp = 'hello';
+      expect(input.aProp).to.not.be.equal(res.aProp);
+    });
+  });
 });
