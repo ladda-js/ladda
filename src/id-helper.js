@@ -13,7 +13,7 @@ export const addId = curry((c, aFn, args, o) => {
     if (aFn && aFn.idFrom === 'ARGS') {
         return {
             ...o,
-            __ladda__id: serialize(args)
+            __ladda__id: serialize(args) || '_'
         };
     } else {
         const getId = getIdGetter(c, aFn);

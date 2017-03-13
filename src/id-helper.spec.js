@@ -12,6 +12,13 @@ describe('IdHelper', () => {
             {...o, __ladda__id: '1-2-3'}
         );
     });
+    it('addId creates default id if idFrom is ARGS and ARGS is empty', () => {
+        const o = {name: 'kalle'};
+        const aFn = {idFrom: 'ARGS'};
+        expect(addId({}, aFn, [], o)).to.deep.equal(
+            {...o, __ladda__id: '_'}
+        );
+    });
     it('removing id from undefined returns undefined', () => {
         const o = undefined;
         expect(removeId(o)).to.equal(o);
