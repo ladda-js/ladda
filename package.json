@@ -14,6 +14,9 @@
     "babel-register": "^6.9.0",
     "chai": "^3.5.0",
     "coveralls": "^2.12.0",
+    "eslint": "^3.17.1",
+    "eslint-config-airbnb-base": "^11.1.1",
+    "eslint-plugin-import": "^2.2.0",
     "gitbook-cli": "^2.3.0",
     "mocha": "^2.5.3",
     "nyc": "^10.1.2",
@@ -23,7 +26,8 @@
     "docs:prepare": "gitbook install",
     "docs:watch": "npm run docs:prepare && gitbook serve",
     "test": "env NODE_PATH=$NODE_PATH:$PWD/src ./node_modules/.bin/mocha --compilers js:babel-register --reporter spec src/*.spec.js src/**/*.spec.js --require mocha.config",
-    "coverage": "env NODE_PATH=$NODE_PATH:$PWD/src nyc -x '**/*.spec.js' -x '**/*.config.js' --reporter=lcov --reporter=text mocha --compilers js:babel-register --reporter spec src/*.spec.js src/**/*.spec.js --require mocha.config"
+    "coverage": "env NODE_PATH=$NODE_PATH:$PWD/src nyc -x '**/*.spec.js' -x '**/*.config.js' --reporter=lcov --reporter=text mocha --compilers js:babel-register --reporter spec src/*.spec.js src/**/*.spec.js --require mocha.config",
+    "lint": "eslint src"
   },
   "author": "Peter Crona <petercrona89@gmail.com> (http://www.icecoldcode.com)",
   "license": "MIT",
