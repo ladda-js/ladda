@@ -10,8 +10,29 @@ const robin = { id: 'robin' };
 
 const users = toIdMap([peter, gernot, robin]);
 
-const m1 = { id: 'x', author: peter.id, recipient: gernot.id, visibleTo: [robin.id] };
-const m2 = { id: 'y', author: gernot.id, recipient: peter.id, visibleTo: [] };
+const c1 = { id: 'a' };
+const c2 = { id: 'b' };
+
+const comments = toIdMap([c1, c2]);
+
+const m1 = {
+  id: 'x',
+  author: peter.id,
+  recipient: gernot.id,
+  visibleTo: [robin.id],
+  nestedData: {
+    comments: [c1.id, c2.id]
+  }
+};
+const m2 = {
+  id: 'y',
+  author: gernot.id,
+  recipient: peter.id,
+  visibleTo: [],
+  nestedData: {
+    comments: []
+  }
+};
 
 const messages = toIdMap([m1, m2]);
 
@@ -29,6 +50,12 @@ getMessage.operation = 'READ';
 getMessage.byId = true;
 const getMessages = getAll(messages);
 getMessages.operation = 'READ';
+
+const getComment = getById(comments);
+getComment.operation = 'READ';
+getComment.byId = true;
+const getComments = getAll(comments);
+getComments.operation = 'READ';
 
 
 const config = () => ({
@@ -49,8 +76,20 @@ const config = () => ({
         schema: {
           author: 'user',
           recipient: 'user',
-          visibleTo: ['user']
+          visibleTo: ['user'],
+          nestedData: {
+            comments: ['comment']
+          }
         }
+      }
+    }
+  },
+  comment: {
+    api: { getComment, getComments },
+    plugins: {
+      denormalizer: {
+        getOne: 'getComment',
+        getAll: 'getComments'
       }
     }
   }
