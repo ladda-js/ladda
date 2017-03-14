@@ -21,13 +21,15 @@ import {
 
 export const NAME = 'denormalizer';
 
+const def = curry((a, b) => b || a);
+
 const toIdMap = toObject(prop('id'));
 
 const getApi = curry((configs, entityName) => compose(prop('api'), prop(entityName))(configs));
 
-const getPluginConf_ = curry((config) => compose(prop(NAME), prop('plugins'))(config));
+const getPluginConf_ = curry((config) => compose(prop(NAME), def({}), prop('plugins'))(config));
 
-const getSchema_ = (config) => compose(prop('schema'), getPluginConf_)(config);
+const getSchema_ = (config) => compose(prop('schema'), def({}), getPluginConf_)(config);
 
 const getPluginConf = curry((cs, entityName) => getPluginConf_(cs[entityName]));
 
