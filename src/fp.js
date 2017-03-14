@@ -179,3 +179,6 @@ export const concat = curry((a, b) => a.concat(b));
 
 export const uniq = (arr) => [...new Set(arr)];
 
+export const fst = (arr) => arr[0];
+export const snd = (arr) => arr[1];
+
