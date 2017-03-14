@@ -74,11 +74,6 @@ const resolve = curry((fetchers, accessors, items) => {
   );
 });
 
-// TODO preprocess configuration. This has several benefits
-// - We don't need traverse the config on the fly all the time
-// - We can prepare a data structure which makes handling of nested data easy
-// - We can validate if all necessary configuration is in place and fail fast if that's not the case
-
 const parseSchema = (schema) => {
   return reduce((m, [field, val]) => {
     if (Array.isArray(val) || typeof val === 'string') {
