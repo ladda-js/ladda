@@ -1,45 +1,26 @@
-import {curry, mapValues} from '../fp';
+import {compose, values} from '../fp';
+import {createEntityStore} from '../entity-store';
+import {createQueryCache} from '../query-cache';
 import {decorateCreate} from './create';
 import {decorateRead} from './read';
 import {decorateUpdate} from './update';
 import {decorateDelete} from './delete';
 import {decorateNoOperation} from './no-operation';
 
-export const decorateApi = curry((config, entityStore, queryCache, entity, apiFn) => {
-  const handler = {
-    CREATE: decorateCreate,
-    READ: decorateRead,
-    UPDATE: decorateUpdate,
-    DELETE: decorateDelete,
-    NO_OPERATION: decorateNoOperation
-  }[apiFn.operation];
-  return handler(config, entityStore, queryCache, entity, apiFn);
-});
+const HANDLERS = {
+  CREATE: decorateCreate,
+  READ: decorateRead,
+  UPDATE: decorateUpdate,
+  DELETE: decorateDelete,
+  NO_OPERATION: decorateNoOperation
+}
 
-export const decorate = curry((config, entityStore, queryCache, entity) => {
-  const decoratedApi = mapValues(
-    decorateApi(config, entityStore, queryCache, entity),
-    entity.api
-  );
-  return {
-    ...entity,
-    api: decoratedApi
+export const decoratorPlugin = ({ config, entityConfigs }) => {
+  const entityStore = compose(createEntityStore, values)(entityConfigs);
+  const queryCache = createQueryCache(entityStore);
+  return ({ entity, apiFn }) => {
+    const handler = HANDLERS[apiFn.operation];
+    return handler(config, entityStore, queryCache, entity, apiFn);
   };
-});
-
-export const decorate2 = curry((
-  entityStore,
-  queryCache,
-  { config, entityConfigs },
-  { entity, apiFnName, apiFn }
-) => {
-  const handler = {
-    CREATE: decorateCreate,
-    READ: decorateRead,
-    UPDATE: decorateUpdate,
-    DELETE: decorateDelete,
-    NO_OPERATION: decorateNoOperation
-  }[apiFn.operation];
-  return handler(config, entityStore, queryCache, entity, apiFn);
-});
+}
 
