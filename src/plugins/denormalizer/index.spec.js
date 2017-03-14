@@ -1,5 +1,5 @@
 import { build } from '../../builder';
-import { uniq, compose, map, flatten, curry, prop, head, last, toObject, values } from '../../fp';
+import { curry, prop, head, last, toObject, values } from '../../fp';
 import { denormalizer, extractAccessors } from '.';
 
 const toIdMap = toObject(prop('id'));
@@ -122,7 +122,7 @@ describe('denormalizer', () => {
       api.message.getMessage(m1.id)
         .then((m) => expectResolved('comments', [c1, c2], m.nestedData))
         .then(() => done());
-    })
+    });
   });
 
   describe('with a fn, that returns a list of objects', () => {

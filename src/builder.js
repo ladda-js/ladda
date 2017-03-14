@@ -1,4 +1,4 @@
-import {mapObject, mapValues, values, compose, toObject, reduce, toPairs,
+import {mapObject, mapValues, compose, toObject, reduce, toPairs,
         prop, filterObject, isEqual, not, curry, copyFunction} from './fp';
 import {decoratorPlugin} from './decorator';
 

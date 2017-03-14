@@ -166,16 +166,16 @@ export const set = curry((props, val, o) => {
     if (!items.length) { return obj; }
     const [k, nextVal] = head(items);
     const next = items.length === 1 ? nextVal : { ...prop(k, obj), ...nextVal };
-    return { ...obj, [k]: update(tail(items), next) }
+    return { ...obj, [k]: update(tail(items), next) };
   };
 
   const zipped = [...map((k) => [k, {}], init(props)), [last(props), val]];
   return update(zipped, o);
 });
 
-export const flatten = (arrs) => reduce(concat, [], arrs);
-
 export const concat = curry((a, b) => a.concat(b));
+
+export const flatten = (arrs) => reduce(concat, [], arrs);
 
 export const uniq = (arr) => [...new Set(arr)];
 

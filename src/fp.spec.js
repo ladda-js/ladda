@@ -306,15 +306,13 @@ describe('fp', () => {
       const x = {};
       const nextX = set([], 1, x);
       expect(nextX).to.equal(x);
-    })
-
-
+    });
   });
 
   describe('concat', () => {
     it('concatenates two lists', () => {
-      const a = [1]
-      const b = [2]
+      const a = [1];
+      const b = [2];
       const expected = [1, 2];
       const actual = concat(a, b);
       expect(actual).to.deep.equal(expected);
