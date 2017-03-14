@@ -160,13 +160,6 @@ export const get = curry((props, o) => {
   }, o, props);
 });
 
-/// a, b, c     x      o
-// {}, {}, x
-//
-// [[['a'] , {}], [['a', 'b'], { c: x }]]
-// const update (p, val i)
-//
-
 export const set = curry((props, val, o) => {
   if (!props.length) { return o; }
   const update = (items, obj) => {
