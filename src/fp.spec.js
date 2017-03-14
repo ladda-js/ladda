@@ -302,6 +302,12 @@ describe('fp', () => {
       expect(nextX.x).to.equal(x.x);
     });
 
+    it('returns the original object when the update path is empty', () => {
+      const x = {};
+      const nextX = set([], 1, x);
+      expect(nextX).to.equal(x);
+    })
+
 
   });
 
