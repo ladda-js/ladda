@@ -275,17 +275,34 @@ describe('fp', () => {
   describe('set', () => {
     it('allows to access set nested data by a list of keys and a new value', () => {
       const keys = ['a', 'b', 'c'];
-      const x = { a: { b: { c: 1 } } };
+      const x = { a: { b: { c: 1 } }, x: { y: '0' } };
       const nextX = set(keys, 2, x);
       expect(get(keys, nextX)).to.equal(2);
     });
 
-    it('returns an mutated copy of the original object', () => {
+    it('returns an immutable copy of the original object', () => {
       const keys = ['a', 'b', 'c'];
-      const x = { a: { b: { c: 1 } } };
-      const nextX = set(keys, 2, x); // set to same value for easier testing
-      expect(nextX).to.equal(x);
+      const x = { a: { b: { c: 1 } }, x: { y: '0' } };
+      const nextX = set(keys, 2, x);
+      expect(nextX).not.to.equal(x);
     });
+
+    it('treats all items along the key path as immutable', () => {
+      const keys = ['a', 'b', 'c'];
+      const x = { a: { b: { c: 1 } }, x: { y: '0' } };
+      const nextX = set(keys, 2, x);
+      expect(nextX.a).not.to.equal(x.a);
+      expect(nextX.a.b).not.to.equal(x.a.b);
+    });
+
+    it('does not update references to obj which are not along the path', () => {
+      const keys = ['a', 'b', 'c'];
+      const x = { a: { b: { c: 1 } }, x: { y: '0' } };
+      const nextX = set(keys, 2, x);
+      expect(nextX.x).to.equal(x.x);
+    });
+
+
   });
 
   describe('concat', () => {
