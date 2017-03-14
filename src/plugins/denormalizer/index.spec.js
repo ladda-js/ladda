@@ -180,16 +180,16 @@ describe('denormalization-helpers', () => {
   describe('extractAccessors', () => {
     it('parses config and returns all paths to entities defined in schemas', () => {
       const expected = {
-        message: {
-          author: 'user',
-          recipient: 'user',
-          visibleTo: ['user'],
-          'nestedData.comments': ['comment']
-        },
-        review: {
-          author: 'user',
-          'meta.data.comments': ['comment']
-        }
+        message: [
+          [['author'], 'user'],
+          [['recipient'], 'user'],
+          [['visibleTo'], ['user']],
+          [['nestedData', 'comments'], ['comment']]
+        ],
+        review: [
+          [['author'], 'user'],
+          [['meta', 'data', 'comments'], ['comment']]
+        ]
       };
 
       const actual = extractAccessors(createConfig());
