@@ -1,7 +1,7 @@
 import {
   compose, curry, head, map, mapValues,
   prop, reduce, fromPairs, toPairs, toObject, values,
-  uniq, flatten, get, set
+  uniq, flatten, get, set, snd
 } from '../../fp';
 
 export const NAME = 'denormalizer';
@@ -25,10 +25,10 @@ const getPluginConf_ = curry((config) => compose(
 const getSchema_ = (config) => compose(prop('schema'), getPluginConf_)(config);
 
 const collectTargets = curry((accessors, res, item) => {
-  return compose(reduce((m, [path, type]) => {
+  return reduce((m, [path, type]) => {
     let list = m[type];
     if (!list) { list = []; }
-    const val = get(path.split('.'), item) // wasteful to do that all the time, try ealier
+    const val = get(path, item)
     if (Array.isArray(val)) {
       list = list.concat(val);
     } else {
@@ -36,17 +36,16 @@ const collectTargets = curry((accessors, res, item) => {
     }
     m[type] = list
     return m;
-  }, res), toPairs)(accessors);
+  }, res, accessors);
 });
 
 const resolveItem = curry((accessors, entities, item) => {
-  return compose(reduce((m, [path, type]) => {
-    const splitPath = path.split('.');
-    const val = get(path.split('.'), item) // wasteful to do that all the time, try ealier
+  return reduce((m, [path, type]) => {
+    const val = get(path, item) // wasteful to do that all the time, try ealier
     const getById = (id) => entities[type][id];
     const resolvedVal = Array.isArray(val) ? map(getById, val) : getById(val);
-    return set(splitPath, resolvedVal, m);
-  }, item), toPairs)(accessors);
+    return set(path, resolvedVal, m);
+  }, item, accessors);
 });
 
 const resolveItems = curry((accessors, items, entities) => {
@@ -90,11 +89,12 @@ const parseSchema = (schema) => {
 };
 
 export const extractAccessors = (configs) => {
-  return reduce((m, c) => {
+  const asMap = reduce((m, c) => {
     const schema = getSchema_(c);
     if (schema) { m[c.name] = parseSchema(schema); }
     return m;
   }, {}, configs);
+  return mapValues(compose(map(([ps, v]) => [ps.split('.'), v]), toPairs))(asMap);
 };
 
 const extractFetchers = (configs, types) => {
@@ -119,7 +119,7 @@ const extractFetchers = (configs, types) => {
 }
 
 // Getters -> [Type]
-const extractTypes = compose(uniq, flatten, flatten, map(values), values);
+const extractTypes = compose(uniq, flatten, map(snd), flatten, values);
 
 export const denormalizer = () => ({ entityConfigs }) => {
   const allAccessors = extractAccessors(values(entityConfigs));
