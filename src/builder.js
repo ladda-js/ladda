@@ -1,6 +1,7 @@
 import {mapObject, mapValues, compose, toObject, reduce, toPairs,
         prop, filterObject, isEqual, not, curry, copyFunction} from './fp';
 import {decorator} from './decorator';
+import {dedup} from './dedup';
 
 // [[EntityName, EntityConfig]] -> Entity
 const toEntity = ([name, c]) => ({
@@ -118,5 +119,5 @@ const applyPlugin = curry((config, entityConfigs, plugin) => {
 export const build = (c, ps = []) => {
   const config = c.__config || {idField: 'id'};
   const createApi = compose(toApi, reduce(applyPlugin(config), getEntityConfigs(c)));
-  return createApi([decorator, ...ps]);
+  return createApi([decorator, ...ps, dedup]);
 };
