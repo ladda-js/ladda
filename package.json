@@ -20,7 +20,8 @@
     "gitbook-cli": "^2.3.0",
     "mocha": "^2.5.3",
     "nyc": "^10.1.2",
-    "sinon": "^1.17.7"
+    "sinon": "^1.17.7",
+    "sinon-chai": "^2.8.0"
   },
   "scripts": {
     "docs:prepare": "gitbook install",
