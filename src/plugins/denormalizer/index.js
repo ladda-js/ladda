@@ -48,7 +48,7 @@ const collectTargets = curry((accessors, res, item) => {
 
 const resolveItem = curry((accessors, entities, item) => {
   return reduce((m, [path, type]) => {
-    const val = get(path, item) // wasteful to do that all the time, try ealier
+    const val = get(path, item);
     const getById = (id) => entities[type][id];
     const resolvedVal = Array.isArray(val) ? map(getById, val) : getById(val);
     return set(path, resolvedVal, m);
