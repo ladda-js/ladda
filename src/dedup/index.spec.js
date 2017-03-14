@@ -81,10 +81,17 @@ fdescribe('dedup', () => {
       });
     });
 
-    // it('propagates errors to all callees', () => {
-    //   const user = { id: 'x' };
-    //   const apiFn = sinon.spy(delay(() => Promise.reject(user)));
-    //   const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
-    // });
+    it('propagates errors to all callees', () => {
+      const error = { error: 'ERROR' };
+      const apiFn = sinon.spy(() => delay(() => Promise.reject(error)));
+      const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
+      return Promise.all([
+        wrappedApiFn().catch((err) => err),
+        wrappedApiFn().catch((err) => err)
+      ]).then((res) => {
+        expect(res[0]).to.equal(error);
+        expect(res[0]).to.equal(res[1]);
+      });
+    });
   });
 });
