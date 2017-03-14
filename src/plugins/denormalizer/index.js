@@ -45,7 +45,7 @@ const resolveItem = curry((accessors, entities, item) => {
     const val = get(path.split('.'), item) // wasteful to do that all the time, try ealier
     const getById = (id) => entities[type][id];
     const resolvedVal = Array.isArray(val) ? map(getById, val) : getById(val);
-    return set(splitPath, resolvedVal, { ...m });
+    return set(splitPath, resolvedVal, m);
   }, item), toPairs)(accessors);
 });
 

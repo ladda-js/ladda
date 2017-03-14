@@ -120,7 +120,7 @@ describe('denormalizer', () => {
     it('resolves references for nested data', (done) => {
       const api = build(config(), [denormalizer()]);
       api.message.getMessage(m1.id)
-      .then((m) => expectResolved('comments', [c1, c2], m.nestedData))
+        .then((m) => expectResolved('comments', [c1, c2], m.nestedData))
         .then(() => done());
     })
   });
