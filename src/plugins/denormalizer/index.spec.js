@@ -1,6 +1,6 @@
-import { build } from '../builder';
-import { denormalizer } from '.';
-import { curry, prop, head, last, toObject, values } from '../fp';
+import { build } from '../../builder';
+import { uniq, compose, map, flatten, curry, prop, head, last, toObject, values } from '../../fp';
+import { denormalizer, extractAccessors } from '.';
 
 const toIdMap = toObject(prop('id'));
 
@@ -132,6 +132,61 @@ describe('denormalizer', () => {
           expectResolved('recipient', users[m2.recipient])(snd);
         })
         .then(() => done());
+    });
+  });
+});
+
+describe('denormalization-helpers', () => {
+  const createConfig = () => [
+    {
+      name: 'message',
+      plugins: {
+        denormalizer: {
+          schema: {
+            author: 'user',
+            recipient: 'user',
+            visibleTo: ['user'],
+            nestedData: {
+              comments: ['comment']
+            }
+          }
+        }
+      }
+    },
+    {
+      name: 'review',
+      plugins: {
+        denormalizer: {
+          schema: {
+            author: 'user',
+            meta: {
+              data: {
+                comments: ['comment']
+              }
+            }
+          }
+        }
+      }
+    }
+  ];
+
+  describe('extractAccessors', () => {
+    it('parses config and returns all paths to entities defined in schemas', () => {
+      const expected = {
+        message: {
+          author: 'user',
+          recipient: 'user',
+          visibleTo: ['user'],
+          'nestedData.comments': ['comment']
+        },
+        review: {
+          author: 'user',
+          'meta.data.comments': ['comment']
+        }
+      };
+
+      const actual = extractAccessors(createConfig());
+      expect(actual).to.deep.equal(expected);
     });
   });
 });
