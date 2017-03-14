@@ -1,4 +1,8 @@
-import { compose, curry, head, map, mapValues, prop, reduce, fromPairs, toPairs, toObject } from '../fp';
+import {
+  compose, curry, head, map, mapValues,
+  prop, reduce, fromPairs, toPairs, toObject, values,
+  uniq, flatten
+} from '../../fp';
 
 export const NAME = 'denormalizer';
 
@@ -13,6 +17,12 @@ const getPluginConf = curry((configs, entityName) => compose(
 const getApi = curry((configs, entityName) => compose(prop('api'), prop(entityName))(configs));
 
 const getSchema = compose(prop('schema'), getPluginConf);
+
+const getPluginConf_ = curry((config) => compose(
+  prop(NAME),
+  prop('plugins'),
+)(config));
+const getSchema_ = (config) => compose(prop('schema'), getPluginConf_)(config);
 
 const collectTargets = curry((schema, res, item) => {
   // TODO need to traverse the schema all the way down, in case they are nested
@@ -77,14 +87,12 @@ const requestEntities = curry((config, api, ids) => {
   return getSome(ids);
 });
 
-const resolve = curry((entityConfigs, schema, items) => {
-  const requestsToMake = compose(toPairs, reduce(collectTargets(schema), {}))(items);
+const resolve = curry((accessors, getters, items) => {
+  const requestsToMake = compose(toPairs, reduce(collectTargets(getters), {}))(items);
   return Promise.all(map(([t, ids]) => {
-    const conf = getPluginConf(entityConfigs, t);
-    const api = getApi(entityConfigs, t);
-    return requestEntities(conf, api, ids).then((es) => [t, es]);
+    return requestEntities(accessors[t], ids).then((es) => [t, es]);
   }, requestsToMake)).then(
-    compose(resolveItems(schema, items), mapValues(toIdMap), fromPairs)
+    compose(resolveItems(getters, items), mapValues(toIdMap), fromPairs)
   );
 });
 
@@ -93,21 +101,69 @@ const resolve = curry((entityConfigs, schema, items) => {
 // - We can prepare a data structure which makes handling of nested data easy
 // - We can validate if all necessary configuration is in place and fail fast if that's not the case
 
-export const denormalizer = curry((
-  { entityConfigs },
-  { entity, apiFnName: name, apiFn: fn }
-) => {
-  const schema = getSchema(entityConfigs, entity.name);
-  if (!schema) {
-    return fn;
-  }
-  return (...args) => {
-    return fn(...args).then((res) => {
-      const isArray = Array.isArray(res);
-      const items = isArray ? res : [res];
+const parseSchema = (schema) => {
+  return reduce((m, [field, val]) => {
+    if (Array.isArray(val) || typeof val === 'string') {
+      m[field] = val;
+    } else {
+      const nextSchema = parseSchema(val);
+      Object.keys(nextSchema).forEach((k) => {
+        m[[field, k].join('.')] = nextSchema[k];
+      });
+    }
+    return m;
+  }, {}, toPairs(schema));
+  return {};
+};
 
-      const resolved = resolve(entityConfigs, schema, items);
-      return isArray ? resolved : resolved.then(head);
-    });
-  };
-});
+export const extractAccessors = (configs) => {
+  return reduce((m, c) => {
+    const schema = getSchema_(c);
+    if (schema) { m[c.name] = parseSchema(schema); }
+    return m;
+  }, {}, configs);
+};
+
+const extractFetchers = (configs, types) => {
+  return compose(fromPairs, map((t) => {
+    const conf = getPluginConf(configs, t);
+    const api = getApi(configs, t);
+    if (!conf) {
+      throw new Error(`No denormalizer config found for type ${t}`);
+    }
+
+    const fromApi = (p) => api[conf[p]];
+    const getOne = fromApi('getOne');
+    const getSome = fromApi('getSome') || ((is) => Promise.all(map(getOne, is)));
+    const getAll = fromApi('getAll') || (() => getSome(ids));
+
+    if (!getOne) {
+      throw new Error(`No 'getOne' accessor defined on type ${t}`);
+    }
+    return [t, { getOne, getSome, getAll }];
+  }))(types);
+}
+
+// Getters -> [Type]
+const extractTypes = compose(uniq, flatten, flatten, map(values), values);
+
+export const denormalizer = () => ({ entityConfigs }) => {
+  const allAccessors = extractAccessors(values(entityConfigs));
+  const allFetchers = extractFetchers(entityConfigs, extractTypes(allAccessors));
+
+  return ({ entity, apiFnName: name, apiFn: fn }) => {
+    const accessors = allAccessors[entity.name];
+    if (!accessors) {
+      return fn;
+    }
+    return (...args) => {
+      return fn(...args).then((res) => {
+        const isArray = Array.isArray(res);
+        const items = isArray ? res : [res];
+
+        const resolved = resolve(allFetchers, accessors, items);
+        return isArray ? resolved : resolved.then(head);
+      });
+    };
+  }
+};
