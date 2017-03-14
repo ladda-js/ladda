@@ -1,7 +1,7 @@
 import {
   compose, curry, head, map, mapValues,
   prop, reduce, fromPairs, toPairs, toObject, values,
-  uniq, flatten
+  uniq, flatten, get, set
 } from '../../fp';
 
 export const NAME = 'denormalizer';
@@ -24,58 +24,36 @@ const getPluginConf_ = curry((config) => compose(
 )(config));
 const getSchema_ = (config) => compose(prop('schema'), getPluginConf_)(config);
 
-const collectTargets = curry((schema, res, item) => {
-  // TODO need to traverse the schema all the way down, in case they are nested
-  const keys = Object.keys(schema);
-  return reduce((m, k) => {
-    const type = schema[k];
+const collectTargets = curry((accessors, res, item) => {
+  return compose(reduce((m, [path, type]) => {
     let list = m[type];
     if (!list) { list = []; }
-    const val = item[k];
-    // need to make sure we pass only unique values!
-    if (typeof val === 'object') {
-      // here we should traverse
-      if (Array.isArray(val)) {
-        list = list.concat(val);
-      }
+    const val = get(path.split('.'), item) // wasteful to do that all the time, try ealier
+    if (Array.isArray(val)) {
+      list = list.concat(val);
     } else {
       list.push(val);
     }
-    if (list.length) {
-      m[type] = list;
-    }
+    m[type] = list
     return m;
-  }, res, keys);
+  }, res), toPairs)(accessors);
 });
 
-const resolveItem = curry((schema, entities, item) => {
-  // reuse traversal function
-  const keys = Object.keys(schema);
-  return reduce((m, k) => {
-    const type = schema[k];
+const resolveItem = curry((accessors, entities, item) => {
+  return compose(reduce((m, [path, type]) => {
+    const splitPath = path.split('.');
+    const val = get(path.split('.'), item) // wasteful to do that all the time, try ealier
     const getById = (id) => entities[type][id];
-    const val = item[k];
-    // typically a drill down would be needed here, we just return
-    // to make the original tests pass for now
-    if (typeof val === 'object' && !Array.isArray(val)) {
-      return m;
-    }
     const resolvedVal = Array.isArray(val) ? map(getById, val) : getById(val);
-    return { ...m, [k]: resolvedVal };
-  }, item, keys);
+    return set(splitPath, resolvedVal, { ...m });
+  }, item), toPairs)(accessors);
 });
 
-const resolveItems = curry((schema, items, entities) => {
-  return map(resolveItem(schema, entities), items);
+const resolveItems = curry((accessors, items, entities) => {
+  return map(resolveItem(accessors, entities), items);
 });
 
-const requestEntities = curry((config, api, ids) => {
-  const fromApi = (p) => api[config[p]];
-  const getOne = fromApi('getOne');
-  const getSome = fromApi('getSome') || ((is) => Promise.all(map(getOne, is)));
-  const getAll = fromApi('getAll') || (() => getSome(ids));
-  const threshold = config.threshold || 0;
-
+const requestEntities = curry(({ getOne, getSome, getAll, threshold }, ids) => {
   const noOfItems = ids.length;
 
   if (noOfItems === 1) {
@@ -87,12 +65,12 @@ const requestEntities = curry((config, api, ids) => {
   return getSome(ids);
 });
 
-const resolve = curry((accessors, getters, items) => {
-  const requestsToMake = compose(toPairs, reduce(collectTargets(getters), {}))(items);
+const resolve = curry((fetchers, accessors, items) => {
+  const requestsToMake = compose(toPairs, reduce(collectTargets(accessors), {}))(items);
   return Promise.all(map(([t, ids]) => {
-    return requestEntities(accessors[t], ids).then((es) => [t, es]);
+    return requestEntities(fetchers[t], ids).then((es) => [t, es]);
   }, requestsToMake)).then(
-    compose(resolveItems(getters, items), mapValues(toIdMap), fromPairs)
+    compose(resolveItems(accessors, items), mapValues(toIdMap), fromPairs)
   );
 });
 
@@ -136,11 +114,12 @@ const extractFetchers = (configs, types) => {
     const getOne = fromApi('getOne');
     const getSome = fromApi('getSome') || ((is) => Promise.all(map(getOne, is)));
     const getAll = fromApi('getAll') || (() => getSome(ids));
+    const threshold = fromApi('threshold') || 0;
 
     if (!getOne) {
       throw new Error(`No 'getOne' accessor defined on type ${t}`);
     }
-    return [t, { getOne, getSome, getAll }];
+    return [t, { getOne, getSome, getAll, threshold }];
   }))(types);
 }
 
