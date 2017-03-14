@@ -455,6 +455,41 @@ describe('denormalizer', () => {
         expect(getAllSpy).to.have.been.calledOnce;
       });
     });
+
+    it('does not fall when entities are unused and have no conf defined', () => {
+      const conf = {
+        user: {
+          api: {
+            getOne: () => Promise.resolve()
+          },
+          plugins: {
+            denormalizer: {
+              getOne: 'getOne'
+            }
+          }
+        },
+        message: {
+          api: {
+            get: () => Promise.resolve({ authors: ['a', 'b', 'c']})
+          },
+          plugins: {
+            denormalizer: {
+              schema: {
+                authors: ['user']
+              }
+            }
+          }
+        },
+        comment: {
+          api: {
+            get: () => Promise.resolve()
+          }
+        }
+      };
+
+      const start = () => build(conf, [denormalizer()]);
+      expect(start).not.to.throw;
+    });
   });
 
   describe('with a fn, that returns a list of objects', () => {
