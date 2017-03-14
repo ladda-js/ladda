@@ -116,6 +116,13 @@ describe('denormalizer', () => {
         .then(expectResolved('visibleTo', [users[m1.visibleTo[0]]]))
         .then(() => done());
     });
+
+    it('resolves references for nested data', (done) => {
+      const api = build(config(), [denormalizer()]);
+      api.message.getMessage(m1.id)
+      .then((m) => expectResolved('comments', [c1, c2], m.nestedData))
+        .then(() => done());
+    })
   });
 
   describe('with a fn, that returns a list of objects', () => {
