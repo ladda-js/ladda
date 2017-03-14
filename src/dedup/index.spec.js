@@ -53,6 +53,19 @@ describe('dedup', () => {
       });
     });
 
+    it('detects complex arguments properly', () => {
+      const user = { id: 'x' };
+      const apiFn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
+      apiFn.operation = 'READ';
+      const wrappedApiFn = dedup({})({ apiFn });
+      return Promise.all([
+        wrappedApiFn({ a: 1, b: [2, 3] }, 'a'),
+        wrappedApiFn({ a: 1, b: [2, 3] }, 'a')
+      ]).then(() => {
+        expect(apiFn).to.have.been.calledOnce;
+      });
+    });
+
     it('passes the result of the single call to all callees', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
