@@ -13,7 +13,7 @@ const HANDLERS = {
   UPDATE: decorateUpdate,
   DELETE: decorateDelete,
   NO_OPERATION: decorateNoOperation
-}
+};
 
 export const decoratorPlugin = ({ config, entityConfigs }) => {
   const entityStore = compose(createEntityStore, values)(entityConfigs);
@@ -22,5 +22,5 @@ export const decoratorPlugin = ({ config, entityConfigs }) => {
     const handler = HANDLERS[apiFn.operation];
     return handler(config, entityStore, queryCache, entity, apiFn);
   };
-}
+};
 

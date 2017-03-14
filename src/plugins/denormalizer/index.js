@@ -25,23 +25,23 @@ const toIdMap = toObject(prop('id'));
 
 const getApi = curry((configs, entityName) => compose(prop('api'), prop(entityName))(configs));
 
-const getPluginConf = curry((cs, entityName) => getPluginConf_(cs[entityName]));
-
 const getPluginConf_ = curry((config) => compose(prop(NAME), prop('plugins'))(config));
 
 const getSchema_ = (config) => compose(prop('schema'), getPluginConf_)(config);
+
+const getPluginConf = curry((cs, entityName) => getPluginConf_(cs[entityName]));
 
 const collectTargets = curry((accessors, res, item) => {
   return reduce((m, [path, type]) => {
     let list = m[type];
     if (!list) { list = []; }
-    const val = get(path, item)
+    const val = get(path, item);
     if (Array.isArray(val)) {
       list = list.concat(val);
     } else {
       list.push(val);
     }
-    m[type] = list
+    m[type] = list;
     return m;
   }, res, accessors);
 });
@@ -65,7 +65,7 @@ const requestEntities = curry(({ getOne, getSome, getAll, threshold }, ids) => {
   if (noOfItems === 1) {
     return getOne(ids[0]).then((e) => [e]);
   }
-  if (noOfItems > threshold) {
+  if (noOfItems > threshold && getAll) {
     return getAll();
   }
   return getSome(ids);
@@ -92,7 +92,6 @@ const parseSchema = (schema) => {
     }
     return m;
   }, {}, toPairs(schema));
-  return {};
 };
 
 
@@ -118,7 +117,7 @@ const extractFetchers = (configs, types) => {
     const fromApi = (p) => api[conf[p]];
     const getOne = fromApi('getOne');
     const getSome = fromApi('getSome') || ((is) => Promise.all(map(getOne, is)));
-    const getAll = fromApi('getAll') || (() => getSome(ids));
+    const getAll = fromApi('getAll');
     const threshold = fromApi('threshold') || 0;
 
     if (!getOne) {
@@ -126,7 +125,7 @@ const extractFetchers = (configs, types) => {
     }
     return [t, { getOne, getSome, getAll, threshold }];
   }))(types);
-}
+};
 
 // Map Type Accessors -> [Type]
 const extractTypes = compose(uniq, flatten, map(snd), flatten, values);
@@ -135,7 +134,7 @@ export const denormalizer = () => ({ entityConfigs }) => {
   const allAccessors = extractAccessors(values(entityConfigs));
   const allFetchers = extractFetchers(entityConfigs, extractTypes(allAccessors));
 
-  return ({ entity, apiFnName: name, apiFn: fn }) => {
+  return ({ entity, apiFn: fn }) => {
     const accessors = allAccessors[entity.name];
     if (!accessors) {
       return fn;
@@ -149,5 +148,5 @@ export const denormalizer = () => ({ entityConfigs }) => {
         return isArray ? resolved : resolved.then(head);
       });
     };
-  }
+  };
 };
