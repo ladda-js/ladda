@@ -166,3 +166,10 @@ export const set = curry((props, val, o) => {
   nestedObj[last(props)] = val;
   return o;
 });
+
+export const flatten = (arrs) => reduce(concat, [], arrs);
+
+export const concat = curry((a, b) => a.concat(b));
+
+export const uniq = (arr) => [...new Set(arr)];
+

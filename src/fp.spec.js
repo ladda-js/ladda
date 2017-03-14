@@ -5,8 +5,8 @@ import {debug, identity, curry, passThrough,
         startsWith, join, on, isEqual,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
-        mapObject, mapValues, toObject, filter, clone,
-        filterObject, copyFunction, get, set} from './fp';
+        mapObject, mapValues, toObject, filter, clone, filterObject,
+        copyFunction, get, set, concat, flatten, uniq} from './fp';
 
 describe('fp', () => {
   describe('debug', () => {
@@ -285,6 +285,45 @@ describe('fp', () => {
       const x = { a: { b: { c: 1 } } };
       const nextX = set(keys, 2, x); // set to same value for easier testing
       expect(nextX).to.equal(x);
+    });
+  });
+
+  describe('concat', () => {
+    it('concatenates two lists', () => {
+      const a = [1]
+      const b = [2]
+      const expected = [1, 2];
+      const actual = concat(a, b);
+      expect(actual).to.deep.equal(expected);
+    });
+  });
+
+  describe('flatten', () => {
+    it('flattens a list of lists', () => {
+      const a = [1];
+      const b = [2];
+      const c = [3, 4];
+      const expected = [1, 2, 3, 4];
+      const actual = (flatten([a, b, c]));
+      expect(actual).to.deep.equal(expected);
+    });
+  });
+
+  describe('uniq', () => {
+    it('returns unique items in a list of primitives', () => {
+      const list = [1, 2, 1, 1, 2, 3];
+      const expected = [1, 2, 3];
+      const actual = uniq(list);
+      expect(actual).to.deep.equal(expected);
+    });
+
+    it('returns unique items in a list of complex objects', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const list = [a, a, b, a, b, a];
+      const expected = [a, b];
+      const actual = uniq(list);
+      expect(actual).to.deep.equal(expected);
     });
   });
 });
