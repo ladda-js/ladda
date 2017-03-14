@@ -107,8 +107,8 @@ export const extractAccessors = (configs) => {
   return mapValues(compose(map(([ps, v]) => [ps.split('.'), v]), toPairs))(asMap);
 };
 
-// EntityConfigs -> [Type] -> Map Type Fetcher
-const extractFetchers = (configs, types) => {
+// PluginConfig -> EntityConfigs -> [Type] -> Map Type Fetcher
+const extractFetchers = (pluginConfig, configs, types) => {
   return compose(fromPairs, map((t) => {
     const conf = getPluginConf(configs, t);
     const api = getApi(configs, t);
@@ -120,7 +120,7 @@ const extractFetchers = (configs, types) => {
     const getOne = fromApi('getOne');
     const getSome = fromApi('getSome') || ((is) => Promise.all(map(getOne, is)));
     const getAll = fromApi('getAll');
-    const threshold = fromApi('threshold') || Infinity;
+    const threshold = fromApi('threshold') || pluginConfig.threshold || Infinity;
 
     if (!getOne) {
       throw new Error(`No 'getOne' accessor defined on type ${t}`);
@@ -132,9 +132,9 @@ const extractFetchers = (configs, types) => {
 // Map Type Accessors -> [Type]
 const extractTypes = compose(uniq, flatten, map(snd), flatten, values);
 
-export const denormalizer = () => ({ entityConfigs }) => {
+export const denormalizer = (pluginConfig = {}) => ({ entityConfigs }) => {
   const allAccessors = extractAccessors(values(entityConfigs));
-  const allFetchers = extractFetchers(entityConfigs, extractTypes(allAccessors));
+  const allFetchers = extractFetchers(pluginConfig, entityConfigs, extractTypes(allAccessors));
 
   return ({ entity, apiFn: fn }) => {
     const accessors = allAccessors[entity.name];
