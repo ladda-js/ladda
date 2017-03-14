@@ -123,6 +123,51 @@ describe('denormalizer', () => {
         .then((m) => expectResolved('comments', [c1, c2], m.nestedData))
         .then(() => done());
     });
+
+    it('fails immediately when no config for an entity present in a schema is defined', () => {
+      const conf = {
+        user: {
+          api: {}
+        },
+        message: {
+          api: {},
+          plugins: {
+            denormalizer: {
+              schema: {
+                author: 'user'
+              }
+            }
+          }
+        }
+      };
+
+      const start = () => build(conf, [denormalizer()]);
+      expect(start).to.throw(/no.*config.*user/i);
+    });
+
+    it('fails immediately when config for an entity present in a schema is incomplete', () => {
+      const conf = {
+        user: {
+          api: {},
+          plugins: {
+            denormalizer: {}
+          }
+        },
+        message: {
+          api: {},
+          plugins: {
+            denormalizer: {
+              schema: {
+                author: 'user'
+              }
+            }
+          }
+        }
+      };
+
+      const start = () => build(conf, [denormalizer()]);
+      expect(start).to.throw(/no.*getOne.*user/i);
+    });
   });
 
   describe('with a fn, that returns a list of objects', () => {
