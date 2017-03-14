@@ -7,7 +7,7 @@ const delay = (cb, t = 5) => new Promise((res, rej) => {
   setTimeout(() => cb().then(res, rej), t);
 });
 
-fdescribe('dedup', () => {
+describe('dedup', () => {
   describe('for operations other than READ', () => {
     it('just returns the original apiFn', () => {
       const user = { id: 'x' };
