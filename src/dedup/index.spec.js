@@ -13,7 +13,7 @@ fdescribe('dedup', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => Promise.resolve({ ...user }));
       apiFn.operation = 'UPDATE';
-      const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
+      const wrappedApiFn = dedup({})({ apiFn });
       expect(wrappedApiFn).to.equal(apiFn);
     });
   });
@@ -23,7 +23,7 @@ fdescribe('dedup', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => Promise.resolve(user));
       apiFn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
+      const wrappedApiFn = dedup({})({ apiFn });
       expect(wrappedApiFn).not.to.equal(apiFn);
     });
 
@@ -31,7 +31,7 @@ fdescribe('dedup', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => Promise.resolve({ ...user }));
       apiFn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
+      const wrappedApiFn = dedup({})({ apiFn });
       return Promise.all([
         wrappedApiFn('x'),
         wrappedApiFn('y')
@@ -44,7 +44,7 @@ fdescribe('dedup', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       apiFn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
+      const wrappedApiFn = dedup({})({ apiFn });
       return Promise.all([
         wrappedApiFn('x'),
         wrappedApiFn('x')
@@ -57,7 +57,7 @@ fdescribe('dedup', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       apiFn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
+      const wrappedApiFn = dedup({})({ apiFn });
       return Promise.all([
         wrappedApiFn(),
         wrappedApiFn()
@@ -72,7 +72,7 @@ fdescribe('dedup', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       apiFn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
+      const wrappedApiFn = dedup({})({ apiFn });
 
       return wrappedApiFn().then(() => {
         return wrappedApiFn().then(() => {
@@ -84,7 +84,7 @@ fdescribe('dedup', () => {
     it('propagates errors to all callees', () => {
       const error = { error: 'ERROR' };
       const apiFn = sinon.spy(() => delay(() => Promise.reject(error)));
-      const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
+      const wrappedApiFn = dedup({})({ apiFn });
       return Promise.all([
         wrappedApiFn().catch((err) => err),
         wrappedApiFn().catch((err) => err)
