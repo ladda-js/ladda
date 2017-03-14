@@ -15,7 +15,7 @@ const HANDLERS = {
   NO_OPERATION: decorateNoOperation
 };
 
-export const decoratorPlugin = ({ config, entityConfigs }) => {
+export const decorator = ({ config, entityConfigs }) => {
   const entityStore = compose(createEntityStore, values)(entityConfigs);
   const queryCache = createQueryCache(entityStore);
   return ({ entity, apiFn }) => {
