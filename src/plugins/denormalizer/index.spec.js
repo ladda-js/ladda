@@ -187,8 +187,7 @@ describe('denormalizer', () => {
           plugins: {
             denormalizer: {
               getOne: 'getOne',
-              getSome: 'getSome',
-              denormalizer: {}
+              getSome: 'getSome'
             }
           }
         },
@@ -211,6 +210,48 @@ describe('denormalizer', () => {
         expect(getOneSpy).to.have.been.calledOnce;
         expect(getOneSpy).to.have.been.calledWith(authorId);
         expect(getSomeSpy).not.to.have.been.called;
+      });
+    });
+
+    it('calls getAll when items requested is above threshold', () => {
+      const getOneSpy = sinon.spy(() => Promise.resolve({ id: 'a' }));
+      const getSomeSpy = sinon.spy(() => Promise.resolve([]));
+      const getAllSpy = sinon.spy(() => Promise.resolve([]));
+
+      const conf = {
+        user: {
+          api: {
+            getOne: getOneSpy,
+            getSome: getSomeSpy,
+            getAll: getAllSpy
+          },
+          plugins: {
+            denormalizer: {
+              getOne: 'getOne',
+              getSome: 'getSome',
+              getAll: 'getAll',
+              threshold: 2
+            }
+          }
+        },
+        message: {
+          api: {
+            get: () => Promise.resolve({ authors: ['a', 'b', 'c']})
+          },
+          plugins: {
+            denormalizer: {
+              schema: {
+                authors: ['user']
+              }
+            }
+          }
+        }
+      };
+
+      const api = build(conf, [denormalizer()]);
+      return api.message.get().then(() => {
+        expect(getSomeSpy).not.to.have.been.called;
+        expect(getAllSpy).to.have.been.calledOnce;
       });
     });
   });
