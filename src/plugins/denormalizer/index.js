@@ -4,6 +4,21 @@ import {
   uniq, flatten, get, set, snd
 } from '../../fp';
 
+/* TYPES
+ *
+ * Path = [String]
+ *
+ * Accessor = [ (Path, Type | [Type]) ]
+ *
+ * Fetcher = {
+ *  getOne: id -> Promise Entity
+ *  getSome: [id] -> Promise [Entity]
+ *  getAll: Promise [Entity]
+ *  threshold: Int
+ * }
+ *
+ */
+
 export const NAME = 'denormalizer';
 
 const toIdMap = toObject(prop('id'));
@@ -88,6 +103,8 @@ const parseSchema = (schema) => {
   return {};
 };
 
+
+// EntityConfigs -> Map String Accessors
 export const extractAccessors = (configs) => {
   const asMap = reduce((m, c) => {
     const schema = getSchema_(c);
@@ -97,6 +114,7 @@ export const extractAccessors = (configs) => {
   return mapValues(compose(map(([ps, v]) => [ps.split('.'), v]), toPairs))(asMap);
 };
 
+// EntityConfigs -> [Type] -> Map String Fetcher
 const extractFetchers = (configs, types) => {
   return compose(fromPairs, map((t) => {
     const conf = getPluginConf(configs, t);
@@ -118,7 +136,7 @@ const extractFetchers = (configs, types) => {
   }))(types);
 }
 
-// Getters -> [Type]
+// Map String Accessors -> [Type]
 const extractTypes = compose(uniq, flatten, map(snd), flatten, values);
 
 export const denormalizer = () => ({ entityConfigs }) => {
