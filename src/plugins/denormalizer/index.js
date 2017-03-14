@@ -120,7 +120,7 @@ const extractFetchers = (pluginConfig, configs, types) => {
     const getOne = fromApi('getOne');
     const getSome = fromApi('getSome') || ((is) => Promise.all(map(getOne, is)));
     const getAll = fromApi('getAll');
-    const threshold = fromApi('threshold') || pluginConfig.threshold || Infinity;
+    const threshold = conf.threshold || pluginConfig.threshold || Infinity;
 
     if (!getOne) {
       throw new Error(`No 'getOne' accessor defined on type ${t}`);
