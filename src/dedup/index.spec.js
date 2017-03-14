@@ -10,6 +10,7 @@ describe('dedup', () => {
     it('just returns the original apiFn', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => Promise.resolve(user));
+      apiFn.operation = 'UPDATE';
       const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
       expect(wrappedApiFn).to.equal(apiFn);
     });
@@ -19,6 +20,7 @@ describe('dedup', () => {
     it('wraps the function', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => Promise.resolve(user));
+      apiFn.operation = 'READ';
       const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
       expect(wrappedApiFn).not.to.equal(apiFn);
     });
@@ -26,6 +28,7 @@ describe('dedup', () => {
     it('makes several calls when apiFn is called with different args', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(() => Promise.resolve(user));
+      apiFn.operation = 'READ';
       const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
       return Promise.all([
         wrappedApiFn('x'),
@@ -38,6 +41,7 @@ describe('dedup', () => {
     it('only makes one call when apiFn is called in identical args', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(delay(() => Promise.resolve(user)));
+      apiFn.operation = 'READ';
       const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
       return Promise.all([
         wrappedApiFn('x'),
@@ -50,6 +54,7 @@ describe('dedup', () => {
     it('passes the result of the single call to all callees', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(delay(() => Promise.resolve(user)));
+      apiFn.operation = 'READ';
       const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
       return Promise.all([
         wrappedApiFn(),
@@ -63,6 +68,7 @@ describe('dedup', () => {
     it('makes subsequent calls if another calls is made after the first one is resolved', () => {
       const user = { id: 'x' };
       const apiFn = sinon.spy(delay(() => Promise.resolve(user)));
+      apiFn.operation = 'READ';
       const wrappedApiFn = dedup({})({ apiFn, apiFnName: 'apiFn' });
 
       return wrappedApiFn().then(() => {
