@@ -193,12 +193,12 @@ describe('denormalizer', () => {
         },
         message: {
           api: {
-            get: () => Promise.resolve({ author: authorId })
+            get: () => Promise.resolve({ authors: [authorId] })
           },
           plugins: {
             denormalizer: {
               schema: {
-                author: 'user'
+                authors: ['user']
               }
             }
           }
@@ -213,7 +213,7 @@ describe('denormalizer', () => {
       });
     });
 
-    it('calls getAll when items requested is above threshold', () => {
+    it('calls getAll when multiple items requested is above threshold', () => {
       const getOneSpy = sinon.spy(() => Promise.resolve({ id: 'a' }));
       const getSomeSpy = sinon.spy(() => Promise.resolve([]));
       const getAllSpy = sinon.spy(() => Promise.resolve([]));
@@ -249,6 +249,207 @@ describe('denormalizer', () => {
       };
 
       const api = build(conf, [denormalizer()]);
+      return api.message.get().then(() => {
+        expect(getSomeSpy).not.to.have.been.called;
+        expect(getAllSpy).to.have.been.calledOnce;
+      });
+    });
+
+    it('calls getSome when multiple items requested are below threshold', () => {
+      const getOneSpy = sinon.spy(() => Promise.resolve({ id: 'a' }));
+      const getSomeSpy = sinon.spy(() => Promise.resolve([]));
+      const getAllSpy = sinon.spy(() => Promise.resolve([]));
+
+      const conf = {
+        user: {
+          api: {
+            getOne: getOneSpy,
+            getSome: getSomeSpy,
+            getAll: getAllSpy
+          },
+          plugins: {
+            denormalizer: {
+              getOne: 'getOne',
+              getSome: 'getSome',
+              getAll: 'getAll',
+              threshold: 3
+            }
+          }
+        },
+        message: {
+          api: {
+            get: () => Promise.resolve({ authors: ['a', 'b']})
+          },
+          plugins: {
+            denormalizer: {
+              schema: {
+                authors: ['user']
+              }
+            }
+          }
+        }
+      };
+
+      const api = build(conf, [denormalizer()]);
+      return api.message.get().then(() => {
+        expect(getSomeSpy).to.have.been.called;
+        expect(getSomeSpy).to.have.been.calledWith(['a', 'b']);
+        expect(getAllSpy).not.to.have.been.calledOnce;
+      });
+    });
+
+    it('calls getSome when multiple items requested are at threshold', () => {
+      const getOneSpy = sinon.spy(() => Promise.resolve({ id: 'a' }));
+      const getSomeSpy = sinon.spy(() => Promise.resolve([]));
+      const getAllSpy = sinon.spy(() => Promise.resolve([]));
+
+      const conf = {
+        user: {
+          api: {
+            getOne: getOneSpy,
+            getSome: getSomeSpy,
+            getAll: getAllSpy
+          },
+          plugins: {
+            denormalizer: {
+              getOne: 'getOne',
+              getSome: 'getSome',
+              getAll: 'getAll',
+              threshold: 2
+            }
+          }
+        },
+        message: {
+          api: {
+            get: () => Promise.resolve({ authors: ['a', 'b']})
+          },
+          plugins: {
+            denormalizer: {
+              schema: {
+                authors: ['user']
+              }
+            }
+          }
+        }
+      };
+
+      const api = build(conf, [denormalizer()]);
+      return api.message.get().then(() => {
+        expect(getSomeSpy).to.have.been.called;
+        expect(getAllSpy).not.to.have.been.calledOnce;
+      });
+    });
+
+    it('calls getSome when items requested are above threshold, but no getAll present', () => {
+      const getOneSpy = sinon.spy(() => Promise.resolve({ id: 'a' }));
+      const getSomeSpy = sinon.spy(() => Promise.resolve([]));
+
+      const conf = {
+        user: {
+          api: {
+            getOne: getOneSpy,
+            getSome: getSomeSpy
+          },
+          plugins: {
+            denormalizer: {
+              getOne: 'getOne',
+              getSome: 'getSome',
+              threshold: 1
+            }
+          }
+        },
+        message: {
+          api: {
+            get: () => Promise.resolve({ authors: ['a', 'b']})
+          },
+          plugins: {
+            denormalizer: {
+              schema: {
+                authors: ['user']
+              }
+            }
+          }
+        }
+      };
+
+      const api = build(conf, [denormalizer()]);
+      return api.message.get().then(() => {
+        expect(getSomeSpy).to.have.been.called;
+        expect(getSomeSpy).to.have.been.calledWith(['a', 'b']);
+      });
+    });
+
+    it('calls getOne several times when there is nothing else defined', () => {
+      const getOneSpy = sinon.spy(() => Promise.resolve({ id: 'a' }));
+
+      const conf = {
+        user: {
+          api: {
+            getOne: getOneSpy
+          },
+          plugins: {
+            denormalizer: {
+              getOne: 'getOne'
+            }
+          }
+        },
+        message: {
+          api: {
+            get: () => Promise.resolve({ authors: ['a', 'b']})
+          },
+          plugins: {
+            denormalizer: {
+              schema: {
+                authors: ['user']
+              }
+            }
+          }
+        }
+      };
+
+      const api = build(conf, [denormalizer()]);
+      return api.message.get().then(() => {
+        expect(getOneSpy).to.have.been.calledTwice;
+        expect(getOneSpy).to.have.been.calledWith('a');
+        expect(getOneSpy).to.have.been.calledWith('b');
+      });
+    });
+
+    it('allows to define a global threshold', () => {
+      const getOneSpy = sinon.spy(() => Promise.resolve({ id: 'a' }));
+      const getSomeSpy = sinon.spy(() => Promise.resolve([]));
+      const getAllSpy = sinon.spy(() => Promise.resolve([]));
+
+      const conf = {
+        user: {
+          api: {
+            getOne: getOneSpy,
+            getSome: getSomeSpy,
+            getAll: getAllSpy
+          },
+          plugins: {
+            denormalizer: {
+              getOne: 'getOne',
+              getSome: 'getSome',
+              getAll: 'getAll'
+            }
+          }
+        },
+        message: {
+          api: {
+            get: () => Promise.resolve({ authors: ['a', 'b', 'c']})
+          },
+          plugins: {
+            denormalizer: {
+              schema: {
+                authors: ['user']
+              }
+            }
+          }
+        }
+      };
+
+      const api = build(conf, [denormalizer({ threshold: 2 })]);
       return api.message.get().then(() => {
         expect(getSomeSpy).not.to.have.been.called;
         expect(getAllSpy).to.have.been.calledOnce;
