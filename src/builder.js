@@ -1,8 +1,6 @@
 import {mapObject, mapValues, values, compose, toObject, reduce, toPairs,
         prop, filterObject, isEqual, not, curry, copyFunction} from './fp';
-import {createEntityStore} from './entity-store';
-import {createQueryCache} from './query-cache';
-import {decorate2} from './decorator';
+import {decoratorPlugin} from './decorator';
 
 // [[EntityName, EntityConfig]] -> Entity
 const toEntity = ([name, c]) => ({
@@ -98,12 +96,6 @@ const getEntityConfigs = compose(
   filterObject(compose(not, isEqual('__config')))
 );
 
-const corePlugin = ({ config, entityConfigs }) => {
-  const entityStore = compose(createEntityStore, values)(entityConfigs);
-  const queryCache = createQueryCache(entityStore);
-  return decorate2(entityStore, queryCache, { config, entityConfigs });
-};
-
 const applyPlugin = curry((config, entityConfigs, plugin) => {
   const pluginDecorator = plugin({ config, entityConfigs });
   return mapApiFunctions(pluginDecorator, entityConfigs);
@@ -113,5 +105,5 @@ const applyPlugin = curry((config, entityConfigs, plugin) => {
 export const build = (c, ps = []) => {
   const config = c.__config || {idField: 'id'};
   const createApi = compose(toApi, reduce(applyPlugin(config), getEntityConfigs(c)));
-  return createApi([corePlugin, ...ps]);
+  return createApi([decoratorPlugin, ...ps]);
 };
