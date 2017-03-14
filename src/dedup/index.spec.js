@@ -93,5 +93,50 @@ fdescribe('dedup', () => {
         expect(res[0]).to.equal(res[1]);
       });
     });
+
+    it('can be disabled on a global level', () => {
+      const user = { id: 'x' };
+      const apiFn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
+      apiFn.operation = 'READ';
+      const config = { noDedup: true };
+      const wrappedApiFn = dedup({ config })({ apiFn });
+
+      return Promise.all([
+        wrappedApiFn(),
+        wrappedApiFn()
+      ]).then(() => {
+        expect(apiFn).to.have.been.calledTwice;
+      });
+    });
+
+    it('can be disabled on an entity level', () => {
+      const user = { id: 'x' };
+      const apiFn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
+      apiFn.operation = 'READ';
+      const entity = { noDedup: true };
+      const wrappedApiFn = dedup({})({ apiFn, entity });
+
+      return Promise.all([
+        wrappedApiFn(),
+        wrappedApiFn()
+      ]).then(() => {
+        expect(apiFn).to.have.been.calledTwice;
+      });
+    });
+
+    it('can be disabled on a function level', () => {
+      const user = { id: 'x' };
+      const apiFn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
+      apiFn.operation = 'READ';
+      apiFn.noDedup = true;
+      const wrappedApiFn = dedup({})({ apiFn });
+
+      return Promise.all([
+        wrappedApiFn(),
+        wrappedApiFn()
+      ]).then(() => {
+        expect(apiFn).to.have.been.calledTwice;
+      });
+    });
   });
 });
