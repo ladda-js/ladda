@@ -1,5 +1,5 @@
 import {
-  compose, curry, head, map, mapValues,
+  compose, curry, head, map, mapObject, mapValues,
   prop, reduce, fromPairs, toPairs, toObject, values,
   uniq, flatten, get, set, snd
 } from '../../fp';
@@ -8,7 +8,7 @@ import {
  *
  * Path = [String]
  *
- * Accessor = [ (Path, Type | [Type]) ]
+ * Accessors = [ (Path, Type | [Type]) ]
  *
  * Fetcher = {
  *  getOne: id -> Promise Entity
@@ -23,20 +23,12 @@ export const NAME = 'denormalizer';
 
 const toIdMap = toObject(prop('id'));
 
-const getPluginConf = curry((configs, entityName) => compose(
-  prop(NAME),
-  prop('plugins'),
-  prop(entityName)
-)(configs));
-
 const getApi = curry((configs, entityName) => compose(prop('api'), prop(entityName))(configs));
 
-const getSchema = compose(prop('schema'), getPluginConf);
+const getPluginConf = curry((cs, entityName) => getPluginConf_(cs[entityName]));
 
-const getPluginConf_ = curry((config) => compose(
-  prop(NAME),
-  prop('plugins'),
-)(config));
+const getPluginConf_ = curry((config) => compose(prop(NAME), prop('plugins'))(config));
+
 const getSchema_ = (config) => compose(prop('schema'), getPluginConf_)(config);
 
 const collectTargets = curry((accessors, res, item) => {
@@ -80,8 +72,8 @@ const requestEntities = curry(({ getOne, getSome, getAll, threshold }, ids) => {
 });
 
 const resolve = curry((fetchers, accessors, items) => {
-  const requestsToMake = compose(toPairs, reduce(collectTargets(accessors), {}))(items);
-  return Promise.all(map(([t, ids]) => {
+  const requestsToMake = compose(reduce(collectTargets(accessors), {}))(items);
+  return Promise.all(mapObject(([t, ids]) => {
     return requestEntities(fetchers[t], ids).then((es) => [t, es]);
   }, requestsToMake)).then(
     compose(resolveItems(accessors, items), mapValues(toIdMap), fromPairs)
@@ -114,7 +106,7 @@ export const extractAccessors = (configs) => {
   return mapValues(compose(map(([ps, v]) => [ps.split('.'), v]), toPairs))(asMap);
 };
 
-// EntityConfigs -> [Type] -> Map String Fetcher
+// EntityConfigs -> [Type] -> Map Type Fetcher
 const extractFetchers = (configs, types) => {
   return compose(fromPairs, map((t) => {
     const conf = getPluginConf(configs, t);
@@ -136,7 +128,7 @@ const extractFetchers = (configs, types) => {
   }))(types);
 }
 
-// Map String Accessors -> [Type]
+// Map Type Accessors -> [Type]
 const extractTypes = compose(uniq, flatten, map(snd), flatten, values);
 
 export const denormalizer = () => ({ entityConfigs }) => {
