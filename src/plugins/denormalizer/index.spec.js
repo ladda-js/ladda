@@ -1,3 +1,7 @@
+/* eslint-disable no-unused-expressions */
+
+import sinon from 'sinon';
+
 import { build } from '../../builder';
 import { curry, prop, head, last, toObject, values } from '../../fp';
 import { denormalizer, extractAccessors } from '.';
@@ -167,6 +171,47 @@ describe('denormalizer', () => {
 
       const start = () => build(conf, [denormalizer()]);
       expect(start).to.throw(/no.*getOne.*user/i);
+    });
+
+    it('calls getOne when there is only one entity to resolve', () => {
+      const getOneSpy = sinon.spy(() => Promise.resolve({ id: 'a' }));
+      const getSomeSpy = sinon.spy(() => Promise.resolve());
+      const authorId = 'x';
+
+      const conf = {
+        user: {
+          api: {
+            getOne: getOneSpy,
+            getSome: getSomeSpy
+          },
+          plugins: {
+            denormalizer: {
+              getOne: 'getOne',
+              getSome: 'getSome',
+              denormalizer: {}
+            }
+          }
+        },
+        message: {
+          api: {
+            get: () => Promise.resolve({ author: authorId })
+          },
+          plugins: {
+            denormalizer: {
+              schema: {
+                author: 'user'
+              }
+            }
+          }
+        }
+      };
+
+      const api = build(conf, [denormalizer()]);
+      return api.message.get().then(() => {
+        expect(getOneSpy).to.have.been.calledOnce;
+        expect(getOneSpy).to.have.been.calledWith(authorId);
+        expect(getSomeSpy).not.to.have.been.called;
+      });
     });
   });
 
