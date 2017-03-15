@@ -3,10 +3,8 @@
 import sinon from 'sinon';
 
 import { build } from '../../builder';
-import { curry, prop, head, last, toObject, values } from '../../fp';
+import { curry, head, last, toIdMap, values } from '../../fp';
 import { denormalizer, extractAccessors } from '.';
-
-const toIdMap = toObject(prop('id'));
 
 const peter = { id: 'peter' };
 const gernot = { id: 'gernot' };
