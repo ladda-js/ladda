@@ -1,7 +1,7 @@
 import {
   compose, curry, head, map, mapObject, mapValues,
-  prop, reduce, fromPairs, toPairs, toObject, values,
-  uniq, flatten, get, set, snd
+  prop, reduce, fromPairs, toPairs, values,
+  uniq, flatten, get, set, snd, toIdMap
 } from '../../fp';
 
 /* TYPES
@@ -22,8 +22,6 @@ import {
 export const NAME = 'denormalizer';
 
 const def = curry((a, b) => b || a);
-
-const toIdMap = toObject(prop('id'));
 
 const getApi = curry((configs, entityName) => compose(prop('api'), prop(entityName))(configs));
 
