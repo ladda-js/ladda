@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-expressions */
 
-import {createEntityStore, put, get, contains, remove} from './entity-store';
+import {createEntityStore, put, mPut, get, contains, remove} from './entity-store';
 import {addId} from './id-helper';
 
 const config = [
@@ -104,6 +104,22 @@ describe('EntityStore', () => {
       const e = {name: 'user'};
       const write = () => put(s, e, addId({}, undefined, undefined, {...v, name: 'kalle'}));
       expect(write).to.throw(Error);
+    });
+  });
+
+  describe('mPut', () => {
+    it('adds values which are later returned when calling get', () => {
+      const s = createEntityStore(config);
+      const v1 = {id: 'hello'};
+      const v2 = {id: 'there'};
+      const e = { name: 'user'};
+      const v1WithId = addId({}, undefined, undefined, v1);
+      const v2WithId = addId({}, undefined, undefined, v2);
+      mPut(s, e, [v1WithId, v2WithId]);
+      const r1 = get(s, e, v1.id);
+      const r2 = get(s, e, v2.id);
+      expect(r1.value).to.deep.equal({...v1, __ladda__id: 'hello'});
+      expect(r2.value).to.deep.equal({...v2, __ladda__id: 'there'});
     });
   });
   describe('get', () => {
