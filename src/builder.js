@@ -81,7 +81,8 @@ const setApiConfigDefaults = ec => {
     operation: 'NO_OPERATION',
     invalidates: [],
     idFrom: 'ENTITY',
-    byId: false
+    byId: false,
+    byIds: false
   };
 
   const writeToObjectIfNotSet = curry((o, [k, v]) => {
