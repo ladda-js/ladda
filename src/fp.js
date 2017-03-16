@@ -184,3 +184,4 @@ export const snd = (arr) => arr[1];
 
 export const toIdMap = toObject(prop('id'));
 
+export const noop = () => {};
