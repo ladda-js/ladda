@@ -18,9 +18,9 @@ const HANDLERS = {
 export const decorator = ({ config, entityConfigs }) => {
   const entityStore = compose(createEntityStore, values)(entityConfigs);
   const queryCache = createQueryCache(entityStore);
-  return ({ entity, apiFn }) => {
-    const handler = HANDLERS[apiFn.operation];
-    return handler(config, entityStore, queryCache, entity, apiFn);
+  return ({ entity, fn }) => {
+    const handler = HANDLERS[fn.operation];
+    return handler(config, entityStore, queryCache, entity, fn);
   };
 };
 

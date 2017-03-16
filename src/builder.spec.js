@@ -134,9 +134,9 @@ describe('builder', () => {
     const plugin = (pConfig) => {
       const pName = pConfig.name;
       pluginTracker[pName] = {};
-      return curry(({ config: c, entityConfigs }, { apiFnName, apiFn }) => {
-        pluginTracker[pName][apiFnName] = true;
-        return apiFn;
+      return curry(({ config: c, entityConfigs }, { fn }) => {
+        pluginTracker[pName][fn.name] = true;
+        return fn;
       });
     };
     const pluginName = 'X';
