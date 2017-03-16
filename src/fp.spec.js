@@ -2,7 +2,7 @@
 
 import sinon from 'sinon';
 import {debug, identity, curry, passThrough,
-        startsWith, join, on, isEqual,
+        startsWith, join, on, isEqual, noop,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
         mapObject, mapValues, toObject, filter, clone, filterObject,
@@ -357,6 +357,13 @@ describe('fp', () => {
       const expected = { a, b, c };
       const actual = toIdMap([a, b, c]);
       expect(actual).to.deep.equal(expected);
+    });
+  });
+
+  describe('noop', () => {
+    it('returns a function that does nothing', () => {
+      expect(noop).not.to.throw;
+      expect(noop()).to.be.undefined;
     });
   });
 });
