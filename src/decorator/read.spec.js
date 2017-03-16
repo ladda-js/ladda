@@ -5,6 +5,7 @@ import {decorateRead} from './read';
 import {createEntityStore} from '../entity-store';
 import {createQueryCache} from '../query-cache';
 import {createSampleConfig, createApiFunction} from '../test-helper';
+import {map} from '../fp';
 
 const config = createSampleConfig();
 
@@ -76,6 +77,81 @@ describe('Read', () => {
       res(1).then(res.bind(null, 1)).then(() => {
         expect(aFn.callCount).to.equal(1);
         done();
+      });
+    });
+    fdescribe('with byIds', () => {
+      const users = {
+        a: { id: 'a' },
+        b: { id: 'b' },
+        c: { id: 'c' }
+      };
+
+      const fn = (ids) => Promise.resolve(map((id) => users[id], ids));
+      const decoratedFn = createApiFunction(fn, { byIds: true });
+
+      it('calls api fn if nothing in cache', () => {
+        const es = createEntityStore(config);
+        const qc = createQueryCache(es);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, es, qc, e, fnWithSpy);
+        return apiFn(['a', 'b']).then((res) => {
+          expect(res).to.deep.equal([users.a, users.b]);
+        });
+      });
+
+      it('calls api fn if nothing in cache', () => {
+        const es = createEntityStore(config);
+        const qc = createQueryCache(es);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, es, qc, e, fnWithSpy);
+        return apiFn(['a', 'b']).then((res) => {
+          expect(res).to.deep.equal([users.a, users.b]);
+        });
+      });
+
+      it('puts item in the cache and can read them again', () => {
+        const es = createEntityStore(config);
+        const qc = createQueryCache(es);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, es, qc, e, fnWithSpy);
+        const args = ['a', 'b'];
+        return apiFn(args).then(() => {
+          return apiFn(args).then((res) => {
+            expect(fnWithSpy).to.have.been.calledOnce;
+            expect(res).to.deep.equal([users.a, users.b]);
+          });
+        });
+      });
+
+      it('only makes additional request for uncached items', () => {
+        const es = createEntityStore(config);
+        const qc = createQueryCache(es);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, es, qc, e, fnWithSpy);
+        return apiFn(['a', 'b']).then(() => {
+          return apiFn(['b', 'c']).then(() => {
+            expect(fnWithSpy).to.have.been.calledTwice;
+            expect(fnWithSpy).to.have.been.calledWith(['a', 'b']);
+            expect(fnWithSpy).to.have.been.calledWith(['c']);
+          });
+        });
+      });
+
+      it('returns all items in correct order when making partial requests', () => {
+        const es = createEntityStore(config);
+        const qc = createQueryCache(es);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, es, qc, e, fnWithSpy);
+        return apiFn(['a', 'b']).then(() => {
+          return apiFn(['a', 'b', 'c']).then((res) => {
+            expect(res).to.deep.equal([users.a, users.b, users.c]);
+          });
+        });
       });
     });
     it('calls api fn if not in cache', (done) => {
