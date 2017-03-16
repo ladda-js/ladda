@@ -3,7 +3,7 @@
  * Only ids are stored here.
  */
 
-import {put as putInEs, get as getFromEs} from './entity-store';
+import {mPut as mPutInEs, get as getFromEs} from './entity-store';
 import {on2, prop, join, reduce, identity,
         curry, map, map_, startsWith, compose, filter} from './fp';
 import {serialize} from './serializer';
@@ -41,7 +41,7 @@ export const put = curry((qc, e, aFn, args, xs) => {
   } else {
     qc.cache[k] = toCacheValue(prop('__ladda__id', xs));
   }
-  map_(putInEs(qc.entityStore, e), Array.isArray(xs) ? xs : [xs]);
+  mPutInEs(qc.entityStore, e, Array.isArray(xs) ? xs : [xs]);
   return xs;
 });
 

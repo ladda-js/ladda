@@ -98,7 +98,7 @@ const setViewValue = (s, e, v) => {
 export const put = handle(setViewValue, setEntityValue);
 
 // EntityStore -> Entity -> [Value] -> ()
-export const mPut = curry((es, e) => map_(put(es, e)));
+export const mPut = curry((es, e, xs) => map_(put(es, e))(xs));
 
 // EntityStore -> Entity -> String -> Value
 const getEntityValue = (s, e, id) => {
