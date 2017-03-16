@@ -136,7 +136,7 @@ export const denormalizer = (pluginConfig = {}) => ({ entityConfigs }) => {
   const allAccessors = extractAccessors(values(entityConfigs));
   const allFetchers = extractFetchers(pluginConfig, entityConfigs, extractTypes(allAccessors));
 
-  return ({ entity, apiFn: fn }) => {
+  return ({ entity, fn }) => {
     const accessors = allAccessors[entity.name];
     if (!accessors) {
       return fn;

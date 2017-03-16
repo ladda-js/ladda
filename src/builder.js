@@ -17,6 +17,13 @@ const KNOWN_STATICS = {
   arity: true
 };
 
+const setFnName = curry((name, fn) => {
+  Object.defineProperty(fn, 'name', { writable: true });
+  fn.name = name;
+  Object.defineProperty(fn, 'name', { writable: false });
+  return fn;
+});
+
 const hoistMetaData = (a, b) => {
   const keys = Object.getOwnPropertyNames(a);
   for (let i = keys.length - 1; i >= 0; i--) {
@@ -25,6 +32,7 @@ const hoistMetaData = (a, b) => {
       b[k] = a[k];
     }
   }
+  setFnName(a.name, b);
   return b;
 };
 
@@ -33,10 +41,15 @@ export const mapApiFunctions = (fn, entityConfigs) => {
     return {
       ...entity,
       api: reduce(
+        // As apiFn name we use key of the api field and not the name of the
+        // fn directly. This is controversial. Decision was made because
+        // the original function name might be polluted at this point, e.g.
+        // containing a "bound" prefix.
         (apiM, [apiFnName, apiFn]) => {
           const getFn = compose(prop(apiFnName), prop('api'));
-          const nextFn = fn({ entity, apiFnName, apiFn });
-          apiM[apiFnName] = hoistMetaData(getFn(entity), nextFn);
+          const nextFn = hoistMetaData(getFn(entity), fn({ entity, fn: apiFn }));
+          setFnName(apiFnName, nextFn);
+          apiM[apiFnName] = nextFn;
           return apiM;
         },
         {},
