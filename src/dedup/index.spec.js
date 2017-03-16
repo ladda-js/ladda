@@ -94,6 +94,19 @@ describe('dedup', () => {
       });
     });
 
+    it('also makes subsequent calls after the first one is rejected', () => {
+      const user = { id: 'x' };
+      const apiFn = sinon.spy(() => delay(() => Promise.reject({ ...user })));
+      apiFn.operation = 'READ';
+      const wrappedApiFn = dedup({})({ apiFn });
+
+      return wrappedApiFn().catch(() => {
+        return wrappedApiFn().catch(() => {
+          expect(apiFn).to.have.been.calledTwice;
+        });
+      });
+    });
+
     it('propagates errors to all callees', () => {
       const error = { error: 'ERROR' };
       const apiFn = sinon.spy(() => delay(() => Promise.reject(error)));
