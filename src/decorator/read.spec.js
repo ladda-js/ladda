@@ -79,7 +79,7 @@ describe('Read', () => {
         done();
       });
     });
-    fdescribe('with byIds', () => {
+    describe('with byIds', () => {
       const users = {
         a: { id: 'a' },
         b: { id: 'b' },
