@@ -19,9 +19,14 @@ export const dedup = ({ config }) => ({ entity, apiFn }) => {
 
     const promise = apiFn(...args);
     cache[key] = promise;
+    const cleanup = () => delete cache[key];
+
     return promise.then((res) => {
-      delete cache[key];
+      cleanup();
       return res;
+    }, (err) => {
+      cleanup();
+      return Promise.reject(err);
     });
   };
 };
