@@ -15,12 +15,6 @@ import {merge} from './merger';
 import {curry, reduce, map_, clone, noop} from './fp';
 import {removeId} from './id-helper';
 
-// EntityStore -> Hook
-const getHook = (es) => es[2];
-
-// EntityStore -> Type -> [Entity] -> ()
-const triggerHook = (es, type, xs) => getHook(es)({ type, entities: removeId(xs) });
-
 // Value -> StoreValue
 const toStoreValue = v => ({value: v, timestamp: Date.now()});
 
@@ -55,6 +49,16 @@ const createViewKey = (e, v) => {
 
 // Entity -> Bool
 const isView = e => !!e.viewOf;
+
+// EntityStore -> Hook
+const getHook = (es) => es[2];
+
+// EntityStore -> Type -> [Entity] -> ()
+const triggerHook = curry((es, e, type, xs) => getHook(es)({
+  type,
+  entity: getEntityType(e),
+  entities: removeId(xs)
+}));
 
 // Function -> Function -> EntityStore -> Entity -> Value -> a
 const handle = curry((viewHandler, entityHandler, s, e, v) => {
@@ -98,7 +102,7 @@ const setViewValue = (s, e, v) => {
 // EntityStore -> Entity -> [Value] -> ()
 export const mPut = curry((es, e, xs) => {
   map_(handle(setViewValue, setEntityValue)(es, e))(xs);
-  triggerHook(es, 'UPDATE', xs);
+  triggerHook(es, e, 'UPDATE', xs);
 });
 
 // EntityStore -> Entity -> Value -> ()
@@ -131,7 +135,7 @@ export const remove = (es, e, id) => {
   rm(es, createEntityKey(e, {__ladda__id: id}));
   rmViews(es, e);
   if (x) {
-    triggerHook(es, 'DELETE', [x.value]);
+    triggerHook(es, e, 'DELETE', [x.value]);
   }
 };
 

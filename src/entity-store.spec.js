@@ -242,14 +242,12 @@ describe('EntityStore', () => {
         const e = { name: 'user'};
         put(s, e, addId({}, undefined, undefined, v));
         expect(hook).to.have.been.called;
+
         expect(hook).to.have.been.calledWith({
           type: 'UPDATE',
+          entity: 'user',
           entities: [v]
         });
-
-        const arg = hook.args[0][0];
-        expect(arg.type).to.equal('UPDATE');
-        expect(arg.entities).to.deep.equal([v]);
       });
     });
 
