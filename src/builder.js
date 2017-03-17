@@ -1,7 +1,11 @@
 import {mapObject, mapValues, compose, toObject, reduce, toPairs,
-        prop, filterObject, isEqual, not, curry, copyFunction} from './fp';
+        prop, filterObject, isEqual, not, curry, copyFunction,
+        set
+      } from './fp';
+
 import {decorator} from './decorator';
 import {dedup} from './dedup';
+import {createListenerStore} from './listener-store';
 
 // [[EntityName, EntityConfig]] -> Entity
 const toEntity = ([name, c]) => ({
@@ -111,14 +115,17 @@ const getEntityConfigs = compose(
   filterObject(compose(not, isEqual('__config')))
 );
 
-const applyPlugin = curry((config, entityConfigs, plugin) => {
-  const pluginDecorator = plugin({ config, entityConfigs });
+const applyPlugin = curry((addListener, config, entityConfigs, plugin) => {
+  const pluginDecorator = plugin({ addListener, config, entityConfigs });
   return mapApiFunctions(pluginDecorator, entityConfigs);
 });
 
 // Config -> Api
 export const build = (c, ps = []) => {
   const config = c.__config || {idField: 'id'};
-  const createApi = compose(toApi, reduce(applyPlugin(config), getEntityConfigs(c)));
-  return createApi([decorator, ...ps, dedup]);
+  const listenerStore = createListenerStore(config);
+  const addListener = set(['__addListener'], listenerStore.addListener);
+  const applyPlugins = reduce(applyPlugin(addListener, config), getEntityConfigs(c));
+  const createApi = compose(addListener, toApi, applyPlugins);
+  return createApi([decorator(listenerStore.onChange), ...ps, dedup]);
 };
