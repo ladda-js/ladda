@@ -21,7 +21,12 @@ module.exports = {
                 query: {
                     presets: ['es2015', 'stage-2']
                 }
-            }
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loaders: ['babel-loader', 'eslint-loader']
+            },
         ]
     }
 };
