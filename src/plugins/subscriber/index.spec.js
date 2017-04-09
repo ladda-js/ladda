@@ -17,7 +17,7 @@ const createConfig = () => {
   getUser.operation = 'READ';
   getUser.byId = true;
   const getUsers = () => Promise.resolve(values(users));
-  getUser.operation = 'READ';
+  getUsers.operation = 'READ';
 
   const updateUser = (nextUser) => {
     const { id } = nextUser;
@@ -25,7 +25,7 @@ const createConfig = () => {
     users[id] = { ...user, ...nextUser };
     return Promise.resolve(users[id]);
   };
-  updateUser.operaton = 'UPDATE';
+  updateUser.operation = 'UPDATE';
 
   const removeUser = (id) => {
     delete users[id];
@@ -52,5 +52,40 @@ describe('subscriber', () => {
     const api = build(createConfig(), [plugin()]);
     expect(api.user.removeUser.createSubscriber).not.to.be;
     expect(api.user.updateUser.createSubscriber).not.to.be;
+  });
+
+  describe('createSubscriber()', () => {
+    it('returns a subscriber shape', () => {
+      const api = build(createConfig(), [plugin()]);
+      const subscriber = api.user.getUsers.createSubscriber();
+      expect(subscriber.useArgs).to.be.a('function');
+      expect(subscriber.destroy).to.be.a('function');
+      expect(subscriber.subscribe).to.be.a('function');
+    });
+  });
+
+  describe('subscriber', () => {
+    describe('destroy', () => {
+      fit('removes all subscriptions', () => {
+        const spy1 = sinon.spy();
+        const spy2 = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+
+        const subscriber = api.user.getUsers.createSubscriber();
+        subscriber.subscribe(spy1);
+        subscriber.subscribe(spy2);
+
+        return api.user.updateUser({ id: 'peter', name: 'Peter' }).then(() => {
+          expect(spy1).to.have.been.calledOnce;
+          expect(spy2).to.have.been.calledOnce;
+          subscriber.destroy();
+
+          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+            expect(spy1).to.have.been.calledOnce;
+            expect(spy2).to.have.been.calledOnce;
+          });
+        });
+      });
+    });
   });
 });
