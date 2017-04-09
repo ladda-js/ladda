@@ -4,7 +4,7 @@ import { map_, removeElement } from '../../fp';
 const isRelevantChange = (entity, fn, change) => true;
 
 const createSubscriberFactory = (state, entity, fn) => () => {
-  let args = [];
+  let cachedArgs = [];
   let subscriptions = [];
 
   const changeListener = (change) => {
@@ -12,7 +12,7 @@ const createSubscriberFactory = (state, entity, fn) => () => {
       return;
     }
 
-    fn(...args).then((res) => map_((subscription) => subscription(res), subscriptions));
+    fn(...cachedArgs).then((res) => map_((subscription) => subscription(res), subscriptions));
   };
 
   const subscriber = {
@@ -22,12 +22,12 @@ const createSubscriberFactory = (state, entity, fn) => () => {
       subscriptions = [];
     },
     withArgs: (...nextArgs) => {
-      args = nextArgs;
+      cachedArgs = nextArgs;
       return subscriber;
     },
     subscribe: (cb) => {
       subscriptions.push(cb);
-      fn(args); // invoke fn, but not the cb. this will happen through the change listener
+      fn(...cachedArgs); // invoke fn, but not the cb. this will happen through the change listener
       return () => { subscriptions = removeElement(cb, subscriptions); };
     },
     alive: true

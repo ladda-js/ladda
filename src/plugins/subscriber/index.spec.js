@@ -69,7 +69,7 @@ describe('subscriber plugin', () => {
 
   describe('subscriber', () => {
     describe('destroy', () => {
-      xit('removes all subscriptions', () => {
+      it('removes all subscriptions', () => {
         const spy1 = sinon.spy();
         const spy2 = sinon.spy();
         const api = build(createConfig(), [plugin()]);
@@ -79,18 +79,17 @@ describe('subscriber plugin', () => {
         subscriber.subscribe(spy2);
 
         return delay().then(() => {
-          expect(spy1).to.have.been.calledOnce;
-          expect(spy2).to.have.been.calledOnce;
+          const initialCallCount = spy1.callCount;
 
           return api.user.updateUser({ id: 'peter', name: 'Peter' }).then(() => {
-            expect(spy1).to.have.been.calledTwice;
-            expect(spy2).to.have.been.calledTwice;
+            expect(spy1.callCount).to.equal(initialCallCount + 1);
+            expect(spy2.callCount).to.equal(initialCallCount + 1);
 
             subscriber.destroy();
 
             return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-              expect(spy1).to.have.been.calledTwice;
-              expect(spy2).to.have.been.calledTwice;
+              expect(spy1.callCount).to.equal(initialCallCount + 1);
+              expect(spy2.callCount).to.equal(initialCallCount + 1);
             });
           });
         });
@@ -193,7 +192,7 @@ describe('subscriber plugin', () => {
         subscriber.withArgs(1, 2, 3).subscribe(() => {});
 
         return delay().then(() => {
-          expect(stub).to.have.been.calledWith([1, 2, 3]);
+          expect(stub).to.have.been.calledWith(1, 2, 3);
 
           subscriber.withArgs('x');
 
