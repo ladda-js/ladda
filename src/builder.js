@@ -64,10 +64,8 @@ export const mapApiFunctions = (fn, entityConfigs) => {
   }, entityConfigs);
 };
 
-const stripMetaData = (fn) => (...args) => fn(...args);
-
 // EntityConfig -> Api
-const toApi = mapValues(compose(mapValues(stripMetaData), prop('api')));
+const toApi = mapValues(prop('api'));
 
 // EntityConfig -> EntityConfig
 const setEntityConfigDefaults = ec => {
