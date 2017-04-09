@@ -123,7 +123,7 @@ export const build = (c, ps = []) => {
   const config = c.__config || {idField: 'id'};
   const listenerStore = createListenerStore(config);
   const addListener = set(['__addListener'], listenerStore.addListener);
-  const applyPlugins = reduce(applyPlugin(addListener, config), getEntityConfigs(c));
+  const applyPlugins = reduce(applyPlugin(listenerStore.addListener, config), getEntityConfigs(c));
   const createApi = compose(addListener, toApi, applyPlugins);
   return createApi([decorator(listenerStore.onChange), ...ps, dedup]);
 };
