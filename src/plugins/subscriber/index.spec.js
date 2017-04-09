@@ -169,6 +169,19 @@ describe('subscriber plugin', () => {
           });
         });
       });
+
+      // eslint-disable-next-line max-len
+      it('several subscriptions lead to several initial invocations - this is a limitation of Ladda\'s listener interface at the moment and needs to be corrected there. This just documents the fact for now', () => {
+        const spies = [sinon.spy(), sinon.spy(), sinon.spy()];
+        const api = build(createConfig(), [plugin()]);
+
+        const subscriber = api.user.getUsers.createSubscriber();
+        spies.forEach((spy) => subscriber.subscribe(spy));
+
+        return delay().then(() => {
+          spies.forEach((spy) => expect(spy.callCount).to.equal(spies.length));
+        });
+      });
     });
 
     describe('withArgs', () => {
