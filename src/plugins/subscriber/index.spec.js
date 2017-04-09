@@ -6,7 +6,7 @@ import { build } from '../../builder';
 import { toIdMap, values } from '../../fp';
 import { subscriber as plugin } from '.';
 
-const delay = () => new Promise(res => setTimeout(() => res(), 1));
+const delay = (t = 1) => new Promise(res => setTimeout(() => res(), t));
 
 const createConfig = () => {
   const peter = { id: 'peter', name: 'peter' };
@@ -78,7 +78,7 @@ describe('subscriber plugin', () => {
         subscriber.subscribe(spy1);
         subscriber.subscribe(spy2);
 
-        return delay(() => {
+        return delay().then(() => {
           expect(spy1).to.have.been.calledOnce;
           expect(spy2).to.have.been.calledOnce;
 
@@ -105,54 +105,76 @@ describe('subscriber plugin', () => {
         expect(subscriber.alive).to.be.false;
       });
     });
-  });
 
-  describe('subscribe', () => {
-    it('immediately invokes for the first time', () => {
-      const spy = sinon.spy();
-      const api = build(createConfig(), [plugin()]);
-      const subscriber = api.user.getUsers.createSubscriber();
+    describe('subscribe', () => {
+      it('immediately invokes for the first time', () => {
+        const spy = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+        const subscriber = api.user.getUsers.createSubscriber();
 
-      subscriber.subscribe(spy);
+        subscriber.subscribe(spy);
 
-      return delay(() => {
-        expect(spy).to.have.been.calledOnce;
-      });
-    });
-
-    it('returns an unsuscribe function', () => {
-      const spy = sinon.spy();
-      const api = build(createConfig(), [plugin()]);
-      const subscriber = api.user.getUsers.createSubscriber();
-
-      const unsubscribe = subscriber.subscribe(spy);
-
-      return delay(() => {
-        expect(spy).to.have.been.calledOnce;
-        unsubscribe();
-
-        return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+        return delay().then(() => {
           expect(spy).to.have.been.calledOnce;
         });
       });
-    });
 
-    it('calls the callback again when a relevant change happens', () => {
-      const spy = sinon.spy();
-      const api = build(createConfig(), [plugin()]);
-      const subscriber = api.user.getUsers.createSubscriber();
+      it('returns an unsuscribe function', () => {
+        const spy = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+        const subscriber = api.user.getUsers.createSubscriber();
 
-      subscriber.subscribe(spy);
+        const unsubscribe = subscriber.subscribe(spy);
 
-      return delay(() => {
-        expect(spy).to.have.been.calledOnce;
+        return delay().then(() => {
+          expect(spy).to.have.been.calledOnce;
+          unsubscribe();
 
-        return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-          expect(spy).to.have.been.calledTwice;
-          return api.user.updateUser({ id: 'peter', name: 'PETer' }).then(() => {
-            expect(spy).to.have.been.calledThrice;
+          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+            expect(spy).to.have.been.calledOnce;
           });
         });
+      });
+
+      it('calls the callback again when a relevant change happens', () => {
+        const spy = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+        const subscriber = api.user.getUsers.createSubscriber();
+
+        subscriber.subscribe(spy);
+
+        return delay().then(() => {
+          expect(spy).to.have.been.calledOnce;
+
+          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+            expect(spy).to.have.been.calledTwice;
+            return api.user.updateUser({ id: 'peter', name: 'PETer' }).then(() => {
+              expect(spy).to.have.been.calledThrice;
+            });
+          });
+        });
+      });
+
+      it('invokes the callback with no arguments by default', () => {
+        const spy = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+        const subscriber = api.user.getUsers.createSubscriber();
+
+        subscriber.subscribe(spy);
+
+        return delay().then(() => {
+          expect(spy).to.have.been.calledOnce;
+
+          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+            expect(spy).to.have.been.calledTwice;
+          });
+        });
+      });
+    });
+
+    describe('useArgs', () => {
+      it('', () => {
+
       });
     });
   });
