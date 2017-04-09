@@ -6,7 +6,8 @@ import {debug, identity, curry, passThrough,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
         mapObject, mapValues, toObject, filter, clone, filterObject,
-        copyFunction, get, set, concat, flatten, uniq, toIdMap} from './fp';
+        copyFunction, get, set, concat, flatten, uniq, toIdMap,
+        removeAtIndex, removeElement} from './fp';
 
 describe('fp', () => {
   describe('debug', () => {
@@ -364,6 +365,91 @@ describe('fp', () => {
     it('returns a function that does nothing', () => {
       expect(noop).not.to.throw;
       expect(noop()).to.be.undefined;
+    });
+  });
+
+  describe('removeAtIndex', () => {
+    it('removes an element at a given index', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const c = { id: 'c' };
+      const list = [a, b, c];
+      const expected = [a, c];
+      const actual = removeAtIndex(1, list);
+
+      expect(actual).not.to.equal(list);
+      expect(actual).to.deep.equal(expected);
+    });
+
+    it('does nothing when the index is negative', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const c = { id: 'c' };
+      const list = [a, b, c];
+      const actual = removeAtIndex(-1, list);
+
+      expect(actual).to.equal(list);
+    });
+
+    it('does nothing when the index is out of high bound', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const c = { id: 'c' };
+      const list = [a, b, c];
+      const actual = removeAtIndex(list.length, list);
+
+      expect(actual).to.equal(list);
+    });
+
+    it('is curried', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const c = { id: 'c' };
+      const list = [a, b, c];
+      const removeAt2 = removeAtIndex(2);
+      const expected = [a, b];
+      const actual = removeAt2(list);
+
+      expect(actual).not.to.equal(list);
+      expect(actual).to.deep.equal(expected);
+    });
+  });
+
+  describe('removeElement', () => {
+    it('removes an element from a list', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const c = { id: 'c' };
+      const list = [a, b, c];
+      const expected = [a, c];
+      const actual = removeElement(b, list);
+
+      expect(actual).not.to.equal(list);
+      expect(actual).to.deep.equal(expected);
+    });
+
+    it('does nothing when the element is not present in the list', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const c = { id: 'c' };
+      const list = [a, c];
+      const actual = removeElement(b, list);
+      expect(actual).to.equal(list);
+    });
+
+    it('is curried', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const c = { id: 'c' };
+      const list = [a, b, c];
+
+      const removeB = removeElement(b);
+
+      const expected = [a, c];
+      const actual = removeB(list);
+
+      expect(actual).not.to.equal(list);
+      expect(actual).to.deep.equal(expected);
     });
   });
 });
