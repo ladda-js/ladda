@@ -6,6 +6,8 @@ import { build } from '../../builder';
 import { toIdMap, values } from '../../fp';
 import { subscriber as plugin } from '.';
 
+const delay = () => new Promise(res => setTimeout(() => res(), 1));
+
 const createConfig = () => {
   const peter = { id: 'peter', name: 'peter' };
   const gernot = { id: 'gernot', name: 'gernot' };
@@ -41,7 +43,7 @@ const createConfig = () => {
 };
 
 
-describe('subscriber', () => {
+describe('subscriber plugin', () => {
   it('patches fns so that a subscriber can be created on READ operations', () => {
     const api = build(createConfig(), [plugin()]);
     expect(api.user.getUsers.createSubscriber).to.be.a('function');
@@ -61,12 +63,13 @@ describe('subscriber', () => {
       expect(subscriber.useArgs).to.be.a('function');
       expect(subscriber.destroy).to.be.a('function');
       expect(subscriber.subscribe).to.be.a('function');
+      expect(subscriber.alive).to.be.true;
     });
   });
 
   describe('subscriber', () => {
     describe('destroy', () => {
-      fit('removes all subscriptions', () => {
+      it('removes all subscriptions', () => {
         const spy1 = sinon.spy();
         const spy2 = sinon.spy();
         const api = build(createConfig(), [plugin()]);
@@ -75,14 +78,79 @@ describe('subscriber', () => {
         subscriber.subscribe(spy1);
         subscriber.subscribe(spy2);
 
-        return api.user.updateUser({ id: 'peter', name: 'Peter' }).then(() => {
+        return delay(() => {
           expect(spy1).to.have.been.calledOnce;
           expect(spy2).to.have.been.calledOnce;
-          subscriber.destroy();
 
-          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-            expect(spy1).to.have.been.calledOnce;
-            expect(spy2).to.have.been.calledOnce;
+          return api.user.updateUser({ id: 'peter', name: 'Peter' }).then(() => {
+            expect(spy1).to.have.been.calledTwice;
+            expect(spy2).to.have.been.calledTwice;
+
+            subscriber.destroy();
+
+            return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+              expect(spy1).to.have.been.calledTwice;
+              expect(spy2).to.have.been.calledTwice;
+            });
+          });
+        });
+      });
+
+      it('marks a subscriber as destroyed', () => {
+        const api = build(createConfig(), [plugin()]);
+        const subscriber = api.user.getUsers.createSubscriber();
+        expect(subscriber.alive).to.be.true;
+
+        subscriber.destroy();
+        expect(subscriber.alive).to.be.false;
+      });
+    });
+  });
+
+  describe('subscribe', () => {
+    it('immediately invokes for the first time', () => {
+      const spy = sinon.spy();
+      const api = build(createConfig(), [plugin()]);
+      const subscriber = api.user.getUsers.createSubscriber();
+
+      subscriber.subscribe(spy);
+
+      return delay(() => {
+        expect(spy).to.have.been.calledOnce;
+      });
+    });
+
+    it('returns an unsuscribe function', () => {
+      const spy = sinon.spy();
+      const api = build(createConfig(), [plugin()]);
+      const subscriber = api.user.getUsers.createSubscriber();
+
+      const unsubscribe = subscriber.subscribe(spy);
+
+      return delay(() => {
+        expect(spy).to.have.been.calledOnce;
+        unsubscribe();
+
+        return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+          expect(spy).to.have.been.calledOnce;
+        });
+      });
+    });
+
+    it('calls the callback again when a relevant change happens', () => {
+      const spy = sinon.spy();
+      const api = build(createConfig(), [plugin()]);
+      const subscriber = api.user.getUsers.createSubscriber();
+
+      subscriber.subscribe(spy);
+
+      return delay(() => {
+        expect(spy).to.have.been.calledOnce;
+
+        return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+          expect(spy).to.have.been.calledTwice;
+          return api.user.updateUser({ id: 'peter', name: 'PETer' }).then(() => {
+            expect(spy).to.have.been.calledThrice;
           });
         });
       });
