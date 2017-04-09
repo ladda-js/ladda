@@ -17,8 +17,7 @@ const isRelevantChange = (entityConifgs, entity, fn, change) => {
   return isChangeOfSameEntity(entity, change);
 };
 
-const createSubscriberFactory = (state, entityConfigs, entity, fn) => () => {
-  let cachedArgs = [];
+const createSubscriberFactory = (state, entityConfigs, entity, fn) => (...args) => {
   let subscriptions = [];
 
   const changeListener = (change) => {
@@ -26,7 +25,7 @@ const createSubscriberFactory = (state, entityConfigs, entity, fn) => () => {
       return;
     }
 
-    fn(...cachedArgs).then(
+    fn(...args).then(
       (res) => map_((subscription) => subscription.successCb(res), subscriptions),
       (err) => map_((subscription) => subscription.errorCb(err), subscriptions)
     );
@@ -38,15 +37,11 @@ const createSubscriberFactory = (state, entityConfigs, entity, fn) => () => {
       state.changeListeners = removeElement(changeListener, state.changeListeners);
       subscriptions = [];
     },
-    withArgs: (...nextArgs) => {
-      cachedArgs = nextArgs;
-      return subscriber;
-    },
     subscribe: (successCb, errorCb = noop) => {
       const subscription = { successCb, errorCb };
       // add ourselves to the subscription list after the first initial call,
       // so that we don't consume a change we triggered ourselves.
-      fn(...cachedArgs).then(
+      fn(...args).then(
         (res) => {
           successCb(res);
           subscriptions.push(subscription);
