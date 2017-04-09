@@ -60,7 +60,6 @@ describe('subscriber plugin', () => {
     it('returns a subscriber shape', () => {
       const api = build(createConfig(), [plugin()]);
       const subscriber = api.user.getUsers.createSubscriber();
-      expect(subscriber.withArgs).to.be.a('function');
       expect(subscriber.destroy).to.be.a('function');
       expect(subscriber.subscribe).to.be.a('function');
       expect(subscriber.alive).to.be.true;
@@ -154,22 +153,6 @@ describe('subscriber plugin', () => {
         });
       });
 
-      it('invokes the callback with no arguments by default', () => {
-        const spy = sinon.spy();
-        const api = build(createConfig(), [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber();
-
-        subscriber.subscribe(spy);
-
-        return delay().then(() => {
-          expect(spy).to.have.been.calledOnce;
-
-          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-            expect(spy).to.have.been.calledTwice;
-          });
-        });
-      });
-
       it('takes an optional second callback invoked on error', () => {
         const spy = sinon.spy();
         const errSpy = sinon.spy();
@@ -202,36 +185,36 @@ describe('subscriber plugin', () => {
           spies.forEach((spy) => expect(spy.callCount).to.equal(1));
         });
       });
-    });
 
-    describe('withArgs', () => {
-      it('returns the subscriber itself', () => {
+      it('invokes the callback with no arguments by default', () => {
+        const spy = sinon.spy();
         const api = build(createConfig(), [plugin()]);
         const subscriber = api.user.getUsers.createSubscriber();
 
-        const nextSubscriber = subscriber.withArgs(1, 2, 3);
-        expect(nextSubscriber).to.equal(subscriber);
+        subscriber.subscribe(spy);
+
+        return delay().then(() => {
+          expect(spy).to.have.been.calledOnce;
+
+          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+            expect(spy).to.have.been.calledTwice;
+          });
+        });
       });
 
-      it('allows to define args, which are used when making the api call', () => {
+      it('takes the arguments of the create call and passes them to the api call', () => {
         const config = createConfig();
         const stub = sinon.stub();
+        const spy = sinon.spy();
         stub.returns(Promise.resolve([]));
         stub.operation = 'READ';
         config.user.api.getUsers = stub;
         const api = build(config, [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber();
-
-        subscriber.withArgs(1, 2, 3).subscribe(() => {});
+        const subscriber = api.user.getUsers.createSubscriber(1, 2, 3);
+        subscriber.subscribe(spy);
 
         return delay().then(() => {
           expect(stub).to.have.been.calledWith(1, 2, 3);
-
-          subscriber.withArgs('x');
-
-          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-            expect(stub.args[1]).to.deep.equal(['x']);
-          });
         });
       });
     });
