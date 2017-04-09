@@ -21,7 +21,8 @@
     "mocha": "^2.5.3",
     "nyc": "^10.1.2",
     "sinon": "^1.17.7",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "webpack": "^1.14.0"
   },
   "scripts": {
     "docs:prepare": "gitbook install",
