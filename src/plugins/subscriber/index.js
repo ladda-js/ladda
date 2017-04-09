@@ -12,7 +12,7 @@ const createSubscriberFactory = (state, entity, fn) => () => {
       return;
     }
 
-    fn(args).then((res) => map_((subscription) => subscription(res), subscriptions));
+    fn(...args).then((res) => map_((subscription) => subscription(res), subscriptions));
   };
 
   const subscriber = {
@@ -21,7 +21,7 @@ const createSubscriberFactory = (state, entity, fn) => () => {
       state.changeListeners = removeElement(changeListener, state.changeListeners);
       subscriptions = [];
     },
-    useArgs: (...nextArgs) => {
+    withArgs: (...nextArgs) => {
       args = nextArgs;
       return subscriber;
     },

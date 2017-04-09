@@ -60,7 +60,7 @@ describe('subscriber plugin', () => {
     it('returns a subscriber shape', () => {
       const api = build(createConfig(), [plugin()]);
       const subscriber = api.user.getUsers.createSubscriber();
-      expect(subscriber.useArgs).to.be.a('function');
+      expect(subscriber.withArgs).to.be.a('function');
       expect(subscriber.destroy).to.be.a('function');
       expect(subscriber.subscribe).to.be.a('function');
       expect(subscriber.alive).to.be.true;
@@ -69,7 +69,7 @@ describe('subscriber plugin', () => {
 
   describe('subscriber', () => {
     describe('destroy', () => {
-      it('removes all subscriptions', () => {
+      xit('removes all subscriptions', () => {
         const spy1 = sinon.spy();
         const spy2 = sinon.spy();
         const api = build(createConfig(), [plugin()]);
@@ -172,9 +172,35 @@ describe('subscriber plugin', () => {
       });
     });
 
-    describe('useArgs', () => {
-      it('', () => {
+    describe('withArgs', () => {
+      it('returns the subscriber itself', () => {
+        const api = build(createConfig(), [plugin()]);
+        const subscriber = api.user.getUsers.createSubscriber();
 
+        const nextSubscriber = subscriber.withArgs(1, 2, 3);
+        expect(nextSubscriber).to.equal(subscriber);
+      });
+
+      it('allows to define args, which are used when making the api call', () => {
+        const config = createConfig();
+        const stub = sinon.stub();
+        stub.returns(Promise.resolve([]));
+        stub.operation = 'READ';
+        config.user.api.getUsers = stub;
+        const api = build(config, [plugin()]);
+        const subscriber = api.user.getUsers.createSubscriber();
+
+        subscriber.withArgs(1, 2, 3).subscribe(() => {});
+
+        return delay().then(() => {
+          expect(stub).to.have.been.calledWith([1, 2, 3]);
+
+          subscriber.withArgs('x');
+
+          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+            expect(stub.args[1]).to.deep.equal(['x']);
+          });
+        });
       });
     });
   });
