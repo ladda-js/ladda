@@ -170,8 +170,28 @@ describe('subscriber plugin', () => {
         });
       });
 
+      it('takes an optional second callback invoked on error', () => {
+        const spy = sinon.spy();
+        const errSpy = sinon.spy();
+        const error = { err: 'x' };
+        const config = createConfig();
+        config.user.api.getUsers = () => Promise.reject(error);
+        config.user.api.getUsers.operation = 'READ';
+
+        const api = build(config, [plugin()]);
+        const subscriber = api.user.getUsers.createSubscriber();
+
+        subscriber.subscribe(spy, errSpy);
+
+        return delay().then(() => {
+          expect(spy).not.to.have.been.called;
+          expect(errSpy).to.have.been.calledOnce;
+          expect(errSpy).to.have.been.calledWith(error);
+        });
+      });
+
       // eslint-disable-next-line max-len
-      it('several subscriptions lead to several initial invocations - this is a limitation of Ladda\'s listener interface at the moment and needs to be corrected there. This just documents the fact for now', () => {
+      it('several parallel subscriptions guarantee to call each subscription only once initially', () => {
         const spies = [sinon.spy(), sinon.spy(), sinon.spy()];
         const api = build(createConfig(), [plugin()]);
 
@@ -179,7 +199,7 @@ describe('subscriber plugin', () => {
         spies.forEach((spy) => subscriber.subscribe(spy));
 
         return delay().then(() => {
-          spies.forEach((spy) => expect(spy.callCount).to.equal(spies.length));
+          spies.forEach((spy) => expect(spy.callCount).to.equal(1));
         });
       });
     });

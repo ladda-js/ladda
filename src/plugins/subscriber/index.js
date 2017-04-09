@@ -1,4 +1,4 @@
-import { map_, removeElement } from '../../fp';
+import { map_, noop, removeElement } from '../../fp';
 
 const isChangeOfSameEntity = (entity, change) => entity.name === change.entity;
 
@@ -26,7 +26,10 @@ const createSubscriberFactory = (state, entityConfigs, entity, fn) => () => {
       return;
     }
 
-    fn(...cachedArgs).then((res) => map_((subscription) => subscription(res), subscriptions));
+    fn(...cachedArgs).then(
+      (res) => map_((subscription) => subscription.successCb(res), subscriptions),
+      (err) => map_((subscription) => subscription.errorCb(err), subscriptions)
+    );
   };
 
   const subscriber = {
@@ -39,10 +42,21 @@ const createSubscriberFactory = (state, entityConfigs, entity, fn) => () => {
       cachedArgs = nextArgs;
       return subscriber;
     },
-    subscribe: (cb) => {
-      subscriptions.push(cb);
-      fn(...cachedArgs); // invoke fn, but not the cb. this will happen through the change listener
-      return () => { subscriptions = removeElement(cb, subscriptions); };
+    subscribe: (successCb, errorCb = noop) => {
+      const subscription = { successCb, errorCb };
+      // add ourselves to the subscription list after the first initial call,
+      // so that we don't consume a change we triggered ourselves.
+      fn(...cachedArgs).then(
+        (res) => {
+          successCb(res);
+          subscriptions.push(subscription);
+        },
+        (err) => {
+          errorCb(err);
+          subscriptions.push(subscription);
+        }
+      );
+      return () => { subscriptions = removeElement(subscription, subscriptions); };
     },
     alive: true
   };
