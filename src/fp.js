@@ -185,3 +185,11 @@ export const snd = (arr) => arr[1];
 export const toIdMap = toObject(prop('id'));
 
 export const noop = () => {};
+
+export const removeAtIndex = curry((i, list) => {
+  const isOutOfBounds = i === -1 || i > list.length - 1;
+  return isOutOfBounds ? list : [...list.slice(0, i), ...list.slice(i + 1)];
+});
+
+export const removeElement = curry((el, list) => removeAtIndex(list.indexOf(el), list));
+
