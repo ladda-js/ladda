@@ -7,7 +7,7 @@ import {debug, identity, curry, passThrough,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
         mapObject, mapValues, toObject, filter, clone, filterObject,
         copyFunction, get, set, concat, flatten, uniq, toIdMap,
-        removeAtIndex, removeElement} from './fp';
+        removeAtIndex, removeElement} from '.';
 
 describe('fp', () => {
   describe('debug', () => {
