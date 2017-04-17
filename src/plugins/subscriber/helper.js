@@ -30,9 +30,8 @@ const analyzeViews = (configs, type, rels) => {
 const analyzeInvalidations = (configs, rels) => {
   Object.keys(rels).forEach((type) => {
     const invalidates = configs[type].invalidates || [];
-    const rel = rels[type];
     invalidates.forEach((invalidatedType) => {
-      rels[invalidatedType].invalidatedBy = [...rel.parents, type, ...rel.views];
+      rels[invalidatedType].invalidatedBy.push(type);
     });
   });
   return rels;

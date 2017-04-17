@@ -14,7 +14,8 @@ describe('subscriber helper', () => {
         },
         miniUser: {
           api: {},
-          viewOf: 'mediumUser'
+          viewOf: 'mediumUser',
+          invalidates: ['activity']
         },
         activity: {
           api: {}
@@ -40,7 +41,7 @@ describe('subscriber helper', () => {
         activity: {
           views: [],
           parents: [],
-          invalidatedBy: ['user', 'mediumUser', 'miniUser']
+          invalidatedBy: ['mediumUser', 'miniUser']
         }
       };
 
