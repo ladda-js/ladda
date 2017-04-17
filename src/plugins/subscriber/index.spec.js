@@ -201,6 +201,33 @@ describe('subscriber plugin', () => {
         });
       });
 
+      it('also invokes error callback in later stages of the subscription\'s lifecycle', () => {
+        const spy = sinon.spy();
+        const errSpy = sinon.spy();
+        const error = { err: 'x' };
+        const config = createConfig();
+        config.user.api.getUsers = () => Promise.reject(error);
+        config.user.api.getUsers.operation = 'READ';
+
+        const api = build(config, [plugin()]);
+        const subscriber = api.user.getUsers.createSubscriber();
+
+        subscriber.subscribe(spy, errSpy);
+
+        return delay().then(() => {
+          expect(spy).not.to.have.been.called;
+          expect(errSpy).to.have.been.calledOnce;
+          expect(errSpy).to.have.been.calledWith(error);
+
+          return api.user.createUser({ id: 'x', name: 'y' }).then(() => {
+            return delay().then(() => {
+              expect(spy).not.to.have.been.called;
+              expect(errSpy).to.have.been.calledTwice;
+            });
+          });
+        });
+      });
+
       // eslint-disable-next-line max-len
       it('several parallel subscriptions guarantee to call each subscription only once initially', () => {
         const spies = [sinon.spy(), sinon.spy(), sinon.spy()];
