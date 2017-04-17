@@ -4,7 +4,8 @@ import sinon from 'sinon';
 import {build} from './builder';
 import {curry} from './fp';
 
-const getUsers = () => Promise.resolve([{id: 1}, {id: 2}]);
+const users = [{ id: 1 }, { id: 2 }];
+const getUsers = () => Promise.resolve(users);
 getUsers.operation = 'READ';
 
 const deleteUser = () => Promise.resolve();
@@ -146,5 +147,51 @@ describe('builder', () => {
     api.user.getUsers()
       .then(expectACall)
       .then(() => done());
+  });
+
+  it('exposes Ladda\'s listener/onChange interface', () => {
+    const api = build(config());
+    expect(api.__addListener).to.be;
+  });
+
+  describe('__addListener', () => {
+    it('allows to add a listener, which gets notified on all cache changes', () => {
+      const api = build(config());
+      const spy = sinon.spy();
+      api.__addListener(spy);
+
+      return api.user.getUsers().then(() => {
+        expect(spy).to.have.been.calledOnce;
+        const changeObject = spy.args[0][0];
+        expect(changeObject.entity).to.equal('user');
+        expect(changeObject.type).to.equal('UPDATE');
+        expect(changeObject.entities).to.deep.equal(users);
+      });
+    });
+
+    it('does not trigger when a pure cache hit is made', () => {
+      const api = build(config());
+      const spy = sinon.spy();
+      api.__addListener(spy);
+
+      return api.user.getUsers().then(() => {
+        expect(spy).to.have.been.calledOnce;
+
+        return api.user.getUsers().then(() => {
+          expect(spy).to.have.been.calledOnce;
+        });
+      });
+    });
+
+    it('returns a deregistration function to remove the listener', () => {
+      const api = build(config());
+      const spy = sinon.spy();
+      const deregister = api.__addListener(spy);
+      deregister();
+
+      return api.user.getUsers().then(() => {
+        expect(spy).not.to.have.been.called;
+      });
+    });
   });
 });
