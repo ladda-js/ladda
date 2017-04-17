@@ -6,7 +6,7 @@ import {addId} from '../id-helper';
 export function decorateCreate(c, es, qc, e, aFn) {
   return (...args) => {
     return aFn(...args)
-      .then(passThrough(compose(put(es, e), addId(c, aFn, args))))
-      .then(passThrough(() => invalidate(qc, e, aFn)));
+      .then(passThrough(() => invalidate(qc, e, aFn)))
+      .then(passThrough(compose(put(es, e), addId(c, aFn, args))));
   };
 }

@@ -5,8 +5,8 @@ import {serialize} from '../serializer';
 
 export function decorateDelete(c, es, qc, e, aFn) {
   return (...args) => {
-    remove(es, e, serialize(args));
     return aFn(...args)
-      .then(passThrough(() => invalidate(qc, e, aFn)));
+      .then(passThrough(() => invalidate(qc, e, aFn)))
+      .then(() => remove(es, e, serialize(args)));
   };
 }
