@@ -3,41 +3,63 @@
 import sinon from 'sinon';
 
 import { build } from '../../builder';
-import { toIdMap, values } from '../../fp';
+import { compose, map, toIdMap, values } from '../../fp';
 import { subscriber as plugin } from '.';
 
 const delay = (t = 1) => new Promise(res => setTimeout(() => res(), t));
+const toMiniUser = ({ id, name }) => ({ id, name });
 
-const createConfig = () => {
-  const peter = { id: 'peter', name: 'peter' };
-  const gernot = { id: 'gernot', name: 'gernot' };
-  const robin = { id: 'robin', name: 'robin' };
-
-  const users = toIdMap([peter, gernot, robin]);
-
-  const getUser = (id) => Promise.resolve(users[id]);
+const createUserApi = (container) => {
+  const getUser = (id) => Promise.resolve(container[id]);
   getUser.operation = 'READ';
   getUser.byId = true;
-  const getUsers = () => Promise.resolve(values(users));
+  const getUsers = () => Promise.resolve(values(container));
   getUsers.operation = 'READ';
 
   const updateUser = (nextUser) => {
     const { id } = nextUser;
-    const user = users[id];
-    users[id] = { ...user, ...nextUser };
-    return Promise.resolve(users[id]);
+    const user = container[id];
+    container[id] = { ...user, ...nextUser };
+    return Promise.resolve(container[id]);
   };
   updateUser.operation = 'UPDATE';
 
   const removeUser = (id) => {
-    delete users[id];
+    delete container[id];
     Promise.resolve();
   };
   removeUser.operation = 'DELETE';
 
+  return { getUser, getUsers, updateUser, removeUser };
+};
+
+const createConfig = () => {
+  const peter = { id: 'peter', name: 'peter', location: 'gothenburg' };
+  const gernot = { id: 'gernot', name: 'gernot', location: 'graz' };
+  const robin = { id: 'robin', name: 'robin', location: 'berlin' };
+
+  const list = [peter, gernot, robin];
+  const users = toIdMap(list);
+  const miniUsers = compose(toIdMap, map(toMiniUser))(list);
+
+  const getActivities = () => Promise.resolve([]);
+  getActivities.operation = 'READ';
+
   return {
     user: {
-      api: { getUser, getUsers, updateUser, removeUser }
+      api: createUserApi(users)
+    },
+    mediumUser: {
+      api: createUserApi(users),
+      viewOf: 'user',
+      invalidates: ['activity']
+    },
+    miniUser: {
+      api: createUserApi(miniUsers),
+      viewOf: 'miniUser'
+    },
+    activity: {
+      api: { getActivities }
     }
   };
 };
@@ -215,6 +237,88 @@ describe('subscriber plugin', () => {
 
         return delay().then(() => {
           expect(stub).to.have.been.calledWith(1, 2, 3);
+        });
+      });
+
+      describe('with views', () => {
+        it('notices changes to a child view', () => {
+          const spy = sinon.spy();
+          const api = build(createConfig(), [plugin()]);
+          const subscriber = api.user.getUsers.createSubscriber();
+
+          subscriber.subscribe(spy);
+
+          return delay().then(() => {
+            expect(spy).to.have.been.calledOnce;
+
+            return api.miniUser.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+              expect(spy).to.have.been.calledTwice;
+            });
+          });
+        });
+
+        it('notices changes to a parent view', () => {
+          const spy = sinon.spy();
+          const api = build(createConfig(), [plugin()]);
+          const subscriber = api.miniUser.getUsers.createSubscriber();
+
+          subscriber.subscribe(spy);
+
+          return delay().then(() => {
+            expect(spy).to.have.been.calledOnce;
+
+            return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+              expect(spy).to.have.been.calledTwice;
+            });
+          });
+        });
+
+        it('notices direct invalidations', () => {
+          const spy = sinon.spy();
+          const api = build(createConfig(), [plugin()]);
+          const subscriber = api.activity.getActivities.createSubscriber();
+
+          subscriber.subscribe(spy);
+
+          return delay().then(() => {
+            expect(spy).to.have.been.calledOnce;
+
+            return api.mediumUser.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+              expect(spy).to.have.been.calledTwice;
+            });
+          });
+        });
+
+        it('notices indirect invalidations (through a parent)', () => {
+          const spy = sinon.spy();
+          const api = build(createConfig(), [plugin()]);
+          const subscriber = api.activity.getActivities.createSubscriber();
+
+          subscriber.subscribe(spy);
+
+          return delay().then(() => {
+            expect(spy).to.have.been.calledOnce;
+
+            return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+              expect(spy).to.have.been.calledTwice;
+            });
+          });
+        });
+
+        it('notices indirect invalidations (through a child)', () => {
+          const spy = sinon.spy();
+          const api = build(createConfig(), [plugin()]);
+          const subscriber = api.activity.getActivities.createSubscriber();
+
+          subscriber.subscribe(spy);
+
+          return delay().then(() => {
+            expect(spy).to.have.been.calledOnce;
+
+            return api.miniUser.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+              expect(spy).to.have.been.calledTwice;
+            });
+          });
         });
       });
     });
