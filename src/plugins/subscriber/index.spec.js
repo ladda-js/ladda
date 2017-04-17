@@ -24,13 +24,19 @@ const createUserApi = (container) => {
   };
   updateUser.operation = 'UPDATE';
 
+  const createUser = (user) => {
+    container[user.id] = user;
+    return Promise.resolve(user);
+  };
+  createUser.operation = 'CREATE';
+
   const removeUser = (id) => {
     delete container[id];
-    Promise.resolve();
+    return Promise.resolve();
   };
   removeUser.operation = 'DELETE';
 
-  return { getUser, getUsers, updateUser, removeUser };
+  return { getUser, getUsers, createUser, updateUser, removeUser };
 };
 
 const createConfig = () => {
@@ -284,14 +290,23 @@ describe('subscriber plugin', () => {
             expect(spy).to.have.been.calledOnce;
 
             return api.mediumUser.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-              expect(spy).to.have.been.calledTwice;
+              return delay().then(() => {
+                expect(spy).to.have.been.calledThrice;
+              });
             });
           });
         });
 
-        it('notices indirect invalidations (through a parent)', () => {
+        it('calls api fns only AFTER they have been invalidated (on update)', () => {
+          const config = createConfig();
+          const state = {
+            activities: [{ id: 'a' }]
+          };
+          config.activity.api.getActivities = () => Promise.resolve(state.activities);
+          config.activity.api.getActivities.operation = 'READ';
+
           const spy = sinon.spy();
-          const api = build(createConfig(), [plugin()]);
+          const api = build(config, [plugin()]);
           const subscriber = api.activity.getActivities.createSubscriber();
 
           subscriber.subscribe(spy);
@@ -299,15 +314,39 @@ describe('subscriber plugin', () => {
           return delay().then(() => {
             expect(spy).to.have.been.calledOnce;
 
-            return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-              expect(spy).to.have.been.calledTwice;
+            const firstArgs = spy.args[0];
+            expect(firstArgs.length).to.equal(1);
+
+            state.activities = [...state.activities, { id: 'b' }];
+
+            return api.mediumUser.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+              return delay().then(() => {
+                // TODO
+                // Ideally this should be called only twice:
+                // 1. The initial subscription
+                // 2. The call after the invalidation by updateUser
+                //
+                // The third call happens after 2. - as this call also creates
+                // an update event. The subscription is consuming its own event.
+                // Not ideal, but not trivial to fix.
+                expect(spy).to.have.been.calledThrice;
+                const secondArgs = spy.args[1];
+                expect(secondArgs[0].length).to.equal(2);
+              });
             });
           });
         });
 
-        it('notices indirect invalidations (through a child)', () => {
+        it('calls api fns only AFTER they have been invalidated (on create)', () => {
+          const config = createConfig();
+          const state = {
+            activities: [{ id: 'a' }]
+          };
+          config.activity.api.getActivities = () => Promise.resolve(state.activities);
+          config.activity.api.getActivities.operation = 'READ';
+
           const spy = sinon.spy();
-          const api = build(createConfig(), [plugin()]);
+          const api = build(config, [plugin()]);
           const subscriber = api.activity.getActivities.createSubscriber();
 
           subscriber.subscribe(spy);
@@ -315,8 +354,52 @@ describe('subscriber plugin', () => {
           return delay().then(() => {
             expect(spy).to.have.been.calledOnce;
 
-            return api.miniUser.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-              expect(spy).to.have.been.calledTwice;
+            const firstArgs = spy.args[0];
+            expect(firstArgs.length).to.equal(1);
+
+            state.activities = [...state.activities, { id: 'b' }];
+
+            return api.mediumUser.createUser({ id: 'timur', name: 'Timur' }).then(() => {
+              return delay().then(() => {
+                expect(spy).to.have.been.calledThrice;
+                const secondArgs = spy.args[1];
+                expect(secondArgs[0].length).to.equal(2);
+              });
+            });
+          });
+        });
+
+        it('calls api fns only AFTER they have been invalidated (on remove)', () => {
+          const config = createConfig();
+          const state = {
+            activities: [{ id: 'a' }]
+          };
+          config.activity.api.getActivities = () => Promise.resolve(state.activities);
+          config.activity.api.getActivities.operation = 'READ';
+
+          const spy = sinon.spy();
+          const api = build(config, [plugin()]);
+          const subscriber = api.activity.getActivities.createSubscriber();
+
+          // fill the cache so that we can remove items later
+          api.user.getUsers().then(() => {
+            subscriber.subscribe(spy);
+
+            return delay().then(() => {
+              expect(spy).to.have.been.calledOnce;
+
+              const firstArgs = spy.args[0];
+              expect(firstArgs.length).to.equal(1);
+
+              state.activities = [...state.activities, { id: 'b' }];
+
+              return api.mediumUser.removeUser('peter').then(() => {
+                return delay().then(() => {
+                  expect(spy).to.have.been.calledThrice;
+                  const secondArgs = spy.args[1];
+                  expect(secondArgs[0].length).to.equal(2);
+                });
+              });
             });
           });
         });
