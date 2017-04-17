@@ -53,11 +53,10 @@ const isView = e => !!e.viewOf;
 // EntityStore -> Hook
 const getHook = (es) => es[2];
 
-// TODO All hook code needs to be able to deal with views also!
 // EntityStore -> Type -> [Entity] -> ()
 const triggerHook = curry((es, e, type, xs) => getHook(es)({
   type,
-  entity: getEntityType(e),
+  entity: e.name, // real name, not getEntityType, which takes views into account!
   entities: removeId(xs)
 }));
 
