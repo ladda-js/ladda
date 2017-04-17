@@ -56,7 +56,7 @@ const createConfig = () => {
     },
     miniUser: {
       api: createUserApi(miniUsers),
-      viewOf: 'miniUser'
+      viewOf: 'mediumUser'
     },
     activity: {
       api: { getActivities }
