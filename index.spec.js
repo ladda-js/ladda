@@ -201,6 +201,7 @@ describe('observable plugin', () => {
         });
       });
 
+      // this is different from e.g. rxjs, which immediately terminates a subscription on error
       it('also invokes error callback in later stages of the subscription\'s lifecycle', () => {
         const spy = sinon.spy();
         const errSpy = sinon.spy();
