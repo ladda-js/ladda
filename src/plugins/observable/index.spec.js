@@ -145,16 +145,16 @@ describe('observable plugin', () => {
         });
       });
 
-      it('returns an unsuscribe function', () => {
+      it('returns a Disposable', () => {
         const spy = sinon.spy();
         const api = build(createConfig(), [plugin()]);
         const observable = api.user.getUsers.createObservable();
 
-        const unsubscribe = observable.subscribe(spy);
+        const disposable = observable.subscribe(spy);
 
         return delay().then(() => {
           expect(spy).to.have.been.calledOnce;
-          unsubscribe();
+          disposable.dispose();
 
           return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
             expect(spy).to.have.been.calledOnce;
