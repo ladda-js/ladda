@@ -4,7 +4,7 @@ import sinon from 'sinon';
 
 import { build } from '../../builder';
 import { compose, map, toIdMap, values } from '../../fp';
-import { subscriber as plugin } from '.';
+import { observable as plugin } from '.';
 
 const delay = (t = 1) => new Promise(res => setTimeout(() => res(), t));
 const toMiniUser = ({ id, name }) => ({ id, name });
@@ -71,39 +71,39 @@ const createConfig = () => {
 };
 
 
-describe('subscriber plugin', () => {
-  it('patches fns so that a subscriber can be created on READ operations', () => {
+describe('observable plugin', () => {
+  it('patches fns so that an observable can be created on READ operations', () => {
     const api = build(createConfig(), [plugin()]);
-    expect(api.user.getUsers.createSubscriber).to.be.a('function');
-    expect(api.user.getUser.createSubscriber).to.be.a('function');
+    expect(api.user.getUsers.createObservable).to.be.a('function');
+    expect(api.user.getUser.createObservable).to.be.a('function');
   });
 
   it('does not patch other operations than read', () => {
     const api = build(createConfig(), [plugin()]);
-    expect(api.user.removeUser.createSubscriber).not.to.be;
-    expect(api.user.updateUser.createSubscriber).not.to.be;
+    expect(api.user.removeUser.createObservable).not.to.be;
+    expect(api.user.updateUser.createObservable).not.to.be;
   });
 
-  describe('createSubscriber()', () => {
-    it('returns a subscriber shape', () => {
+  describe('createObservable()', () => {
+    it('returns an observable shape', () => {
       const api = build(createConfig(), [plugin()]);
-      const subscriber = api.user.getUsers.createSubscriber();
-      expect(subscriber.destroy).to.be.a('function');
-      expect(subscriber.subscribe).to.be.a('function');
-      expect(subscriber.alive).to.be.true;
+      const observable = api.user.getUsers.createObservable();
+      expect(observable.destroy).to.be.a('function');
+      expect(observable.subscribe).to.be.a('function');
+      expect(observable.alive).to.be.true;
     });
   });
 
-  describe('subscriber', () => {
+  describe('observable', () => {
     describe('destroy', () => {
       it('removes all subscriptions', () => {
         const spy1 = sinon.spy();
         const spy2 = sinon.spy();
         const api = build(createConfig(), [plugin()]);
 
-        const subscriber = api.user.getUsers.createSubscriber();
-        subscriber.subscribe(spy1);
-        subscriber.subscribe(spy2);
+        const observable = api.user.getUsers.createObservable();
+        observable.subscribe(spy1);
+        observable.subscribe(spy2);
 
         return delay().then(() => {
           const initialCallCount = spy1.callCount;
@@ -112,7 +112,7 @@ describe('subscriber plugin', () => {
             expect(spy1.callCount).to.equal(initialCallCount + 1);
             expect(spy2.callCount).to.equal(initialCallCount + 1);
 
-            subscriber.destroy();
+            observable.destroy();
 
             return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
               expect(spy1.callCount).to.equal(initialCallCount + 1);
@@ -122,13 +122,13 @@ describe('subscriber plugin', () => {
         });
       });
 
-      it('marks a subscriber as destroyed', () => {
+      it('marks a observable as destroyed', () => {
         const api = build(createConfig(), [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber();
-        expect(subscriber.alive).to.be.true;
+        const observable = api.user.getUsers.createObservable();
+        expect(observable.alive).to.be.true;
 
-        subscriber.destroy();
-        expect(subscriber.alive).to.be.false;
+        observable.destroy();
+        expect(observable.alive).to.be.false;
       });
     });
 
@@ -136,9 +136,9 @@ describe('subscriber plugin', () => {
       it('immediately invokes for the first time', () => {
         const spy = sinon.spy();
         const api = build(createConfig(), [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber();
+        const observable = api.user.getUsers.createObservable();
 
-        subscriber.subscribe(spy);
+        observable.subscribe(spy);
 
         return delay().then(() => {
           expect(spy).to.have.been.calledOnce;
@@ -148,9 +148,9 @@ describe('subscriber plugin', () => {
       it('returns an unsuscribe function', () => {
         const spy = sinon.spy();
         const api = build(createConfig(), [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber();
+        const observable = api.user.getUsers.createObservable();
 
-        const unsubscribe = subscriber.subscribe(spy);
+        const unsubscribe = observable.subscribe(spy);
 
         return delay().then(() => {
           expect(spy).to.have.been.calledOnce;
@@ -165,9 +165,9 @@ describe('subscriber plugin', () => {
       it('calls the callback again when a relevant change happens', () => {
         const spy = sinon.spy();
         const api = build(createConfig(), [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber();
+        const observable = api.user.getUsers.createObservable();
 
-        subscriber.subscribe(spy);
+        observable.subscribe(spy);
 
         return delay().then(() => {
           expect(spy).to.have.been.calledOnce;
@@ -190,9 +190,9 @@ describe('subscriber plugin', () => {
         config.user.api.getUsers.operation = 'READ';
 
         const api = build(config, [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber();
+        const observable = api.user.getUsers.createObservable();
 
-        subscriber.subscribe(spy, errSpy);
+        observable.subscribe(spy, errSpy);
 
         return delay().then(() => {
           expect(spy).not.to.have.been.called;
@@ -210,9 +210,9 @@ describe('subscriber plugin', () => {
         config.user.api.getUsers.operation = 'READ';
 
         const api = build(config, [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber();
+        const observable = api.user.getUsers.createObservable();
 
-        subscriber.subscribe(spy, errSpy);
+        observable.subscribe(spy, errSpy);
 
         return delay().then(() => {
           expect(spy).not.to.have.been.called;
@@ -233,8 +233,8 @@ describe('subscriber plugin', () => {
         const spies = [sinon.spy(), sinon.spy(), sinon.spy()];
         const api = build(createConfig(), [plugin()]);
 
-        const subscriber = api.user.getUsers.createSubscriber();
-        spies.forEach((spy) => subscriber.subscribe(spy));
+        const observable = api.user.getUsers.createObservable();
+        spies.forEach((spy) => observable.subscribe(spy));
 
         return delay().then(() => {
           spies.forEach((spy) => expect(spy.callCount).to.equal(1));
@@ -244,9 +244,9 @@ describe('subscriber plugin', () => {
       it('invokes the callback with no arguments by default', () => {
         const spy = sinon.spy();
         const api = build(createConfig(), [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber();
+        const observable = api.user.getUsers.createObservable();
 
-        subscriber.subscribe(spy);
+        observable.subscribe(spy);
 
         return delay().then(() => {
           expect(spy).to.have.been.calledOnce;
@@ -265,8 +265,8 @@ describe('subscriber plugin', () => {
         stub.operation = 'READ';
         config.user.api.getUsers = stub;
         const api = build(config, [plugin()]);
-        const subscriber = api.user.getUsers.createSubscriber(1, 2, 3);
-        subscriber.subscribe(spy);
+        const observable = api.user.getUsers.createObservable(1, 2, 3);
+        observable.subscribe(spy);
 
         return delay().then(() => {
           expect(stub).to.have.been.calledWith(1, 2, 3);
@@ -277,9 +277,9 @@ describe('subscriber plugin', () => {
         it('notices changes to a child view', () => {
           const spy = sinon.spy();
           const api = build(createConfig(), [plugin()]);
-          const subscriber = api.user.getUsers.createSubscriber();
+          const observable = api.user.getUsers.createObservable();
 
-          subscriber.subscribe(spy);
+          observable.subscribe(spy);
 
           return delay().then(() => {
             expect(spy).to.have.been.calledOnce;
@@ -293,9 +293,9 @@ describe('subscriber plugin', () => {
         it('notices changes to a parent view', () => {
           const spy = sinon.spy();
           const api = build(createConfig(), [plugin()]);
-          const subscriber = api.miniUser.getUsers.createSubscriber();
+          const observable = api.miniUser.getUsers.createObservable();
 
-          subscriber.subscribe(spy);
+          observable.subscribe(spy);
 
           return delay().then(() => {
             expect(spy).to.have.been.calledOnce;
@@ -309,9 +309,9 @@ describe('subscriber plugin', () => {
         it('notices direct invalidations', () => {
           const spy = sinon.spy();
           const api = build(createConfig(), [plugin()]);
-          const subscriber = api.activity.getActivities.createSubscriber();
+          const observable = api.activity.getActivities.createObservable();
 
-          subscriber.subscribe(spy);
+          observable.subscribe(spy);
 
           return delay().then(() => {
             expect(spy).to.have.been.calledOnce;
@@ -334,9 +334,9 @@ describe('subscriber plugin', () => {
 
           const spy = sinon.spy();
           const api = build(config, [plugin()]);
-          const subscriber = api.activity.getActivities.createSubscriber();
+          const observable = api.activity.getActivities.createObservable();
 
-          subscriber.subscribe(spy);
+          observable.subscribe(spy);
 
           return delay().then(() => {
             expect(spy).to.have.been.calledOnce;
@@ -374,9 +374,9 @@ describe('subscriber plugin', () => {
 
           const spy = sinon.spy();
           const api = build(config, [plugin()]);
-          const subscriber = api.activity.getActivities.createSubscriber();
+          const observable = api.activity.getActivities.createObservable();
 
-          subscriber.subscribe(spy);
+          observable.subscribe(spy);
 
           return delay().then(() => {
             expect(spy).to.have.been.calledOnce;
@@ -406,11 +406,11 @@ describe('subscriber plugin', () => {
 
           const spy = sinon.spy();
           const api = build(config, [plugin()]);
-          const subscriber = api.activity.getActivities.createSubscriber();
+          const observable = api.activity.getActivities.createObservable();
 
           // fill the cache so that we can remove items later
           api.user.getUsers().then(() => {
-            subscriber.subscribe(spy);
+            observable.subscribe(spy);
 
             return delay().then(() => {
               expect(spy).to.have.been.calledOnce;
