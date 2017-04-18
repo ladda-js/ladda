@@ -40,28 +40,28 @@ const createObservableFactory = (state, relationships, entityConfigs, entity, fn
     }
 
     fn(...args).then(
-      (res) => map_((subscription) => subscription.successCb(res), subscriptions),
-      (err) => map_((subscription) => subscription.errorCb(err), subscriptions)
+      (res) => map_((subscription) => subscription.onNext(res), subscriptions),
+      (err) => map_((subscription) => subscription.onError(err), subscriptions)
     );
   };
 
-  const subscriber = {
+  const observable = {
     destroy: () => {
-      subscriber.alive = false;
+      observable.alive = false;
       state.changeListeners = removeElement(changeListener, state.changeListeners);
       subscriptions = [];
     },
-    subscribe: (successCb, errorCb = noop) => {
-      const subscription = { successCb, errorCb };
+    subscribe: (onNext, onError = noop) => {
+      const subscription = { onNext, onError };
       // add ourselves to the subscription list after the first initial call,
       // so that we don't consume a change we triggered ourselves.
       fn(...args).then(
         (res) => {
-          successCb(res);
+          onNext(res);
           subscriptions.push(subscription);
         },
         (err) => {
-          errorCb(err);
+          onError(err);
           subscriptions.push(subscription);
         }
       );
@@ -71,7 +71,7 @@ const createObservableFactory = (state, relationships, entityConfigs, entity, fn
   };
 
   state.changeListeners.push(changeListener);
-  return subscriber;
+  return observable;
 };
 
 export const observable = () => ({ addListener, entityConfigs }) => {

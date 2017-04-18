@@ -1,11 +1,11 @@
 import { build } from './builder';
-import { subscriber } from './plugins/subscriber';
+import { observable } from './plugins/observable';
 import { denormalizer } from './plugins/denormalizer';
 
 module.exports = {
   build,
   plugins: {
-    subscriber,
+    observable,
     denormalizer
   }
 };
