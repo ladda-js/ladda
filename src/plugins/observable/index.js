@@ -31,7 +31,7 @@ const isRelevantChange = (relationships, entity, fn, change) => {
     isInvalidatedByChange(rel, change);
 };
 
-const createSubscriberFactory = (state, relationships, entityConfigs, entity, fn) => (...args) => {
+const createObservableFactory = (state, relationships, entityConfigs, entity, fn) => (...args) => {
   let subscriptions = [];
 
   const changeListener = (change) => {
@@ -74,7 +74,7 @@ const createSubscriberFactory = (state, relationships, entityConfigs, entity, fn
   return subscriber;
 };
 
-export const subscriber = () => ({ addListener, entityConfigs }) => {
+export const observable = () => ({ addListener, entityConfigs }) => {
   const state = {
     changeListeners: []
   };
@@ -85,7 +85,7 @@ export const subscriber = () => ({ addListener, entityConfigs }) => {
 
   return ({ entity, fn }) => {
     if (fn.operation !== 'READ') { return fn; }
-    fn.createSubscriber = createSubscriberFactory(state, relationships, entityConfigs, entity, fn);
+    fn.createObservable = createObservableFactory(state, relationships, entityConfigs, entity, fn);
     return fn;
   };
 };
