@@ -2,6 +2,7 @@
 
 import sinon from 'sinon';
 import {build} from './builder';
+import {curry} from './fp';
 
 const getUsers = () => Promise.resolve([{id: 1}, {id: 2}]);
 getUsers.operation = 'READ';
@@ -125,5 +126,25 @@ describe('builder', () => {
       .then(delay)
       .then(() => api.user.getUsers())
       .then(expectOnlyOneApiCall);
+  });
+
+  it('takes plugins as second argument', (done) => {
+    const myConfig = config();
+    const pluginTracker = {};
+    const plugin = (pConfig) => {
+      const pName = pConfig.name;
+      pluginTracker[pName] = {};
+      return curry(({ config: c, entityConfigs }, { fn }) => {
+        pluginTracker[pName][fn.name] = true;
+        return fn;
+      });
+    };
+    const pluginName = 'X';
+    const expectACall = () => expect(pluginTracker[pluginName].getUsers).to.be.true;
+
+    const api = build(myConfig, [plugin({ name: pluginName })]);
+    api.user.getUsers()
+      .then(expectACall)
+      .then(() => done());
   });
 });

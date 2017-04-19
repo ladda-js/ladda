@@ -5,8 +5,8 @@ import {debug, identity, curry, passThrough,
         startsWith, join, on, isEqual,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
-        mapObject, mapValues, toObject, filter, clone,
-        filterObject, copyFunction} from './fp';
+        mapObject, mapValues, toObject, filter, clone, filterObject,
+        copyFunction, get, set, concat, flatten, uniq} from './fp';
 
 describe('fp', () => {
   describe('debug', () => {
@@ -255,6 +255,96 @@ describe('fp', () => {
       const res = copyFunction(input);
       res.aProp = 'hello';
       expect(input.aProp).to.not.be.equal(res.aProp);
+    });
+  });
+
+  describe('get', () => {
+    it('allows to access deep nested data by a list of keys', () => {
+      const x = { a: { b: { c: 1 } } };
+      const actual = get(['a', 'b', 'c'], x);
+      expect(actual).to.equal(1);
+    });
+
+    it('returns undefined when a too deep path is given', () => {
+      const x = { a: 1 };
+      const actual = get(['a', 'b', 'c'], x);
+      expect(actual).to.be.undefined;
+    });
+  });
+
+  describe('set', () => {
+    it('allows to access set nested data by a list of keys and a new value', () => {
+      const keys = ['a', 'b', 'c'];
+      const x = { a: { b: { c: 1 } }, x: { y: '0' } };
+      const nextX = set(keys, 2, x);
+      expect(get(keys, nextX)).to.equal(2);
+    });
+
+    it('returns an immutable copy of the original object', () => {
+      const keys = ['a', 'b', 'c'];
+      const x = { a: { b: { c: 1 } }, x: { y: '0' } };
+      const nextX = set(keys, 2, x);
+      expect(nextX).not.to.equal(x);
+    });
+
+    it('treats all items along the key path as immutable', () => {
+      const keys = ['a', 'b', 'c'];
+      const x = { a: { b: { c: 1 } }, x: { y: '0' } };
+      const nextX = set(keys, 2, x);
+      expect(nextX.a).not.to.equal(x.a);
+      expect(nextX.a.b).not.to.equal(x.a.b);
+    });
+
+    it('does not update references to obj which are not along the path', () => {
+      const keys = ['a', 'b', 'c'];
+      const x = { a: { b: { c: 1 } }, x: { y: '0' } };
+      const nextX = set(keys, 2, x);
+      expect(nextX.x).to.equal(x.x);
+    });
+
+    it('returns the original object when the update path is empty', () => {
+      const x = {};
+      const nextX = set([], 1, x);
+      expect(nextX).to.equal(x);
+    });
+  });
+
+  describe('concat', () => {
+    it('concatenates two lists', () => {
+      const a = [1];
+      const b = [2];
+      const expected = [1, 2];
+      const actual = concat(a, b);
+      expect(actual).to.deep.equal(expected);
+    });
+  });
+
+  describe('flatten', () => {
+    it('flattens a list of lists', () => {
+      const a = [1];
+      const b = [2];
+      const c = [3, 4];
+      const expected = [1, 2, 3, 4];
+      const actual = (flatten([a, b, c]));
+      expect(actual).to.deep.equal(expected);
+    });
+  });
+
+  describe('uniq', () => {
+    it('returns unique items in a list of primitives', () => {
+      const list = [1, 2, 1, 1, 2, 3];
+      const expected = [1, 2, 3];
+      const actual = uniq(list);
+      expect(actual).to.deep.equal(expected);
+    });
+
+    it('returns unique items in a list of complex objects', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const list = [a, a, b, a, b, a];
+      const expected = [a, b];
+      const actual = uniq(list);
+      expect(actual).to.deep.equal(expected);
     });
   });
 });

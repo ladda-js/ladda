@@ -101,6 +101,9 @@ export const mapValues = curry((fn, o) => {
   }, {}, keys);
 });
 
+// Object<a, b> -> [b]
+export const values = mapObject((pair) => pair[1]);
+
 // (a -> b) -> [Object] -> Object<b, a>
 export const toObject = curry((getK, xs) => reduce(
   (m, x) => writeToObject(m, getK(x), x),
@@ -149,3 +152,33 @@ export const copyFunction = f => {
   }
   return newF;
 };
+
+export const get = curry((props, o) => {
+  return reduce((m, p) => {
+    if (!m) { return m; }
+    return prop(p, m);
+  }, o, props);
+});
+
+export const set = curry((props, val, o) => {
+  if (!props.length) { return o; }
+  const update = (items, obj) => {
+    if (!items.length) { return obj; }
+    const [k, nextVal] = head(items);
+    const next = items.length === 1 ? nextVal : { ...prop(k, obj), ...nextVal };
+    return { ...obj, [k]: update(tail(items), next) };
+  };
+
+  const zipped = [...map((k) => [k, {}], init(props)), [last(props), val]];
+  return update(zipped, o);
+});
+
+export const concat = curry((a, b) => a.concat(b));
+
+export const flatten = (arrs) => reduce(concat, [], arrs);
+
+export const uniq = (arr) => [...new Set(arr)];
+
+export const fst = (arr) => arr[0];
+export const snd = (arr) => arr[1];
+

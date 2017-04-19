@@ -1,8 +1,6 @@
-import {mapObject, mapValues, compose, map, toObject,
+import {mapObject, mapValues, compose, toObject, reduce, toPairs,
         prop, filterObject, isEqual, not, curry, copyFunction} from './fp';
-import {createEntityStore} from './entity-store';
-import {createQueryCache} from './query-cache';
-import {decorate} from './decorator';
+import {decorator} from './decorator';
 
 // [[EntityName, EntityConfig]] -> Entity
 const toEntity = ([name, c]) => ({
@@ -10,8 +8,61 @@ const toEntity = ([name, c]) => ({
   ...c
 });
 
-// [Entity] -> Api
-const toApi = compose(mapValues(prop('api')), toObject(prop('name')));
+const KNOWN_STATICS = {
+  name: true,
+  length: true,
+  prototype: true,
+  caller: true,
+  arguments: true,
+  arity: true
+};
+
+const setFnName = curry((name, fn) => {
+  Object.defineProperty(fn, 'name', { writable: true });
+  fn.name = name;
+  Object.defineProperty(fn, 'name', { writable: false });
+  return fn;
+});
+
+const hoistMetaData = (a, b) => {
+  const keys = Object.getOwnPropertyNames(a);
+  for (let i = keys.length - 1; i >= 0; i--) {
+    const k = keys[i];
+    if (!KNOWN_STATICS[k]) {
+      b[k] = a[k];
+    }
+  }
+  setFnName(a.name, b);
+  return b;
+};
+
+export const mapApiFunctions = (fn, entityConfigs) => {
+  return mapValues((entity) => {
+    return {
+      ...entity,
+      api: reduce(
+        // As apiFn name we use key of the api field and not the name of the
+        // fn directly. This is controversial. Decision was made because
+        // the original function name might be polluted at this point, e.g.
+        // containing a "bound" prefix.
+        (apiM, [apiFnName, apiFn]) => {
+          const getFn = compose(prop(apiFnName), prop('api'));
+          const nextFn = hoistMetaData(getFn(entity), fn({ entity, fn: apiFn }));
+          setFnName(apiFnName, nextFn);
+          apiM[apiFnName] = nextFn;
+          return apiM;
+        },
+        {},
+        toPairs(entity.api)
+      )
+    };
+  }, entityConfigs);
+};
+
+const stripMetaData = (fn) => (...args) => fn(...args);
+
+// EntityConfig -> Api
+const toApi = mapValues(compose(mapValues(stripMetaData), prop('api')));
 
 // EntityConfig -> EntityConfig
 const setEntityConfigDefaults = ec => {
@@ -51,19 +102,21 @@ const setApiConfigDefaults = ec => {
 
 // Config -> Map String EntityConfig
 const getEntityConfigs = compose(
+  toObject(prop('name')),
+  mapObject(toEntity),
   mapValues(setApiConfigDefaults),
   mapValues(setEntityConfigDefaults),
   filterObject(compose(not, isEqual('__config')))
 );
 
-// Config -> Api
-export const build = (c) => {
-  const config = c.__config || {idField: 'id'};
-  const entityConfigs = getEntityConfigs(c);
-  const entities = mapObject(toEntity, entityConfigs);
-  const entityStore = createEntityStore(entities);
-  const queryCache = createQueryCache(entityStore);
-  const createApi = compose(toApi, map(decorate(config, entityStore, queryCache)));
+const applyPlugin = curry((config, entityConfigs, plugin) => {
+  const pluginDecorator = plugin({ config, entityConfigs });
+  return mapApiFunctions(pluginDecorator, entityConfigs);
+});
 
-  return createApi(entities);
+// Config -> Api
+export const build = (c, ps = []) => {
+  const config = c.__config || {idField: 'id'};
+  const createApi = compose(toApi, reduce(applyPlugin(config), getEntityConfigs(c)));
+  return createApi([decorator, ...ps]);
 };
