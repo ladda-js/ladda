@@ -6,6 +6,7 @@ export const createApiFunction = (fn, config = {}) => {
   fnCopy.invalidates = config.invalidates || [];
   fnCopy.idFrom = config.idFrom || 'ENTITY';
   fnCopy.byId = config.byId || false;
+  fnCopy.byIds = config.byIds || false;
   return fnCopy;
 };
 

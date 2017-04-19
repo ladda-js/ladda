@@ -97,6 +97,9 @@ const setViewValue = (s, e, v) => {
 // EntityStore -> Entity -> Value -> ()
 export const put = handle(setViewValue, setEntityValue);
 
+// EntityStore -> Entity -> [Value] -> ()
+export const mPut = curry((es, e) => map_(put(es, e)));
+
 // EntityStore -> Entity -> String -> Value
 const getEntityValue = (s, e, id) => {
   const k = createEntityKey(e, {__ladda__id: id});

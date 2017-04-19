@@ -6,7 +6,7 @@ import {debug, identity, curry, passThrough,
         on2, init, tail, last, head, map, map_, reverse,
         reduce, compose, prop, zip, flip, toPairs, fromPairs,
         mapObject, mapValues, toObject, filter, clone, filterObject,
-        copyFunction, get, set, concat, flatten, uniq} from './fp';
+        copyFunction, get, set, concat, flatten, uniq, toIdMap} from './fp';
 
 describe('fp', () => {
   describe('debug', () => {
@@ -344,6 +344,18 @@ describe('fp', () => {
       const list = [a, a, b, a, b, a];
       const expected = [a, b];
       const actual = uniq(list);
+      expect(actual).to.deep.equal(expected);
+    });
+  });
+
+  describe('toIdMap', () => {
+    it('returns a map with ids as keys from a list of entities', () => {
+      const a = { id: 'a' };
+      const b = { id: 'b' };
+      const c = { id: 'c' };
+
+      const expected = { a, b, c };
+      const actual = toIdMap([a, b, c]);
       expect(actual).to.deep.equal(expected);
     });
   });
