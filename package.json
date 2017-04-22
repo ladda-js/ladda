@@ -29,7 +29,8 @@
     "docs:watch": "npm run docs:prepare && gitbook serve",
     "test": "env NODE_PATH=$NODE_PATH:$PWD/src ./node_modules/.bin/mocha --compilers js:babel-register --reporter spec src/*.spec.js 'src/**/*.spec.js' --require mocha.config",
     "coverage": "env NODE_PATH=$NODE_PATH:$PWD/src nyc -x '**/*.spec.js' -x '**/*.config.js' --reporter=lcov --reporter=text mocha --compilers js:babel-register --reporter spec src/*.spec.js 'src/**/*.spec.js' --require mocha.config",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "prepublish": "webpack"
   },
   "author": "Peter Crona <petercrona89@gmail.com> (http://www.icecoldcode.com)",
   "license": "MIT",
