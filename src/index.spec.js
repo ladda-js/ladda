@@ -88,50 +88,11 @@ describe('observable plugin', () => {
     it('returns an observable shape', () => {
       const api = build(createConfig(), [plugin()]);
       const observable = api.user.getUsers.createObservable();
-      expect(observable.destroy).to.be.a('function');
       expect(observable.subscribe).to.be.a('function');
-      expect(observable.alive).to.be.true;
     });
   });
 
   describe('observable', () => {
-    describe('destroy', () => {
-      it('removes all subscriptions', () => {
-        const spy1 = sinon.spy();
-        const spy2 = sinon.spy();
-        const api = build(createConfig(), [plugin()]);
-
-        const observable = api.user.getUsers.createObservable();
-        observable.subscribe(spy1);
-        observable.subscribe(spy2);
-
-        return delay().then(() => {
-          const initialCallCount = spy1.callCount;
-
-          return api.user.updateUser({ id: 'peter', name: 'Peter' }).then(() => {
-            expect(spy1.callCount).to.equal(initialCallCount + 1);
-            expect(spy2.callCount).to.equal(initialCallCount + 1);
-
-            observable.destroy();
-
-            return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-              expect(spy1.callCount).to.equal(initialCallCount + 1);
-              expect(spy2.callCount).to.equal(initialCallCount + 1);
-            });
-          });
-        });
-      });
-
-      it('marks a observable as destroyed', () => {
-        const api = build(createConfig(), [plugin()]);
-        const observable = api.user.getUsers.createObservable();
-        expect(observable.alive).to.be.true;
-
-        observable.destroy();
-        expect(observable.alive).to.be.false;
-      });
-    });
-
     describe('subscribe', () => {
       it('immediately invokes for the first time', () => {
         const spy = sinon.spy();

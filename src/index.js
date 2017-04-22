@@ -45,12 +45,22 @@ const createObservableFactory = (state, relationships, entityConfigs, entity, fn
     );
   };
 
-  const observable = {
-    destroy: () => {
-      observable.alive = false;
+  const addSubscription = (subscription) => {
+    if (subscriptions.length === 0) {
+      state.changeListeners.push(changeListener);
+    }
+    subscriptions.push(subscription);
+  };
+
+  const removeSubscription = (subscription) => {
+    subscriptions = removeElement(subscription, subscriptions);
+    if (subscriptions.length === 0) {
       state.changeListeners = removeElement(changeListener, state.changeListeners);
-      subscriptions = [];
-    },
+    }
+  };
+
+
+  const observable = {
     subscribe: (onNext, onError = noop) => {
       const subscription = { onNext, onError };
       // add ourselves to the subscription list after the first initial call,
@@ -58,19 +68,18 @@ const createObservableFactory = (state, relationships, entityConfigs, entity, fn
       fn(...args).then(
         (res) => {
           onNext(res);
-          subscriptions.push(subscription);
+          addSubscription(subscription);
         },
         (err) => {
           onError(err);
-          subscriptions.push(subscription);
+          addSubscription(subscription);
         }
       );
-      return { dispose: () => { subscriptions = removeElement(subscription, subscriptions); } };
+      return { dispose: () => { removeSubscription(subscription); } };
     },
     alive: true
   };
 
-  state.changeListeners.push(changeListener);
   return observable;
 };
 
