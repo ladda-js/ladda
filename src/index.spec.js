@@ -6,7 +6,6 @@ import { compose, map, toIdMap, values } from 'ladda-fp';
 import { build } from 'ladda-cache';
 import { logger } from '.';
 
-const delay = (t = 1) => new Promise(res => setTimeout(() => res(), t));
 const toMiniUser = ({ id, name }) => ({ id, name });
 
 const createUserApi = (container) => {
@@ -72,14 +71,50 @@ const createMockLogger = () => ({
   info: sinon.spy(),
   warn: sinon.spy(),
   error: sinon.spy(),
-  debug: sinon.spy()
+  group: sinon.spy(),
+  groupEnd: sinon.spy()
+});
+
+const createLogger = (implementation, conf = {}) => logger({
+  implementation,
+  noFormat: true,
+  ...conf
 });
 
 describe('Ladda logger', () => {
+  it('pass disable: true to disable logging', () => {
+    const l = createMockLogger();
+    const api = build(createConfig(), [createLogger(l, { disable: true })]);
+    expect(l.log).not.to.have.been.called;
+    return api.user.getUsers().then(() => {
+      expect(l.log).not.to.have.been.called;
+    });
+  });
+
   it('logs on startup', () => {
     const l = createMockLogger();
-    build(createConfig(), [logger({ implementation: l })]);
+    build(createConfig(), [createLogger(l)]);
+    expect(l.log).to.have.been.calledOnce;
+  });
+
+  it('logs on api calls', () => {
+    const l = createMockLogger();
+    const api = build(createConfig(), [createLogger(l)]);
+    expect(l.log).to.have.been.calledOnce;
+
+    return api.user.getUsers().then(() => {
+      expect(l.log).to.have.been.calledThrice;
+    });
+  });
+
+  it('logs changes in the cache', () => {
+    const l = createMockLogger();
+    const api = build(createConfig(), [createLogger(l)]);
     expect(l.log).to.have.been.called;
+
+    return api.user.getUsers().then(() => {
+      expect(l.log).to.have.been.calledThrice;
+    });
   });
 });
 
