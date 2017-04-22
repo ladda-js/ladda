@@ -1,3 +1,4 @@
+import {passThrough, compose, curry, reduce, toIdMap, map, concat, zip} from 'ladda-fp';
 import {get as getFromEs,
         put as putInEs,
         mPut as mPutInEs,
@@ -7,7 +8,6 @@ import {get as getFromQc,
         put as putInQc,
         contains as inQc,
         getValue} from '../query-cache';
-import {passThrough, compose, curry, reduce, toIdMap, map, concat, zip} from '../fp';
 import {addId, removeId} from '../id-helper';
 
 const getTtl = e => e.ttl * 1000;

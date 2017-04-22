@@ -1,4 +1,4 @@
-import { reduce } from '../fp';
+import { reduce } from 'ladda-fp';
 
 const toKey = (args) => JSON.stringify(args);
 

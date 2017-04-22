@@ -1,4 +1,4 @@
-import { map_, noop, removeElement } from '../../fp';
+import { map_, noop, removeElement } from 'ladda-fp';
 import { analyzeEntityRelationships } from './helper';
 
 const isChangeOfSameEntity = (entity, change) => entity.name === change.entity;

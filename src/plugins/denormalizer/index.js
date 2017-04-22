@@ -2,7 +2,7 @@ import {
   compose, curry, head, map, mapObject, mapValues,
   prop, reduce, fromPairs, toPairs, values,
   uniq, flatten, get, set, snd, toIdMap
-} from '../../fp';
+} from 'ladda-fp';
 
 /* TYPES
  *
