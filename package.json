@@ -1,6 +1,6 @@
 {
   "name": "ladda-cache",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Data fetching layer with support for caching",
   "main": "dist/bundle.js",
   "dependencies": {},
@@ -29,13 +29,17 @@
     "docs:watch": "npm run docs:prepare && gitbook serve",
     "test": "env NODE_PATH=$NODE_PATH:$PWD/src ./node_modules/.bin/mocha --compilers js:babel-register --reporter spec src/*.spec.js 'src/**/*.spec.js' --require mocha.config",
     "coverage": "env NODE_PATH=$NODE_PATH:$PWD/src nyc -x '**/*.spec.js' -x '**/*.config.js' --reporter=lcov --reporter=text mocha --compilers js:babel-register --reporter spec src/*.spec.js 'src/**/*.spec.js' --require mocha.config",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "prepublish": "npm run lint && npm test && webpack"
   },
-  "author": "Peter Crona <petercrona89@gmail.com> (http://www.icecoldcode.com)",
+  "author": [
+    "Peter Crona <petercrona89@gmail.com> (http://www.icecoldcode.com)",
+    "Gernot Hoeflechner <1986gh@gmail.com> (http://github.com/lfdm)"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/petercrona/ladda.git"
+    "url": "https://github.com/ladda-js/ladda.git"
   },
-  "homepage": "https://github.com/petercrona/ladda"
+  "homepage": "https://github.com/ladda-js/ladda"
 }
