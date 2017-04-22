@@ -16,32 +16,33 @@ const timer = (typeof performance !== 'undefined' && performance !== null) && ty
 /* eslint-enable no-undef */
 /* eslint-enable max-len */
 
-const repeat = (str, times) => (new Array(times + 1)).join(str);
-const pad = (num, maxLength) => repeat('0', maxLength - num.toString().length) + num;
-const getDuration = (start) => (timer.now() - start) / 1000;
-/* eslint-disable max-len */
-const formatTime = (time) => `${pad(time.getHours(), 2)}:${pad(time.getMinutes(), 2)}:${pad(time.getSeconds(), 2)}.${pad(time.getMilliseconds(), 3)}`;
-/* eslint-enable max-len */
+const round = (value, decimals) => {
+  const rounded = Math.round(`${value}e${decimals}`);
+  return Number(`${rounded}e-${decimals}`);
+};
 
+const getDuration = (start) => round((timer.now() - start) / 1000, 3);
 
-const toTitleStyle = (color) => `color: ${color}; font-weight: bold';`;
-const toTextStyle = (color) => `color: ${color}`;
-const toSubTextStyle = (color) => `color: ${color}, font-weight: lighter`;
+const inBoldStyle = (color) => `color: ${color}; font-weight: bold;`;
 
-const toTimeText = (time, duration) => `@ ${formatTime(time)} (in ${duration}ms)`;
+const toTimeText = (duration) => `in ${duration}ms`;
 
-const logGroup = (impl, formattedText, titleColor, colors, collapse) => {
-  const args = [
-    formattedText,
-    toTitleStyle(titleColor),
-    toTextStyle(colors.text),
-    toSubTextStyle(colors.subText)
-  ];
+const logGroup = (impl, collapse, ...args) => {
   if (collapse) {
     impl.groupCollapsed(...args);
   } else {
     impl.group(...args);
   }
+};
+
+const logResult = (impl, formattedText, titleColor, colors, collapse) => {
+  const args = [
+    formattedText,
+    inBoldStyle(colors.subText),
+    inBoldStyle(titleColor),
+    inBoldStyle(colors.subText)
+  ];
+  logGroup(impl, collapse, ...args);
 };
 
 const createLogger = (impl, disabled, collapse, colors, noFormat) => {
@@ -58,12 +59,7 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
       if (noFormat) {
         impl.log('Ladda setup with entityConfigs', entityConfigs, 'and global config', config);
       } else {
-        const text = 'Ladda setup';
-        if (collapse) {
-          impl.groupCollapsed(text);
-        } else {
-          impl.group(text);
-        }
+        logGroup(impl, collapse, 'Ladda setup running');
         impl.log('entity configs', entityConfigs);
         impl.log('global config', config);
         impl.groupEnd();
@@ -74,17 +70,24 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
       if (noFormat) {
         impl.log(text, change);
       } else {
-        impl.log(`%c${text}`, toTitleStyle(colors.info), change);
+        const args = [
+          `%c${text} %c${change.type} ${change.entity}`,
+          inBoldStyle(colors.subText),
+          inBoldStyle(colors.info)
+        ];
+        logGroup(impl, collapse, ...args);
+        impl.log('entities', change.entities);
+        impl.groupEnd();
       }
     },
-    logResolve: (fnName, startTime, start, res, args) => {
+    logResolve: (fnName, start, res, args) => {
       const text = 'Ladda resolved';
-      const timeText = toTimeText(startTime, getDuration(start));
+      const timeText = toTimeText(getDuration(start));
       if (noFormat) {
         impl.log(`${text} ${fnName} ${timeText} with`, res, 'from args', args);
       } else {
-        const title = `%c${text} %c${fnName} %c@ ${timeText}`;
-        logGroup(impl, title, colors.success, colors, collapse);
+        const title = `%c${text} %c${fnName} %c${timeText}`;
+        logResult(impl, title, colors.success, colors, collapse);
         impl.log('args', args);
         impl.log('res', res);
         impl.groupEnd();
@@ -97,7 +100,7 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
         impl.log(`${text} ${fnName} ${timeText} with err`, err, 'from args', args);
       } else {
         const title = `%c${text} %c${fnName} %c@ ${timeText}`;
-        logGroup(impl, title, colors.error, colors, collapse);
+        logResult(impl, title, colors.error, colors, collapse);
         impl.log('args', args);
         impl.log('err', err);
         impl.groupEnd();
@@ -109,11 +112,11 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
 
 export const logger = ({
   disable = false,
-  collapse = false,
+  collapse = true,
   colors = defaultColors,
   implementation = console,
   noFormat = false
-}) => {
+} = {}) => {
   const l = createLogger(implementation, disable, collapse, colors, noFormat);
 
   return ({ addListener, entityConfigs, config }) => {
@@ -123,15 +126,14 @@ export const logger = ({
     return ({ entity, fn }) => {
       const fnName = toFnName(entity, fn);
       return (...args) => {
-        const startTime = new Date();
         const start = timer.now();
         return fn(...args).then(
           (res) => {
-            l.logResolve(fnName, startTime, start, res, args);
+            l.logResolve(fnName, start, res, args);
             return res;
           },
           (err) => {
-            l.logReject(fnName, startTime, start, err, args);
+            l.logReject(fnName, start, err, args);
             return Promise.reject(err);
           }
         );
