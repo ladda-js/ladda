@@ -32,11 +32,14 @@
     "lint": "eslint src",
     "prepublish": "npm run lint && npm test && webpack"
   },
-  "author": "Peter Crona <petercrona89@gmail.com> (http://www.icecoldcode.com)",
+  "author": [
+    "Peter Crona <petercrona89@gmail.com> (http://www.icecoldcode.com)",
+    "Gernot Hoeflechner <1986gh@gmail.com> (http://github.com/lfdm)"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/petercrona/ladda.git"
+    "url": "https://github.com/ladda-js/ladda.git"
   },
-  "homepage": "https://github.com/petercrona/ladda"
+  "homepage": "https://github.com/ladda-js/ladda"
 }
