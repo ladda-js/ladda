@@ -3,7 +3,7 @@
 import sinon from 'sinon';
 
 import { compose, map, toIdMap, values } from 'ladda-fp';
-import { build } from '../../builder';
+import { build } from 'ladda-cache';
 import { observable as plugin } from '.';
 
 const delay = (t = 1) => new Promise(res => setTimeout(() => res(), t));
