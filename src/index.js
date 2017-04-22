@@ -75,7 +75,7 @@ const createObservableFactory = (state, relationships, entityConfigs, entity, fn
           addSubscription(subscription);
         }
       );
-      return { dispose: () => { removeSubscription(subscription); } };
+      return { unsubscribe: () => { removeSubscription(subscription); } };
     },
     alive: true
   };

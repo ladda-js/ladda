@@ -115,7 +115,7 @@ describe('observable plugin', () => {
 
         return delay().then(() => {
           expect(spy).to.have.been.calledOnce;
-          disposable.dispose();
+          disposable.unsubscribe();
 
           return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
             expect(spy).to.have.been.calledOnce;
