@@ -42,8 +42,10 @@ import { observable } from 'ladda-observable';
 const config = { /* your ladda configuration */ };
 
 export default build(config, [
-  logger(),
-  observable()
+  observable(),
+  logger()
 ]);
 ```
+
+Plugins are evaluated from left to right.
 
