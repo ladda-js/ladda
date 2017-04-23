@@ -3,7 +3,7 @@
 ## Signature
 
 ```javascript
-({ entityConfigs, config, addListener }) => ({ entity, fn }) => ApiFn
+({ entityConfigs, config, addChangeListener }) => ({ entity, fn }) => ApiFn
 ```
 
 <br/>
@@ -12,8 +12,8 @@ It is a good practice to allow your users to pass in an additional
 plugin configuration object, thus reaching a final shape like this:
 
 ```javascript
-export const yourPlugin = (pluginConfig) => {
-  return ({ entityConfigs, config, addListener }) => {
+export const yourPlugin = (pluginConfig = {}) => {
+  return ({ entityConfigs, config, addChangeListener }) => {
     // Use this space to setup additional data structures and helpers,
     // that act across entities.
     return ({ entity, fn }) => {
@@ -23,9 +23,9 @@ export const yourPlugin = (pluginConfig) => {
         // Do your magic here!
         // Invoke the original fn with its arguments or a variation of it.
         return fn(...args);
-      }
-    }
-  }
+      };
+    };
+  };
 };
 ```
 

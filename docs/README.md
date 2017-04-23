@@ -13,6 +13,7 @@
   * [Invalidation](/docs/advanced/Invalidation.md)
   * [Views](/docs/advanced/ViewOf.md)
   * [Custom ID](/docs/advanced/CustomId.md)
+  * [Change listener](/docs/advanced/ChangeListener.md)
   * [Plugins](/docs/advanced/Plugins.md)
     * [Cheat Sheet](/docs/advanced/Plugins-CheatSheet.md)
     * [Known Plugins](/docs/advanced/Plugins-KnownPlugins.md)
