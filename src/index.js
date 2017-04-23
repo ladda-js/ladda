@@ -119,8 +119,8 @@ export const logger = ({
 } = {}) => {
   const l = createLogger(implementation, disable, collapse, colors, noFormat);
 
-  return ({ addListener, entityConfigs, config }) => {
-    addListener((change) => l.logChange(change));
+  return ({ addChangeListener, entityConfigs, config }) => {
+    addChangeListener((change) => l.logChange(change));
     l.logSetup(entityConfigs, config);
 
     return ({ entity, fn }) => {
