@@ -1,6 +1,6 @@
+import {passThrough} from 'ladda-fp';
 import {put} from '../entity-store';
 import {invalidate} from '../query-cache';
-import {passThrough} from '../fp';
 import {addId} from '../id-helper';
 
 export function decorateUpdate(c, es, qc, e, aFn) {

@@ -11,8 +11,8 @@
  * Of course, this also requiers the view to truly be a subset of the entity.
  */
 
+import {curry, reduce, map_, clone, noop} from 'ladda-fp';
 import {merge} from './merger';
-import {curry, reduce, map_, clone, noop} from './fp';
 import {removeId} from './id-helper';
 
 // Value -> StoreValue

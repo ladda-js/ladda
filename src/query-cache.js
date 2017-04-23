@@ -3,9 +3,9 @@
  * Only ids are stored here.
  */
 
-import {mPut as mPutInEs, get as getFromEs} from './entity-store';
 import {on2, prop, join, reduce, identity,
-        curry, map, map_, startsWith, compose, filter} from './fp';
+        curry, map, map_, startsWith, compose, filter} from 'ladda-fp';
+import {mPut as mPutInEs, get as getFromEs} from './entity-store';
 import {serialize} from './serializer';
 
 // Entity -> [String] -> String

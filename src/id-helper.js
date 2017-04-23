@@ -1,5 +1,5 @@
+import {curry, map, prop} from 'ladda-fp';
 import {serialize} from './serializer';
-import {curry, map, prop} from './fp';
 
 const getIdGetter = (c, aFn) => {
   if (aFn && aFn.idFrom && typeof aFn.idFrom === 'function') {

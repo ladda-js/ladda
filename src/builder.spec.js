@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-expressions */
 
 import sinon from 'sinon';
+import {curry} from 'ladda-fp';
 import {build} from './builder';
-import {curry} from './fp';
 
 const users = [{ id: 1 }, { id: 2 }];
 const getUsers = () => Promise.resolve(users);

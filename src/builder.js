@@ -1,7 +1,7 @@
 import {mapObject, mapValues, compose, toObject, reduce, toPairs,
         prop, filterObject, isEqual, not, curry, copyFunction,
         set
-      } from './fp';
+      } from 'ladda-fp';
 
 import {decorator} from './decorator';
 import {dedup} from './dedup';

@@ -1,4 +1,4 @@
-import { curry, map_ } from './fp';
+import { curry, map_ } from 'ladda-fp';
 
 const remove = curry((el, arr) => {
   const i = arr.indexOf(el);

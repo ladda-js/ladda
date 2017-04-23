@@ -3,7 +3,9 @@
   "version": "0.2.0",
   "description": "Data fetching layer with support for caching",
   "main": "dist/bundle.js",
-  "dependencies": {},
+  "dependencies": {
+    "ladda-fp": "^0.2.0"
+  },
   "devDependencies": {
     "babel-core": "^6.9.0",
     "babel-loader": "^7.0.0",

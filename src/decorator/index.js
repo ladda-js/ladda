@@ -1,4 +1,4 @@
-import {compose, values} from '../fp';
+import {compose, values} from 'ladda-fp';
 import {createEntityStore} from '../entity-store';
 import {createQueryCache} from '../query-cache';
 import {decorateCreate} from './create';
