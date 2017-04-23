@@ -142,6 +142,22 @@ describe('observable plugin', () => {
         });
       });
 
+      it('does not trigger the callback when an unrelated change happens', () => {
+        const spy = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+        const observable = api.user.getUsers.createObservable();
+
+        observable.subscribe(spy);
+
+        return delay().then(() => {
+          expect(spy).to.have.been.calledOnce;
+
+          return api.activity.getActivities().then(() => {
+            expect(spy).to.have.been.calledOnce;
+          });
+        });
+      });
+
       it('takes an optional second callback invoked on error', () => {
         const spy = sinon.spy();
         const errSpy = sinon.spy();
@@ -200,6 +216,27 @@ describe('observable plugin', () => {
 
         return delay().then(() => {
           spies.forEach((spy) => expect(spy.callCount).to.equal(1));
+        });
+      });
+
+      it('unsubscribing one subscription does not affect another', () => {
+        const spy1 = sinon.spy();
+        const spy2 = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+
+        const observable = api.user.getUsers.createObservable();
+        const subscription1 = observable.subscribe(spy1);
+        observable.subscribe(spy2);
+
+        return delay().then(() => {
+          expect(spy1).to.have.been.calledOnce;
+          expect(spy2).to.have.been.calledOnce;
+          subscription1.unsubscribe();
+
+          return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
+            expect(spy1).to.have.been.calledOnce;
+            expect(spy2).to.have.been.calledTwice;
+          });
         });
       });
 

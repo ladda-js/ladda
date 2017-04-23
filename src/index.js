@@ -41,7 +41,7 @@ const createObservableFactory = (
   let subscriptions = [];
 
   const changeListener = (change) => {
-    if (!subscriptions.length || !isRelevantChange(relationships, entity, fn, change)) {
+    if (!isRelevantChange(relationships, entity, fn, change)) {
       return;
     }
 
