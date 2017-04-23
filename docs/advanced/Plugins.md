@@ -12,13 +12,13 @@ plugins](/docs/advanced/Plugins-KnownPlugins.md).
 
 ## Building a simple logger plugin
 
-At its core a plugin is a higher order function, which returns a mapping
-function, which is invoked for each __ApiFunction__ you specified in
-your Ladda configuration - it is is supposed to return a
-new enhanced version of the given ApiFunction.
+At its core a plugin is a higher order function, which returns a
+decorator function, which is invoked for each __ApiFunction__ you
+specified in your Ladda configuration - it is is supposed to return a
+new decorated version of the given ApiFunction.
 
 Let's start with the minimal boilerplate, which is needed to get a
-plugin off the ground and then discuss each step in more detail.
+plugin off the ground:
 
 ```javascript
 export const logger = (pluginConfig = {}) => {
@@ -32,7 +32,26 @@ export const logger = (pluginConfig = {}) => {
 };
 ```
 
-### The plugin factory
+These function can be described as three individual steps, which
+eventually return a decorate ApiFunction.
+We refer to these steps as __create__, __setup__ and __decorate__.
+
+If we were to give these functions names, our boilerplate would look
+like this:
+
+```javascript
+function create(pluginConfig = {}) {
+  return function setup({ entityConfigs, config, addChangeListener }) {
+    return function decorate({ entity, fn }) {
+      return function decoratedApiFn(...args) {
+        return fn(...args);
+      }
+    }
+  }
+}
+```
+
+### Create: The plugin factory
 
 ```javascript
 export const logger = (pluginConfig = {}) => {
@@ -43,7 +62,7 @@ export const logger = (pluginConfig = {}) => {
 ```
 
 It is generally a good practice to expose your plugin as a module, which
-is a plugin factory: A higher order function which produces a plugin.
+is a plugin factory: A function which produces a plugin.
 
 While this is strictly speaking not needed it allows you to take
 additional configuration arguments for your plugin.
@@ -58,7 +77,7 @@ Try to adhere to this principle, even if your plugin does not take any
 configuration arguments when you start out. Also try to provide good
 defaults, so that your users can try and play with your plugin easily.
 
-### Producing the plugin mapping function
+### Setup: Producing the plugin decorator function
 
 ```javascript
 export const logger = (pluginConfig = {}) => {
@@ -70,14 +89,14 @@ export const logger = (pluginConfig = {}) => {
 };
 ```
 
-We mentioned earlier, that a plugin is a higher order function which
-produces a mapping function, which should return a new ApiFunction.
+We mentioned earlier, that a plugin is a function which produces a
+decorator function, which should return a new decorated ApiFunction.
 
 This function is called exactly once during build time (when Ladda's
 `build` function is called).
 
 The Plugin API tries to give you as much information as possible while
-you are creating your plugin. The plugin higher order function therefore
+you are creating your plugin. The plugin function therefore
 receives the complete entity configuration you specified, the global
 ladda configuration and the registration function to add a change
 listener.
@@ -104,7 +123,8 @@ time something changes inside of Ladda's cache. Check the [Change
 Listener documentation](/docs/advanced/ChangeListener.md) for more info.
 
 A more sophisticated plugin would use this space to define additional
-data structures, that should act across all entities.
+data structures, that should act across all entities, hence we refer to
+this step as __setup__.
 
 Things are a little simpler with our logger plugin. Let's notify
 the user that Ladda's setup is running and present all configuration we
@@ -139,12 +159,12 @@ export const logger = (pluginConfig = {}) => {
 };
 ```
 
-We need to return a mapping function here, which will be invoked for
+We need to return a decorator function here, which will be invoked for
 every ApiFunction we defined in our build configuration. Our goal is to
 wrap such an ApiFunction and return one with enhanced functionality.
 
 
-### Wrapping the original ApiFunction
+### Decorate: Wrapping the original ApiFunction
 
 ```javascript
 export const logger = (pluginConfig = {}) => {
@@ -160,7 +180,7 @@ export const logger = (pluginConfig = {}) => {
 };
 ```
 
-Our mapping function will receive a single argument, which is an object
+Our decorator function will receive a single argument, which is an object
 with two fields:
 
 - `entity` is an __EntityConfig__ as described above. All defaults are
@@ -217,7 +237,7 @@ side-effect (printing to the console), we make sure that we pass the
 original results on properly: The resolved promise value, or the error
 with which our promise got rejected.
 
-Mind that you can just return a plain function from this mapping
+Mind that you can just return a plain function from this decorator
 function. You do __NOT__ need to worry about all meta data the `fn` you
 received was provided with. Ladda's `build` function will make sure,
 that all meta data that was originally defined will be added to the

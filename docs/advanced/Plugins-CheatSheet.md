@@ -29,6 +29,9 @@ export const yourPlugin = (pluginConfig = {}) => {
 };
 ```
 
+We commonly refer to this process as __create => setup => decorate__
+steps, with the final goal of producing a decorated __ApiFunction__.
+
 ## Apply a plugin
 
 Pass plugins in a list of plugins as an optional second argument to
