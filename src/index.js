@@ -31,7 +31,13 @@ const isRelevantChange = (relationships, entity, fn, change) => {
     isInvalidatedByChange(rel, change);
 };
 
-const createObservableFactory = (state, relationships, entityConfigs, entity, fn) => (...args) => {
+const createObservableFactory = (
+  state,
+  relationships,
+  entityConfigs,
+  entity,
+  fn
+) => (...args) => {
   let subscriptions = [];
 
   const changeListener = (change) => {
@@ -76,26 +82,33 @@ const createObservableFactory = (state, relationships, entityConfigs, entity, fn
         }
       );
       return { unsubscribe: () => { removeSubscription(subscription); } };
-    },
-    alive: true
+    }
   };
 
   return observable;
 };
 
-export const observable = () => ({ addListener, entityConfigs }) => {
-  const state = {
-    changeListeners: []
-  };
+export const observable = () => {
+  return ({ addChangeListener, entityConfigs }) => {
+    const state = {
+      changeListeners: []
+    };
 
-  const relationships = analyzeEntityRelationships(entityConfigs);
+    const relationships = analyzeEntityRelationships(entityConfigs);
 
-  addListener((change) => map_((c) => c(change), state.changeListeners));
+    addChangeListener((change) => map_((c) => c(change), state.changeListeners));
 
-  return ({ entity, fn }) => {
-    if (fn.operation !== 'READ') { return fn; }
-    fn.createObservable = createObservableFactory(state, relationships, entityConfigs, entity, fn);
-    return fn;
+    return ({ entity, fn }) => {
+      if (fn.operation !== 'READ') { return fn; }
+      fn.createObservable = createObservableFactory(
+        state,
+        relationships,
+        entityConfigs,
+        entity,
+        fn
+      );
+      return fn;
+    };
   };
 };
 
