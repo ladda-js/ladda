@@ -15,6 +15,9 @@ const createUserApi = (container) => {
   const getUsers = () => Promise.resolve(values(container));
   getUsers.operation = 'READ';
 
+  const getUsersRejected = () => Promise.reject({ err: 'error' });
+  getUsersRejected.operation = 'READ';
+
   const updateUser = (nextUser) => {
     const { id } = nextUser;
     const user = container[id];
@@ -35,7 +38,7 @@ const createUserApi = (container) => {
   };
   removeUser.operation = 'DELETE';
 
-  return { getUser, getUsers, createUser, updateUser, removeUser };
+  return { getUser, getUsers, getUsersRejected, createUser, updateUser, removeUser };
 };
 
 const createConfig = () => {
@@ -72,6 +75,7 @@ const createMockLogger = () => ({
   warn: sinon.spy(),
   error: sinon.spy(),
   group: sinon.spy(),
+  groupCollapsed: sinon.spy(),
   groupEnd: sinon.spy()
 });
 
@@ -81,39 +85,135 @@ const createLogger = (implementation, conf = {}) => logger({
   ...conf
 });
 
+const createFormatLogger = (implementation, conf = {}) => logger({
+  implementation,
+  noFormat: false,
+  ...conf
+});
+
+const resetSpies = (l) => {
+  Object.keys(l).forEach((k) => l[k].reset());
+};
+
 describe('Ladda logger', () => {
-  it('pass disable: true to disable logging', () => {
-    const l = createMockLogger();
-    const api = build(createConfig(), [createLogger(l, { disable: true })]);
-    expect(l.log).not.to.have.been.called;
-    return api.user.getUsers().then(() => {
+  describe('with a no format logger', () => {
+    it('pass disable: true to disable logging', () => {
+      const l = createMockLogger();
+      const api = build(createConfig(), [createLogger(l, { disable: true })]);
       expect(l.log).not.to.have.been.called;
+      return api.user.getUsers().then(() => {
+        expect(l.log).not.to.have.been.called;
+      });
+    });
+
+    it('logs on startup', () => {
+      const l = createMockLogger();
+      build(createConfig(), [createLogger(l)]);
+      expect(l.log).to.have.been.calledOnce;
+    });
+
+    it('logs on successful api calls', () => {
+      const l = createMockLogger();
+      const api = build(createConfig(), [createLogger(l)]);
+      expect(l.log).to.have.been.calledOnce;
+
+      return api.user.getUsers().then(() => {
+        expect(l.log).to.have.been.calledThrice;
+      });
+    });
+
+    it('logs on failed api calls', () => {
+      const l = createMockLogger();
+      const api = build(createConfig(), [createLogger(l)]);
+      expect(l.log).to.have.been.calledOnce;
+
+      return api.user.getUsersRejected().catch(() => {
+        expect(l.log).to.have.been.calledTwice;
+      });
+    });
+
+    it('logs changes in the cache', () => {
+      const l = createMockLogger();
+      const api = build(createConfig(), [createLogger(l)]);
+      expect(l.log).to.have.been.called;
+
+      return api.user.getUsers().then(() => {
+        expect(l.log).to.have.been.calledThrice;
+      });
     });
   });
 
-  it('logs on startup', () => {
-    const l = createMockLogger();
-    build(createConfig(), [createLogger(l)]);
-    expect(l.log).to.have.been.calledOnce;
-  });
+  describe('with a format logger', () => {
+    const expectSetupGroup = (l) => {
+      expect(l.groupCollapsed).to.have.been.calledOnce;
+      expect(l.log).to.have.been.calledTwice;
+      expect(l.groupEnd).to.have.been.calledOnce;
+    };
 
-  it('logs on api calls', () => {
-    const l = createMockLogger();
-    const api = build(createConfig(), [createLogger(l)]);
-    expect(l.log).to.have.been.calledOnce;
-
-    return api.user.getUsers().then(() => {
-      expect(l.log).to.have.been.calledThrice;
+    it('pass disable: true to disable logging', () => {
+      const l = createMockLogger();
+      const api = build(createConfig(), [createFormatLogger(l, { disable: true })]);
+      expect(l.log).not.to.have.been.called;
+      return api.user.getUsers().then(() => {
+        expect(l.log).not.to.have.been.called;
+      });
     });
-  });
 
-  it('logs changes in the cache', () => {
-    const l = createMockLogger();
-    const api = build(createConfig(), [createLogger(l)]);
-    expect(l.log).to.have.been.called;
+    it('logs on startup', () => {
+      const l = createMockLogger();
+      build(createConfig(), [createFormatLogger(l)]);
 
-    return api.user.getUsers().then(() => {
-      expect(l.log).to.have.been.calledThrice;
+      expectSetupGroup(l);
+    });
+
+    it('properly logs group based on the collapse flag', () => {
+      const l = createMockLogger();
+      build(createConfig(), [createFormatLogger(l, { collapse: false })]);
+      expect(l.groupCollapsed).not.to.have.been.calledOnce;
+      expect(l.group).to.have.been.calledOnce;
+      expect(l.log).to.have.been.calledTwice;
+      expect(l.groupEnd).to.have.been.calledOnce;
+    });
+
+
+    it('logs on successful api calls', () => {
+      const l = createMockLogger();
+      const api = build(createConfig(), [createFormatLogger(l)]);
+      expectSetupGroup(l);
+      resetSpies(l);
+
+      return api.user.getUsers().then(() => {
+        expect(l.groupCollapsed).to.have.been.calledTwice;
+        expect(l.log).to.have.been.calledThrice;
+        expect(l.groupEnd).to.have.been.calledTwice;
+      });
+    });
+
+    it('logs on failed api calls', () => {
+      const l = createMockLogger();
+      const api = build(createConfig(), [createFormatLogger(l)]);
+      expectSetupGroup(l);
+      resetSpies(l);
+
+      return api.user.getUsersRejected().catch(() => {
+        expect(l.log).to.have.been.calledTwice;
+        expect(l.groupCollapsed).to.have.been.calledOnce;
+        expect(l.log).to.have.been.calledTwice;
+        expect(l.groupEnd).to.have.been.calledOnc;
+      });
+    });
+
+    it('logs changes in the cache', () => {
+      const l = createMockLogger();
+      const api = build(createConfig(), [createFormatLogger(l)]);
+      expectSetupGroup(l);
+      resetSpies(l);
+
+      return api.user.getUsers().then(() => {
+        expect(l.groupCollapsed).to.have.been.calledTwice;
+        expect(l.log).to.have.been.calledThrice;
+        expect(l.groupEnd).to.have.been.calledTwice;
+      });
     });
   });
 });
