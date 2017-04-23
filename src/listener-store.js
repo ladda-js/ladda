@@ -6,7 +6,7 @@ const remove = curry((el, arr) => {
   return arr;
 });
 
-const addListener = curry((listeners, listener) => {
+const addChangeListener = curry((listeners, listener) => {
   listeners.push(listener);
   return () => remove(listener, listeners);
 });
@@ -17,7 +17,7 @@ export const createListenerStore = () => {
   const listeners = [];
   return {
     onChange: notify(listeners),
-    addListener: addListener(listeners)
+    addChangeListener: addChangeListener(listeners)
   };
 };
 

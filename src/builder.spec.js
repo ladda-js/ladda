@@ -151,14 +151,14 @@ describe('builder', () => {
 
   it('exposes Ladda\'s listener/onChange interface', () => {
     const api = build(config());
-    expect(api.__addListener).to.be;
+    expect(api.__addChangeListener).to.be;
   });
 
-  describe('__addListener', () => {
+  describe('__addChangeListener', () => {
     it('allows to add a listener, which gets notified on all cache changes', () => {
       const api = build(config());
       const spy = sinon.spy();
-      api.__addListener(spy);
+      api.__addChangeListener(spy);
 
       return api.user.getUsers().then(() => {
         expect(spy).to.have.been.calledOnce;
@@ -172,7 +172,7 @@ describe('builder', () => {
     it('does not trigger when a pure cache hit is made', () => {
       const api = build(config());
       const spy = sinon.spy();
-      api.__addListener(spy);
+      api.__addChangeListener(spy);
 
       return api.user.getUsers().then(() => {
         expect(spy).to.have.been.calledOnce;
@@ -186,7 +186,7 @@ describe('builder', () => {
     it('returns a deregistration function to remove the listener', () => {
       const api = build(config());
       const spy = sinon.spy();
-      const deregister = api.__addListener(spy);
+      const deregister = api.__addChangeListener(spy);
       deregister();
 
       return api.user.getUsers().then(() => {

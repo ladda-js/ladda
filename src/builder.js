@@ -113,8 +113,8 @@ const getEntityConfigs = compose(
   filterObject(compose(not, isEqual('__config')))
 );
 
-const applyPlugin = curry((addListener, config, entityConfigs, plugin) => {
-  const pluginDecorator = plugin({ addListener, config, entityConfigs });
+const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => {
+  const pluginDecorator = plugin({ addChangeListener, config, entityConfigs });
   return mapApiFunctions(pluginDecorator, entityConfigs);
 });
 
@@ -122,8 +122,9 @@ const applyPlugin = curry((addListener, config, entityConfigs, plugin) => {
 export const build = (c, ps = []) => {
   const config = c.__config || {idField: 'id'};
   const listenerStore = createListenerStore(config);
-  const addListener = set(['__addListener'], listenerStore.addListener);
-  const applyPlugins = reduce(applyPlugin(listenerStore.addListener, config), getEntityConfigs(c));
-  const createApi = compose(addListener, toApi, applyPlugins);
+  const addChangeListener = set(['__addChangeListener'], listenerStore.addChangeListener);
+  const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, config);
+  const applyPlugins = reduce(applyPlugin_, getEntityConfigs(c));
+  const createApi = compose(addChangeListener, toApi, applyPlugins);
   return createApi([decorator(listenerStore.onChange), ...ps, dedup]);
 };
