@@ -96,9 +96,9 @@ This function is called exactly once during build time (when Ladda's
 `build` function is called).
 
 The Plugin API tries to give you as much information as possible while
-you are creating your plugin. The plugin function therefore
-receives the complete entity configuration you specified, the global
-ladda configuration and the registration function to add a change
+you are creating your plugin. The plugin function therefore receives a
+single object with the complete entity configuration you specified, the
+global ladda configuration and the registration function to add a change
 listener.
 
 `entityConfigs` is a slightly enhanced version of the configuration you
@@ -126,9 +126,9 @@ A more sophisticated plugin would use this space to define additional
 data structures, that should act across all entities, hence we refer to
 this step as __setup__.
 
-Things are a little simpler with our logger plugin. Let's notify
-the user that Ladda's setup is running and present all configuration we
-received:
+Things are a little simpler with our logger plugin - e.g. it doesn't
+hold any state of its own. Let's notify the user that Ladda's setup is
+running and present all configuration we received:
 
 
 ```javascript
@@ -311,8 +311,6 @@ which itself is passed a reference to the ApiFunction produced by `a`.
 And that's it! Congratulations, you just built your first Ladda plugin!
 You can try to run this code for yourself to see it in action, or open
 up your developer console while browsing the [Contact List Example
-Application](https://...).
-
-This app uses a more comprehensive implementation of the logger we just
-built, which can be found in the
+Application](https://...). This app uses a more comprehensive
+implementation of the logger we just built, which can be found in the
 [ladda-logger](https://github.com/ladda-js/ladda-logger) repository.
