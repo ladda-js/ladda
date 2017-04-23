@@ -1,0 +1,49 @@
+# Plugins Cheat Sheet
+
+## Signature
+
+```javascript
+({ entityConfigs, config, addListener }) => ({ entity, fn }) => ApiFn
+```
+
+<br/>
+
+It is a good practice to allow your users to pass in an additional
+plugin configuration object, thus reaching a final shape like this:
+
+```javascript
+export const yourPlugin = (pluginConfig) => {
+  return ({ entityConfigs, config, addListener }) => {
+    // Use this space to setup additional data structures and helpers,
+    // that act across entities.
+    return ({ entity, fn }) => {
+      // Use this space to setup additional data structures and helpers,
+      // that act on a single entity.
+      return (...args) => {
+        // Do your magic here!
+        // Invoke the original fn with its arguments or a variation of it.
+        return fn(...args);
+      }
+    }
+  }
+};
+```
+
+## Apply a plugin
+
+Pass plugins in a list of plugins as an optional second argument to
+Ladda's `build` function.
+
+```javascript
+import { build } from 'ladda-cache';
+import { logger } from 'ladda-logger';
+import { observable } from 'ladda-observable';
+
+const config = { /* your ladda configuration */ };
+
+export default build(config, [
+  logger(),
+  observable()
+]);
+```
+
