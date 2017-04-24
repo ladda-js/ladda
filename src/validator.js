@@ -13,7 +13,7 @@ const isValidLogger = (logger) => logger && typeof logger.error === 'function';
 
 const getEntityNames = (entityConfigs) => Object.keys(entityConfigs);
 
-const checkApiDeclaration = (logger, entityConfigs, config, entityName, entity) => {
+const checkApiDeclaration = (logger, entityConfigs, entityName, entity) => {
   if (typeof entity.api !== 'object') {
     warn(logger, `No api definition found for entity ${entityName}`);
     return;
@@ -76,7 +76,7 @@ const checkApiDeclaration = (logger, entityConfigs, config, entityName, entity) 
   )(entity.api);
 };
 
-const checkViewOf = (logger, entityConfigs, config, entityName, entity) => {
+const checkViewOf = (logger, entityConfigs, entityName, entity) => {
   const { viewOf } = entity;
   if (viewOf && !isConfigured(viewOf, entityConfigs)) {
     warn(
@@ -87,7 +87,7 @@ const checkViewOf = (logger, entityConfigs, config, entityName, entity) => {
   }
 };
 
-const checkInvalidations = (logger, entityConfigs, config, entityName, entity) => {
+const checkInvalidations = (logger, entityConfigs, entityName, entity) => {
   const { invalidates, invalidatesOn } = entity;
   map_((entityToInvalidate) => {
     if (!isConfigured(entityToInvalidate, entityConfigs)) {
@@ -110,7 +110,7 @@ const checkInvalidations = (logger, entityConfigs, config, entityName, entity) =
   }, invalidatesOn);
 };
 
-const checkTTL = (logger, entityConfigs, config, entityName, entity) => {
+const checkTTL = (logger, entityConfigs, entityName, entity) => {
   if (typeof entity.ttl !== 'number') {
     warn(
       logger,
@@ -119,7 +119,7 @@ const checkTTL = (logger, entityConfigs, config, entityName, entity) => {
   }
 };
 
-const checkNoDedup = (logger, entityConfigs, config, entityName, entity) => {
+const checkNoDedup = (logger, entityConfigs, entityName, entity) => {
   if (typeof entity.noDedup !== 'boolean') {
     warn(
       logger,
@@ -128,7 +128,7 @@ const checkNoDedup = (logger, entityConfigs, config, entityName, entity) => {
   }
 };
 
-const checkEntities = (logger, entityConfigs, config) => {
+const checkEntities = (logger, entityConfigs) => {
   const checks = [
     checkApiDeclaration,
     checkViewOf,
@@ -139,10 +139,21 @@ const checkEntities = (logger, entityConfigs, config) => {
 
   compose(
     map_(([entityName, entity]) => {
-      map_((check) => check(logger, entityConfigs, config, entityName, entity), checks);
+      map_((check) => check(logger, entityConfigs, entityName, entity), checks);
     }),
     toPairs
   )(entityConfigs);
+};
+
+const checkGlobalConfig = (logger, config) => {
+  const { noDedup, idField } = config;
+  if (typeof noDedup !== 'boolean') {
+    warn(logger, 'noDedup needs to be a boolean, was string');
+  }
+
+  if (typeof idField !== 'string') {
+    warn(logger, 'idField needs to be a string, was boolean');
+  }
 };
 
 
@@ -153,5 +164,7 @@ export const validateConfig = (logger, entityConfigs, config) => {
     return;
   }
 
-  checkEntities(logger, entityConfigs, config);
+
+  checkGlobalConfig(logger, config);
+  checkEntities(logger, entityConfigs);
 };
