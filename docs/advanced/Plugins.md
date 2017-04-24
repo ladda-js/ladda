@@ -119,8 +119,30 @@ out (as it is optional) you will receive an object with applied defaults
 here.
 
 `addChangeListener` allows us to register a callback to be invoked each
-time something changes inside of Ladda's cache. Check the [Change
-Listener documentation](/docs/advanced/ChangeListener.md) for more info.
+time something changes inside of Ladda's cache.
+The callback is invoked with a single argument, a ChangeObject of the
+following shape:
+
+
+```javascript
+{
+  type: 'UPDATE' | 'REMOVE',
+  entity: EntityName,
+  entities: EntityValue[]
+}
+```
+
+At this point in time there is no difference made between adding new
+EntityValues and updating already present ones: Both events lead to a
+change of the type `UPDATE`.
+The `entities` field is guaranteed to be a list of EntityValues, even if
+a change only affects a single entity.
+
+`addChangeListener` returns a deregistration function. Call it to stop
+listening for changes.
+
+<br/>
+
 
 A more sophisticated plugin would use this space to define additional
 data structures, that should act across all entities, hence we refer to
