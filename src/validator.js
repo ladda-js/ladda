@@ -30,7 +30,7 @@ const checkApiDeclaration = (logger, entityConfigs, config, entityName, entity) 
   compose(
     // eslint-disable-next-line no-unused-vars
     map_(([fnName, fn]) => {
-      const { operation, invalidates, idFrom, byId, byIds } = fn;
+      const { operation, invalidates, idFrom, byId, byIds, noDedup } = fn;
       const fullName = `${entityName}.${fnName}`;
       if (!isOperation(operation)) {
         warnApi(
@@ -48,6 +48,12 @@ const checkApiDeclaration = (logger, entityConfigs, config, entityName, entity) 
       if (typeof byIds !== 'boolean') {
         warnApi(
           `${fullName}'s byIds needs to be a boolean, was ${typeof byIds}'`
+        );
+      }
+
+      if (typeof noDedup !== 'boolean') {
+        warnApi(
+          `${fullName}'s noDedup needs to be a boolean, was ${typeof noDedup}'`
         );
       }
 
@@ -113,12 +119,22 @@ const checkTTL = (logger, entityConfigs, config, entityName, entity) => {
   }
 };
 
+const checkNoDedup = (logger, entityConfigs, config, entityName, entity) => {
+  if (typeof entity.noDedup !== 'boolean') {
+    warn(
+      logger,
+      `Entity ${entityName} specified noDedup as ${typeof entity.noDedup}, needs to be a boolean`
+    );
+  }
+};
+
 const checkEntities = (logger, entityConfigs, config) => {
   const checks = [
     checkApiDeclaration,
     checkViewOf,
     checkInvalidations,
-    checkTTL
+    checkTTL,
+    checkNoDedup
   ];
 
   compose(

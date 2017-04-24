@@ -146,6 +146,27 @@ describe('validateConfig', () => {
     expect(logger.error.args[0][0]).to.match(/activity.*ttl.*string.*needs to be a number/);
   });
 
+  it('checks for wrong noDedup value', () => {
+    const logger = createLogger();
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll: () => {} },
+        noDedup: false
+      },
+      activity: {
+        api: { getAll: () => {} },
+        noDedup: 'X'
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/activity.*noDedup.*string.*needs to be a boolean/);
+  });
+
+
   it('checks for wrong api operations', () => {
     const logger = createLogger();
 
@@ -200,6 +221,25 @@ describe('validateConfig', () => {
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
     expect(logger.error.args[0][0]).to.match(/user.getAll.*byIds.*string/);
+  });
+
+  it('checks for wrong api noDedup definition', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'READ';
+    getAll.noDedup = 'X';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll }
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*noDedup.*string/);
   });
 
   it('checks for wrong api idFrom (illegal type)', () => {
