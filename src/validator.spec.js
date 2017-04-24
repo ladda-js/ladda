@@ -113,4 +113,143 @@ describe('validateConfig', () => {
     expect(logger.error).to.have.been.called;
     expect(logger.error.args[0][0]).to.match(/notification.*invalid operation.*X/);
   });
+
+  it('checks for wrong ttl values', () => {
+    const logger = createLogger();
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll: () => {} },
+        ttl: 300
+      },
+      activity: {
+        api: { getAll: () => {} },
+        ttl: 'xxx'
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/activity.*ttl.*string.*needs to be a number/);
+  });
+
+  it('checks for wrong api operations', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'X';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll }
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*operation.*X/);
+  });
+
+  it('checks for wrong api byId field', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'READ';
+    getAll.byId = 'xxx';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll }
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*byId.*string/);
+  });
+
+  it('checks for wrong api byIds field', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'READ';
+    getAll.byIds = 'xxx';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll }
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*byIds.*string/);
+  });
+
+  it('checks for wrong api idFrom (illegal type)', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'READ';
+    getAll.idFrom = true;
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll }
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*idFrom/);
+  });
+
+  it('checks for wrong api idFrom (illegal string)', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'READ';
+    getAll.idFrom = 'X';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll }
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*idFrom/);
+  });
+
+  it('checks for wrong api invalidates definition', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'READ';
+    getAll.invalidates = ['getOne', 'getSme']; // typo!
+
+    const getOne = () => {};
+    getOne.operation = 'READ';
+
+    const getSome = () => {};
+    getSome.operation = 'READ';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll, getSome, getOne }
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*invalidate.*getSme/);
+  });
 });
