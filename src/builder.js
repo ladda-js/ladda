@@ -1,6 +1,5 @@
 import {mapObject, mapValues, compose, toObject, reduce, toPairs,
-        prop, filterObject, isEqual, not, curry, copyFunction,
-        set
+        prop, filterObject, isEqual, not, curry, copyFunction
       } from 'ladda-fp';
 
 import {decorator} from './decorator';
@@ -122,9 +121,8 @@ const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => 
 export const build = (c, ps = []) => {
   const config = c.__config || {idField: 'id'};
   const listenerStore = createListenerStore(config);
-  const addChangeListener = set(['__addChangeListener'], listenerStore.addChangeListener);
   const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, config);
   const applyPlugins = reduce(applyPlugin_, getEntityConfigs(c));
-  const createApi = compose(addChangeListener, toApi, applyPlugins);
+  const createApi = compose(toApi, applyPlugins);
   return createApi([decorator(listenerStore.onChange), ...ps, dedup]);
 };
