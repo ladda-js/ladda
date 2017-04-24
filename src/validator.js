@@ -7,9 +7,8 @@ const warn = (logger, msg, ...args) => {
 
 const OPERATIONS = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'NO_OPERATION'];
 const isOperation = (op) => OPERATIONS.indexOf(op) !== -1;
-const isConfigured = (entityName, entityConfigs) => {
-  return !!entityConfigs[entityName];
-};
+const isConfigured = (entityName, entityConfigs) => !!entityConfigs[entityName];
+const isIdFromString = (idFrom) => typeof idfrom === 'string' && ['ENTITY', 'ARGS'].indexOf(idFrom) !== -1;
 
 const getEntityNames = (entityConfigs) => Object.keys(entityConfigs);
 
@@ -18,9 +17,12 @@ const checkApiDeclaration = (logger, entityConfigs, config, entityName, entity) 
     warn(logger, `No api definition found for entity ${entityName}`);
     return;
   }
-  const warnApi = (msg, ...args) => {
-    return warn(logger, `Invalid api config. ${msg}`, ...args);
-  };
+
+  const warnApi = (msg, ...args) => warn(
+    logger,
+    `Invalid api config. ${msg}`,
+    ...args
+  );
 
   const apiNames = Object.keys(entity.api);
 
@@ -30,26 +32,36 @@ const checkApiDeclaration = (logger, entityConfigs, config, entityName, entity) 
       const { operation, invalidates, idFrom, byId, byIds } = fn;
       const fullName = `${entityName}.${fnName}`;
       if (!isOperation(operation)) {
-        warnApi(`${fullName}'s operation is ${operation}, use one of: `, OPERATIONS);
+        warnApi(
+          `${fullName}'s operation is ${operation}, use one of: `,
+          OPERATIONS
+        );
       }
 
       if (typeof byId !== 'boolean') {
-        warnApi(`${fullName}'s byId needs to be a boolean, was ${typeof byId}'`);
+        warnApi(
+          `${fullName}'s byId needs to be a boolean, was ${typeof byId}'`
+        );
       }
 
       if (typeof byIds !== 'boolean') {
-        warnApi(`${fullName}'s byIds needs to be a boolean, was ${typeof byIds}'`);
+        warnApi(
+          `${fullName}'s byIds needs to be a boolean, was ${typeof byIds}'`
+        );
       }
 
-      if (typeof idFrom !== 'function') {
-        if (typeof idFrom !== 'string' || ['ENTITY', 'ARGS'].indexOf(idFrom) === -1) {
-          warnApi(`${fullName} defines illegal idFrom. Use 'ENTITY', 'ARGS', or a function (Entity => id)`);
-        }
+      if (typeof idFrom !== 'function' || !isIdFromString(idFrom)) {
+        warnApi(
+          `${fullName} defines illegal idFrom. Use 'ENTITY', 'ARGS', or a function (Entity => id)`
+        );
       }
 
       map_((fnToInvalidate) => {
         if (typeof entity.api[fnToInvalidate] !== 'function') {
-          warnApi(`${fullName} tries to invalidate ${fnToInvalidate}, which is not a function. Use on of: `, apiNames);
+          warnApi(
+            `${fullName} tries to invalidate ${fnToInvalidate}, which is not a function. Use on of: `,
+            apiNames
+          );
         }
       }, invalidates);
     }),
@@ -60,7 +72,11 @@ const checkApiDeclaration = (logger, entityConfigs, config, entityName, entity) 
 const checkViewOf = (logger, entityConfigs, config, entityName, entity) => {
   const { viewOf } = entity;
   if (viewOf && !isConfigured(viewOf, entityConfigs)) {
-    warn(logger, `The view ${viewOf} of entity ${entityName} is not configured. Use on of: `, getEntityNames(entityConfigs));
+    warn(
+      logger,
+      `The view ${viewOf} of entity ${entityName} is not configured. Use on of: `,
+      getEntityNames(entityConfigs)
+    );
   }
 };
 
@@ -68,20 +84,31 @@ const checkInvalidations = (logger, entityConfigs, config, entityName, entity) =
   const { invalidates, invalidatesOn } = entity;
   map_((entityToInvalidate) => {
     if (!isConfigured(entityToInvalidate, entityConfigs)) {
-      warn(logger, `Entity ${entityName} tries to invalidate ${entityToInvalidate}, which is not configured. Use one of: `, getEntityNames(entityConfigs));
+      warn(
+        logger,
+        `Entity ${entityName} tries to invalidate ${entityToInvalidate}, which is not configured. Use one of: `,
+        getEntityNames(entityConfigs)
+      );
     }
   }, invalidates);
 
   map_((operation) => {
     if (!isOperation(operation)) {
-      warn(logger, `Entity ${entityName} tries to invalidate on invalid operation ${operation}. Use on of: `, OPERATIONS);
+      warn(
+        logger,
+        `Entity ${entityName} tries to invalidate on invalid operation ${operation}. Use on of: `,
+        OPERATIONS
+      );
     }
   }, invalidatesOn);
 };
 
 const checkTTL = (logger, entityConfigs, config, entityName, entity) => {
   if (typeof entity.ttl !== 'number') {
-    warn(logger, `Entity ${entityName} specified ttl as type of ${typeof entity.ttl}, needs to be a number in seconds`);
+    warn(
+      logger,
+      `Entity ${entityName} specified ttl as type of ${typeof entity.ttl}, needs to be a number in seconds`
+    );
   }
 };
 
@@ -92,6 +119,7 @@ const checkEntities = (logger, entityConfigs, config) => {
     checkInvalidations,
     checkTTL
   ];
+
   compose(
     map_(([entityName, entity]) => {
       map_((check) => check(logger, entityConfigs, config, entityName, entity), checks);
