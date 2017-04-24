@@ -113,6 +113,12 @@ export const getEntityConfigs = compose( // exported for testing
   filterObject(compose(not, isEqual('__config')))
 );
 
+const getGlobalConfig = (config) => ({
+  idField: 'id',
+  useProductionBuild: process.NODE_ENV === 'production',
+  ...(config.__config || {})
+});
+
 const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => {
   const pluginDecorator = plugin({ addChangeListener, config, entityConfigs });
   return mapApiFunctions(pluginDecorator, entityConfigs);
@@ -120,7 +126,7 @@ const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => 
 
 // Config -> Api
 export const build = (c, ps = []) => {
-  const config = c.__config || {idField: 'id'};
+  const config = getGlobalConfig(c);
   const entityConfigs = getEntityConfigs(c);
   validateConfig(console, entityConfigs, config);
   const listenerStore = createListenerStore(config);

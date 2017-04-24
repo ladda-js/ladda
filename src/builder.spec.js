@@ -19,6 +19,9 @@ const config = () => ({
       deleteUser
     },
     invalidates: ['alles']
+  },
+  __config: {
+    useProductionBuild: true
   }
 });
 
@@ -76,7 +79,7 @@ describe('builder', () => {
   });
   it('Works with non default id set', (done) => {
     const myConfig = config();
-    myConfig.__config = {idField: 'mySecretId'};
+    myConfig.__config = {idField: 'mySecretId', useProductionBuild: true};
     myConfig.user.api.getUsers = sinon.spy(
       () => Promise.resolve([{mySecretId: 1}, {mySecretId: 2}])
     );
