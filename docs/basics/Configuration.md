@@ -24,6 +24,11 @@ There are a handful optional options to configure Ladda. In a minimal configurat
 
 * **byId**: `true | false`. This is an optimization that tells Ladda that the first argument is an id. This allows Ladda to directly try to fetch the data from the cache, even if it was acquired by another call. This is useful if you previously called for example "getAllUsers" and now want to fetch one user directly from the cache. By default false.
 
+* **byIds**: `true | false`. Another optimization which tells Ladda that
+  the first argument is a list of ids. Ladda will try to make an optimal
+call (if any), looking up items from the cache and only calling for
+items that are not yet present. Defaults to false.
+
 ## Ladda Configuration
 
 * **idField**: Specify the default property that contains the ID. By default this is `"id"`.

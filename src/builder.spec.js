@@ -149,16 +149,25 @@ describe('builder', () => {
       .then(() => done());
   });
 
-  it('exposes Ladda\'s listener/onChange interface', () => {
-    const api = build(config());
-    expect(api.__addListener).to.be;
-  });
+  describe('change listener', () => {
+    it('exposes Ladda\'s listener/onChange interface to plugins', () => {
+      const plugin = ({ addChangeListener }) => {
+        expect(addChangeListener).to.be;
+        return ({ fn }) => fn;
+      };
 
-  describe('__addListener', () => {
-    it('allows to add a listener, which gets notified on all cache changes', () => {
-      const api = build(config());
+      build(config(), [plugin]);
+    });
+
+    it('allows plugins to add a listener, which gets notified on all cache changes', () => {
       const spy = sinon.spy();
-      api.__addListener(spy);
+
+      const plugin = ({ addChangeListener }) => {
+        addChangeListener(spy);
+        return ({ fn }) => fn;
+      };
+
+      const api = build(config(), [plugin]);
 
       return api.user.getUsers().then(() => {
         expect(spy).to.have.been.calledOnce;
@@ -170,9 +179,14 @@ describe('builder', () => {
     });
 
     it('does not trigger when a pure cache hit is made', () => {
-      const api = build(config());
       const spy = sinon.spy();
-      api.__addListener(spy);
+
+      const plugin = ({ addChangeListener }) => {
+        addChangeListener(spy);
+        return ({ fn }) => fn;
+      };
+
+      const api = build(config(), [plugin]);
 
       return api.user.getUsers().then(() => {
         expect(spy).to.have.been.calledOnce;
@@ -184,10 +198,15 @@ describe('builder', () => {
     });
 
     it('returns a deregistration function to remove the listener', () => {
-      const api = build(config());
       const spy = sinon.spy();
-      const deregister = api.__addListener(spy);
-      deregister();
+
+      const plugin = ({ addChangeListener }) => {
+        const deregister = addChangeListener(spy);
+        deregister();
+        return ({ fn }) => fn;
+      };
+
+      const api = build(config(), [plugin]);
 
       return api.user.getUsers().then(() => {
         expect(spy).not.to.have.been.called;
