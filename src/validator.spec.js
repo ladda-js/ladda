@@ -7,13 +7,20 @@ const createLogger = () => ({
   error: sinon.spy()
 });
 
+const createGlobalConfig = (conf) => ({
+  idField: 'id',
+  noDedup: false,
+  useProductionBuild: false,
+  ...conf
+});
+
 describe('validateConfig', () => {
   it('does not do anything when using production build', () => {
     const logger = createLogger();
     const eConfigs = getEntityConfigs({
       user: {}
     });
-    const config = { useProductionBuild: true };
+    const config = createGlobalConfig({ useProductionBuild: true });
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).not.to.have.been.called;
@@ -25,10 +32,44 @@ describe('validateConfig', () => {
     const eConfigs = getEntityConfigs({
       user: {}
     });
-    const config = { useProductionBuild: true };
+    const config = createGlobalConfig({ useProductionBuild: true });
 
     validateConfig(invalidLogger, eConfigs, config);
     expect(invalidLogger.x).not.to.have.been.called;
+  });
+
+  it('checks the global config object - idField', () => {
+    const logger = createLogger();
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: {
+          getAll: () => {}
+        }
+      }
+    });
+    const config = createGlobalConfig({ idField: true });
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/idField.*string.*was.*boolean/);
+  });
+
+  it('checks the global config object - noDedup', () => {
+    const logger = createLogger();
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: {
+          getAll: () => {}
+        }
+      }
+    });
+    const config = createGlobalConfig({ noDedup: 'X' });
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/noDedup.*boolean.*was.*string/);
   });
 
   it('checks for missing api declarations', () => {
@@ -42,7 +83,7 @@ describe('validateConfig', () => {
       },
       activity: {}
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
@@ -71,7 +112,7 @@ describe('validateConfig', () => {
         viewOf: 'mdiumUser' // typo!
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
@@ -95,7 +136,7 @@ describe('validateConfig', () => {
         invalidates: ['activity']
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
@@ -119,7 +160,7 @@ describe('validateConfig', () => {
         invalidatesOn: ['X']
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
@@ -139,12 +180,33 @@ describe('validateConfig', () => {
         ttl: 'xxx'
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
     expect(logger.error.args[0][0]).to.match(/activity.*ttl.*string.*needs to be a number/);
   });
+
+  it('checks for wrong noDedup value', () => {
+    const logger = createLogger();
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll: () => {} },
+        noDedup: false
+      },
+      activity: {
+        api: { getAll: () => {} },
+        noDedup: 'X'
+      }
+    });
+    const config = createGlobalConfig({});
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/activity.*noDedup.*string.*needs to be a boolean/);
+  });
+
 
   it('checks for wrong api operations', () => {
     const logger = createLogger();
@@ -157,7 +219,7 @@ describe('validateConfig', () => {
         api: { getAll }
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
@@ -176,7 +238,7 @@ describe('validateConfig', () => {
         api: { getAll }
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
@@ -195,11 +257,30 @@ describe('validateConfig', () => {
         api: { getAll }
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
     expect(logger.error.args[0][0]).to.match(/user.getAll.*byIds.*string/);
+  });
+
+  it('checks for wrong api noDedup definition', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'READ';
+    getAll.noDedup = 'X';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll }
+      }
+    });
+    const config = createGlobalConfig({});
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.called;
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*noDedup.*string/);
   });
 
   it('checks for wrong api idFrom (illegal type)', () => {
@@ -214,7 +295,7 @@ describe('validateConfig', () => {
         api: { getAll }
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
@@ -233,7 +314,7 @@ describe('validateConfig', () => {
         api: { getAll }
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
@@ -258,7 +339,7 @@ describe('validateConfig', () => {
         api: { getAll, getSome, getOne }
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
@@ -278,7 +359,7 @@ describe('validateConfig', () => {
         invalidates: ['X']
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.calledTwice;
@@ -301,7 +382,7 @@ describe('validateConfig', () => {
         ttl: 400
       }
     });
-    const config = {};
+    const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).not.to.have.been.called;

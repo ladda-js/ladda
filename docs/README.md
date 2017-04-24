@@ -12,6 +12,7 @@
 * [Advanced](/docs/advanced/README.md)
   * [Invalidation](/docs/advanced/Invalidation.md)
   * [Views](/docs/advanced/ViewOf.md)
+  * [Deduplication](/docs/advanced/Deduplication.md)
   * [Custom ID](/docs/advanced/CustomId.md)
   * [Plugins](/docs/advanced/Plugins.md)
     * [Cheat Sheet](/docs/advanced/Plugins-CheatSheet.md)
