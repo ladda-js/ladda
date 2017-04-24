@@ -252,4 +252,46 @@ describe('validateConfig', () => {
     expect(logger.error).to.have.been.called;
     expect(logger.error.args[0][0]).to.match(/user.getAll.*invalidate.*getSme/);
   });
+
+  it('informs about several errors', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'READ';
+    getAll.idFrom = 'X';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll },
+        invalidates: ['X']
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.calledTwice;
+  });
+
+  it('happily accepts valid configurations', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'READ';
+    getAll.idFrom = 'ENTITY';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll },
+        invalidates: ['activity']
+      },
+      activity: {
+        api: { getAll: () => {} },
+        ttl: 400
+      }
+    });
+    const config = {};
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).not.to.have.been.calledTwice;
+  });
 });
