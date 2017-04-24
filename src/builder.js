@@ -5,6 +5,7 @@ import {mapObject, mapValues, compose, toObject, reduce, toPairs,
 import {decorator} from './decorator';
 import {dedup} from './dedup';
 import {createListenerStore} from './listener-store';
+import {validateConfig} from './validator';
 
 // [[EntityName, EntityConfig]] -> Entity
 const toEntity = ([name, c]) => ({
@@ -99,18 +100,24 @@ const setApiConfigDefaults = ec => {
 
   return {
     ...ec,
-    api: mapValues(setDefaults, ec.api)
+    api: ec.api ? mapValues(setDefaults, ec.api) : ec.api
   };
 };
 
 // Config -> Map String EntityConfig
-const getEntityConfigs = compose(
+export const getEntityConfigs = compose( // exported for testing
   toObject(prop('name')),
   mapObject(toEntity),
   mapValues(setApiConfigDefaults),
   mapValues(setEntityConfigDefaults),
   filterObject(compose(not, isEqual('__config')))
 );
+
+const getGlobalConfig = (config) => ({
+  idField: 'id',
+  useProductionBuild: process.NODE_ENV === 'production',
+  ...(config.__config || {})
+});
 
 const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => {
   const pluginDecorator = plugin({ addChangeListener, config, entityConfigs });
@@ -119,10 +126,12 @@ const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => 
 
 // Config -> Api
 export const build = (c, ps = []) => {
-  const config = c.__config || {idField: 'id'};
+  const config = getGlobalConfig(c);
+  const entityConfigs = getEntityConfigs(c);
+  validateConfig(console, entityConfigs, config);
   const listenerStore = createListenerStore(config);
   const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, config);
-  const applyPlugins = reduce(applyPlugin_, getEntityConfigs(c));
+  const applyPlugins = reduce(applyPlugin_, entityConfigs);
   const createApi = compose(toApi, applyPlugins);
   return createApi([decorator(listenerStore.onChange), ...ps, dedup]);
 };
