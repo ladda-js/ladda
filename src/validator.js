@@ -8,7 +8,8 @@ const warn = (logger, msg, ...args) => {
 const OPERATIONS = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'NO_OPERATION'];
 const isOperation = (op) => OPERATIONS.indexOf(op) !== -1;
 const isConfigured = (entityName, entityConfigs) => !!entityConfigs[entityName];
-const isIdFromString = (idFrom) => typeof idfrom === 'string' && ['ENTITY', 'ARGS'].indexOf(idFrom) !== -1;
+const isIdFromString = (idFrom) => typeof idFrom === 'string' && ['ENTITY', 'ARGS'].indexOf(idFrom) !== -1;
+const isValidLogger = (logger) => logger && typeof logger.error === 'function';
 
 const getEntityNames = (entityConfigs) => Object.keys(entityConfigs);
 
@@ -50,7 +51,7 @@ const checkApiDeclaration = (logger, entityConfigs, config, entityName, entity) 
         );
       }
 
-      if (typeof idFrom !== 'function' || !isIdFromString(idFrom)) {
+      if (typeof idFrom !== 'function' && !isIdFromString(idFrom)) {
         warnApi(
           `${fullName} defines illegal idFrom. Use 'ENTITY', 'ARGS', or a function (Entity => id)`
         );
@@ -132,7 +133,7 @@ const checkEntities = (logger, entityConfigs, config) => {
 export const validateConfig = (logger, entityConfigs, config) => {
   // do not remove the process.NODE_ENV check here - allows uglifiers
   // to optimize and remove all unreachable code.
-  if (process.NODE_ENV === 'production' || config.useProductionBuild) {
+  if (process.NODE_ENV === 'production' || config.useProductionBuild || !isValidLogger(logger)) {
     return;
   }
 

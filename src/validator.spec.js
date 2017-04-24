@@ -19,6 +19,18 @@ describe('validateConfig', () => {
     expect(logger.error).not.to.have.been.called;
   });
 
+  it('does not do anything when invalid logger is passed', () => {
+    const invalidLogger = { x: sinon.spy() };
+
+    const eConfigs = getEntityConfigs({
+      user: {}
+    });
+    const config = { useProductionBuild: true };
+
+    validateConfig(invalidLogger, eConfigs, config);
+    expect(invalidLogger.x).not.to.have.been.called;
+  });
+
   it('checks for missing api declarations', () => {
     const logger = createLogger();
 
@@ -292,6 +304,6 @@ describe('validateConfig', () => {
     const config = {};
 
     validateConfig(logger, eConfigs, config);
-    expect(logger.error).not.to.have.been.calledTwice;
+    expect(logger.error).not.to.have.been.called;
   });
 });
