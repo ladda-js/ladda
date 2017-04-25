@@ -1,8 +1,11 @@
-import {mapObject, mapValues, compose, map, toObject,
-        prop, filterObject, isEqual, not, curry, copyFunction} from './fp';
-import {createEntityStore} from './entity-store';
-import {createQueryCache} from './query-cache';
-import {decorate} from './decorator';
+import {mapObject, mapValues, compose, toObject, reduce, toPairs,
+        prop, filterObject, isEqual, not, curry, copyFunction
+      } from 'ladda-fp';
+
+import {decorator} from './decorator';
+import {dedup} from './dedup';
+import {createListenerStore} from './listener-store';
+import {validateConfig} from './validator';
 
 // [[EntityName, EntityConfig]] -> Entity
 const toEntity = ([name, c]) => ({
@@ -10,8 +13,59 @@ const toEntity = ([name, c]) => ({
   ...c
 });
 
-// [Entity] -> Api
-const toApi = compose(mapValues(prop('api')), toObject(prop('name')));
+const KNOWN_STATICS = {
+  name: true,
+  length: true,
+  prototype: true,
+  caller: true,
+  arguments: true,
+  arity: true
+};
+
+const setFnName = curry((name, fn) => {
+  Object.defineProperty(fn, 'name', { writable: true });
+  fn.name = name;
+  Object.defineProperty(fn, 'name', { writable: false });
+  return fn;
+});
+
+const hoistMetaData = (a, b) => {
+  const keys = Object.getOwnPropertyNames(a);
+  for (let i = keys.length - 1; i >= 0; i--) {
+    const k = keys[i];
+    if (!KNOWN_STATICS[k]) {
+      b[k] = a[k];
+    }
+  }
+  setFnName(a.name, b);
+  return b;
+};
+
+export const mapApiFunctions = (fn, entityConfigs) => {
+  return mapValues((entity) => {
+    return {
+      ...entity,
+      api: reduce(
+        // As apiFn name we use key of the api field and not the name of the
+        // fn directly. This is controversial. Decision was made because
+        // the original function name might be polluted at this point, e.g.
+        // containing a "bound" prefix.
+        (apiM, [apiFnName, apiFn]) => {
+          const getFn = compose(prop(apiFnName), prop('api'));
+          const nextFn = hoistMetaData(getFn(entity), fn({ entity, fn: apiFn }));
+          setFnName(apiFnName, nextFn);
+          apiM[apiFnName] = nextFn;
+          return apiM;
+        },
+        {},
+        toPairs(entity.api)
+      )
+    };
+  }, entityConfigs);
+};
+
+// EntityConfig -> Api
+const toApi = mapValues(prop('api'));
 
 // EntityConfig -> EntityConfig
 const setEntityConfigDefaults = ec => {
@@ -19,6 +73,7 @@ const setEntityConfigDefaults = ec => {
     ttl: 300,
     invalidates: [],
     invalidatesOn: ['CREATE', 'UPDATE', 'DELETE'],
+    noDedup: false,
     ...ec
   };
 };
@@ -29,7 +84,9 @@ const setApiConfigDefaults = ec => {
     operation: 'NO_OPERATION',
     invalidates: [],
     idFrom: 'ENTITY',
-    byId: false
+    byId: false,
+    byIds: false,
+    noDedup: false
   };
 
   const writeToObjectIfNotSet = curry((o, [k, v]) => {
@@ -45,25 +102,39 @@ const setApiConfigDefaults = ec => {
 
   return {
     ...ec,
-    api: mapValues(setDefaults, ec.api)
+    api: ec.api ? mapValues(setDefaults, ec.api) : ec.api
   };
 };
 
 // Config -> Map String EntityConfig
-const getEntityConfigs = compose(
+export const getEntityConfigs = compose( // exported for testing
+  toObject(prop('name')),
+  mapObject(toEntity),
   mapValues(setApiConfigDefaults),
   mapValues(setEntityConfigDefaults),
   filterObject(compose(not, isEqual('__config')))
 );
 
-// Config -> Api
-export const build = (c) => {
-  const config = c.__config || {idField: 'id'};
-  const entityConfigs = getEntityConfigs(c);
-  const entities = mapObject(toEntity, entityConfigs);
-  const entityStore = createEntityStore(entities);
-  const queryCache = createQueryCache(entityStore);
-  const createApi = compose(toApi, map(decorate(config, entityStore, queryCache)));
+const getGlobalConfig = (config) => ({
+  idField: 'id',
+  noDedup: false,
+  useProductionBuild: process.NODE_ENV === 'production',
+  ...(config.__config || {})
+});
 
-  return createApi(entities);
+const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => {
+  const pluginDecorator = plugin({ addChangeListener, config, entityConfigs });
+  return mapApiFunctions(pluginDecorator, entityConfigs);
+});
+
+// Config -> Api
+export const build = (c, ps = []) => {
+  const config = getGlobalConfig(c);
+  const entityConfigs = getEntityConfigs(c);
+  validateConfig(console, entityConfigs, config);
+  const listenerStore = createListenerStore(config);
+  const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, config);
+  const applyPlugins = reduce(applyPlugin_, entityConfigs);
+  const createApi = compose(toApi, applyPlugins);
+  return createApi([decorator(listenerStore.onChange), ...ps, dedup]);
 };

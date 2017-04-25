@@ -31,7 +31,7 @@ const config = [
 
 
 describe('Decorate', () => {
-  it('decorated function invalidates if NO_OPERATION is configured', (done) => {
+  xit('decorated function invalidates if NO_OPERATION is configured', (done) => {
     const aFn = createApiFunction(() => Promise.resolve('hej'));
     const xOrg = [{id: 1, name: 'Kalle'}];
     const es = createEntityStore(config);

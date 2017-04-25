@@ -1,9 +1,11 @@
 /* eslint-disable no-unused-expressions */
 
 import sinon from 'sinon';
+import {curry} from 'ladda-fp';
 import {build} from './builder';
 
-const getUsers = () => Promise.resolve([{id: 1}, {id: 2}]);
+const users = [{ id: 1 }, { id: 2 }];
+const getUsers = () => Promise.resolve(users);
 getUsers.operation = 'READ';
 
 const deleteUser = () => Promise.resolve();
@@ -17,6 +19,9 @@ const config = () => ({
       deleteUser
     },
     invalidates: ['alles']
+  },
+  __config: {
+    useProductionBuild: true
   }
 });
 
@@ -74,7 +79,7 @@ describe('builder', () => {
   });
   it('Works with non default id set', (done) => {
     const myConfig = config();
-    myConfig.__config = {idField: 'mySecretId'};
+    myConfig.__config = {idField: 'mySecretId', useProductionBuild: true};
     myConfig.user.api.getUsers = sinon.spy(
       () => Promise.resolve([{mySecretId: 1}, {mySecretId: 2}])
     );
@@ -125,5 +130,90 @@ describe('builder', () => {
       .then(delay)
       .then(() => api.user.getUsers())
       .then(expectOnlyOneApiCall);
+  });
+
+  it('takes plugins as second argument', (done) => {
+    const myConfig = config();
+    const pluginTracker = {};
+    const plugin = (pConfig) => {
+      const pName = pConfig.name;
+      pluginTracker[pName] = {};
+      return curry(({ config: c, entityConfigs }, { fn }) => {
+        pluginTracker[pName][fn.name] = true;
+        return fn;
+      });
+    };
+    const pluginName = 'X';
+    const expectACall = () => expect(pluginTracker[pluginName].getUsers).to.be.true;
+
+    const api = build(myConfig, [plugin({ name: pluginName })]);
+    api.user.getUsers()
+      .then(expectACall)
+      .then(() => done());
+  });
+
+  describe('change listener', () => {
+    it('exposes Ladda\'s listener/onChange interface to plugins', () => {
+      const plugin = ({ addChangeListener }) => {
+        expect(addChangeListener).to.be;
+        return ({ fn }) => fn;
+      };
+
+      build(config(), [plugin]);
+    });
+
+    it('allows plugins to add a listener, which gets notified on all cache changes', () => {
+      const spy = sinon.spy();
+
+      const plugin = ({ addChangeListener }) => {
+        addChangeListener(spy);
+        return ({ fn }) => fn;
+      };
+
+      const api = build(config(), [plugin]);
+
+      return api.user.getUsers().then(() => {
+        expect(spy).to.have.been.calledOnce;
+        const changeObject = spy.args[0][0];
+        expect(changeObject.entity).to.equal('user');
+        expect(changeObject.type).to.equal('UPDATE');
+        expect(changeObject.entities).to.deep.equal(users);
+      });
+    });
+
+    it('does not trigger when a pure cache hit is made', () => {
+      const spy = sinon.spy();
+
+      const plugin = ({ addChangeListener }) => {
+        addChangeListener(spy);
+        return ({ fn }) => fn;
+      };
+
+      const api = build(config(), [plugin]);
+
+      return api.user.getUsers().then(() => {
+        expect(spy).to.have.been.calledOnce;
+
+        return api.user.getUsers().then(() => {
+          expect(spy).to.have.been.calledOnce;
+        });
+      });
+    });
+
+    it('returns a deregistration function to remove the listener', () => {
+      const spy = sinon.spy();
+
+      const plugin = ({ addChangeListener }) => {
+        const deregister = addChangeListener(spy);
+        deregister();
+        return ({ fn }) => fn;
+      };
+
+      const api = build(config(), [plugin]);
+
+      return api.user.getUsers().then(() => {
+        expect(spy).not.to.have.been.called;
+      });
+    });
   });
 });

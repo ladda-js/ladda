@@ -14,6 +14,9 @@ There are a handful optional options to configure Ladda. In a minimal configurat
 
 * **api** (required): An object of ApiFunctions, functions that communicate with an external service and return a Promise. The function name as key and function as value.
 
+* **noDedup**: `true | false` Disable [deduplication](/docs/advanced/Deduplication.md)
+  of all "READ" operations for this entity. Defaults to false.
+
 ## Method Configuration
 
 * **operation**: `"CREATE" | "READ" | "UPDATE" | "DELETE" | "NO_OPERATION"`. Default is `"NO_OPERATION"`.
@@ -24,6 +27,17 @@ There are a handful optional options to configure Ladda. In a minimal configurat
 
 * **byId**: `true | false`. This is an optimization that tells Ladda that the first argument is an id. This allows Ladda to directly try to fetch the data from the cache, even if it was acquired by another call. This is useful if you previously called for example "getAllUsers" and now want to fetch one user directly from the cache. By default false.
 
+* **byIds**: `true | false`. Another optimization which tells Ladda that
+  the first argument is a list of ids. Ladda will try to make an optimal
+call (if any), looking up items from the cache and only calling for
+items that are not yet present. Defaults to false.
+
+* **noDedup**: `true | false` Disable [deduplication](/docs/advanced/Deduplication.md)
+  a "READ" operation. Defaults to false.
+
 ## Ladda Configuration
 
 * **idField**: Specify the default property that contains the ID. By default this is `"id"`.
+
+* **noDedup**: `true | false` Disable [deduplication](/docs/advanced/Deduplication.md)
+  of "READ" operation for all entities. Defaults to false.
