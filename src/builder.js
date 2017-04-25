@@ -73,7 +73,7 @@ const setEntityConfigDefaults = ec => {
     ttl: 300,
     invalidates: [],
     invalidatesOn: ['CREATE', 'UPDATE', 'DELETE'],
-    noDedup: false,
+    enableDeduplication: true,
     ...ec
   };
 };
@@ -86,7 +86,7 @@ const setApiConfigDefaults = ec => {
     idFrom: 'ENTITY',
     byId: false,
     byIds: false,
-    noDedup: false
+    enableDeduplication: true
   };
 
   const writeToObjectIfNotSet = curry((o, [k, v]) => {
@@ -117,7 +117,7 @@ export const getEntityConfigs = compose( // exported for testing
 
 const getGlobalConfig = (config) => ({
   idField: 'id',
-  noDedup: false,
+  enableDeduplication: true,
   useProductionBuild: process.NODE_ENV === 'production',
   ...(config.__config || {})
 });

@@ -30,7 +30,7 @@ const checkApiDeclaration = (logger, entityConfigs, entityName, entity) => {
   compose(
     // eslint-disable-next-line no-unused-vars
     map_(([fnName, fn]) => {
-      const { operation, invalidates, idFrom, byId, byIds, noDedup } = fn;
+      const { operation, invalidates, idFrom, byId, byIds, enableDeduplication } = fn;
       const fullName = `${entityName}.${fnName}`;
       if (!isOperation(operation)) {
         warnApi(
@@ -51,9 +51,9 @@ const checkApiDeclaration = (logger, entityConfigs, entityName, entity) => {
         );
       }
 
-      if (typeof noDedup !== 'boolean') {
+      if (typeof enableDeduplication !== 'boolean') {
         warnApi(
-          `${fullName}'s noDedup needs to be a boolean, was ${typeof noDedup}'`
+          `${fullName}'s enableDeduplication needs to be a boolean, was ${typeof enableDeduplication}'`
         );
       }
 
@@ -120,10 +120,10 @@ const checkTTL = (logger, entityConfigs, entityName, entity) => {
 };
 
 const checkNoDedup = (logger, entityConfigs, entityName, entity) => {
-  if (typeof entity.noDedup !== 'boolean') {
+  if (typeof entity.enableDeduplication !== 'boolean') {
     warn(
       logger,
-      `Entity ${entityName} specified noDedup as ${typeof entity.noDedup}, needs to be a boolean`
+      `Entity ${entityName} specified enableDeduplication as ${typeof entity.enableDeduplication}, needs to be a boolean`
     );
   }
 };
@@ -146,9 +146,9 @@ const checkEntities = (logger, entityConfigs) => {
 };
 
 const checkGlobalConfig = (logger, config) => {
-  const { noDedup, idField } = config;
-  if (typeof noDedup !== 'boolean') {
-    warn(logger, 'noDedup needs to be a boolean, was string');
+  const { enableDeduplication, idField } = config;
+  if (typeof enableDeduplication !== 'boolean') {
+    warn(logger, 'enableDeduplication needs to be a boolean, was string');
   }
 
   if (typeof idField !== 'string') {

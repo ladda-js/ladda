@@ -9,7 +9,7 @@ const createLogger = () => ({
 
 const createGlobalConfig = (conf) => ({
   idField: 'id',
-  noDedup: false,
+  enableDeduplication: true,
   useProductionBuild: false,
   ...conf
 });
@@ -55,7 +55,7 @@ describe('validateConfig', () => {
     expect(logger.error.args[0][0]).to.match(/idField.*string.*was.*boolean/);
   });
 
-  it('checks the global config object - noDedup', () => {
+  it('checks the global config object - enableDeduplication', () => {
     const logger = createLogger();
 
     const eConfigs = getEntityConfigs({
@@ -65,11 +65,11 @@ describe('validateConfig', () => {
         }
       }
     });
-    const config = createGlobalConfig({ noDedup: 'X' });
+    const config = createGlobalConfig({ enableDeduplication: 'X' });
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
-    expect(logger.error.args[0][0]).to.match(/noDedup.*boolean.*was.*string/);
+    expect(logger.error.args[0][0]).to.match(/enableDeduplication.*boolean.*was.*string/);
   });
 
   it('checks for missing api declarations', () => {
@@ -187,24 +187,26 @@ describe('validateConfig', () => {
     expect(logger.error.args[0][0]).to.match(/activity.*ttl.*string.*needs to be a number/);
   });
 
-  it('checks for wrong noDedup value', () => {
+  it('checks for wrong enableDeduplication value', () => {
     const logger = createLogger();
 
     const eConfigs = getEntityConfigs({
       user: {
         api: { getAll: () => {} },
-        noDedup: false
+        enableDeduplication: true
       },
       activity: {
         api: { getAll: () => {} },
-        noDedup: 'X'
+        enableDeduplication: 'X'
       }
     });
     const config = createGlobalConfig({});
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
-    expect(logger.error.args[0][0]).to.match(/activity.*noDedup.*string.*needs to be a boolean/);
+    expect(logger.error.args[0][0]).to.match(
+        /activity.*enableDeduplication.*string.*needs to be a boolean/
+    );
   });
 
 
@@ -264,12 +266,12 @@ describe('validateConfig', () => {
     expect(logger.error.args[0][0]).to.match(/user.getAll.*byIds.*string/);
   });
 
-  it('checks for wrong api noDedup definition', () => {
+  it('checks for wrong api enableDeduplication definition', () => {
     const logger = createLogger();
 
     const getAll = () => {};
     getAll.operation = 'READ';
-    getAll.noDedup = 'X';
+    getAll.enableDeduplication = 'X';
 
     const eConfigs = getEntityConfigs({
       user: {
@@ -280,7 +282,7 @@ describe('validateConfig', () => {
 
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
-    expect(logger.error.args[0][0]).to.match(/user.getAll.*noDedup.*string/);
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*enableDeduplication.*string/);
   });
 
   it('checks for wrong api idFrom (illegal type)', () => {

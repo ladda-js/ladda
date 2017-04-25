@@ -2,7 +2,11 @@ import { reduce } from 'ladda-fp';
 
 const toKey = (args) => JSON.stringify(args);
 
-const isActive = reduce((active, conf = {}) => active && !conf.noDedup, true);
+const isActive = reduce(
+    (active, conf = {}) => active && (conf.enableDeduplication ||
+                                      conf.enableDeduplication === undefined),
+    true
+);
 
 export const dedup = ({ config }) => ({ entity, fn }) => {
   if (fn.operation !== 'READ') { return fn; }
