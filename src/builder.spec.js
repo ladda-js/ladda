@@ -152,6 +152,23 @@ describe('builder', () => {
       .then(() => done());
   });
 
+  it('applies dedup before and after the plugins, if there are any', () => {
+    const getAll = sinon.stub().returns(Promise.resolve([]));
+    getAll.operation = 'READ';
+    const conf = { test: { api: { getAll } } };
+    const plugin = () => ({ fn }) => () => {
+      fn();
+      fn();
+      return fn();
+    };
+    const api = build(conf, [plugin]);
+    api.test.getAll();
+    api.test.getAll();
+    return api.test.getAll().then(() => {
+      expect(getAll).to.have.been.calledOnce;
+    });
+  });
+
   describe('change listener', () => {
     it('exposes Ladda\'s listener/onChange interface to plugins', () => {
       const plugin = ({ addChangeListener }) => {
