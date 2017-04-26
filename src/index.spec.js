@@ -84,6 +84,7 @@ describe('observable plugin', () => {
     expect(api.user.updateUser.createObservable).not.to.be;
   });
 
+
   describe('createObservable()', () => {
     it('returns an observable shape', () => {
       const api = build(createConfig(), [plugin()]);
@@ -134,9 +135,13 @@ describe('observable plugin', () => {
           expect(spy).to.have.been.calledOnce;
 
           return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-            expect(spy).to.have.been.calledTwice;
-            return api.user.updateUser({ id: 'peter', name: 'PETer' }).then(() => {
-              expect(spy).to.have.been.calledThrice;
+            return delay().then(() => {
+              expect(spy).to.have.been.calledTwice;
+              return api.user.updateUser({ id: 'peter', name: 'PETer' }).then(() => {
+                return delay().then(() => {
+                  expect(spy).to.have.been.calledThrice;
+                });
+              });
             });
           });
         });
@@ -234,8 +239,10 @@ describe('observable plugin', () => {
           subscription1.unsubscribe();
 
           return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-            expect(spy1).to.have.been.calledOnce;
-            expect(spy2).to.have.been.calledTwice;
+            return delay().then(() => {
+              expect(spy1).to.have.been.calledOnce;
+              expect(spy2).to.have.been.calledTwice;
+            });
           });
         });
       });
@@ -251,7 +258,9 @@ describe('observable plugin', () => {
           expect(spy).to.have.been.calledOnce;
 
           return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-            expect(spy).to.have.been.calledTwice;
+            return delay().then(() => {
+              expect(spy).to.have.been.calledTwice;
+            });
           });
         });
       });
@@ -282,9 +291,10 @@ describe('observable plugin', () => {
 
           return delay().then(() => {
             expect(spy).to.have.been.calledOnce;
-
             return api.miniUser.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-              expect(spy).to.have.been.calledTwice;
+              return delay().then(() => {
+                expect(spy).to.have.been.calledTwice;
+              });
             });
           });
         });
@@ -300,7 +310,9 @@ describe('observable plugin', () => {
             expect(spy).to.have.been.calledOnce;
 
             return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-              expect(spy).to.have.been.calledTwice;
+              return delay().then(() => {
+                expect(spy).to.have.been.calledTwice;
+              });
             });
           });
         });
@@ -426,6 +438,37 @@ describe('observable plugin', () => {
                   expect(secondArgs[0].length).to.equal(2);
                 });
               });
+            });
+          });
+        });
+      });
+
+      it('makes sure identical observables are not needlessly fired in parallel', () => {
+        const apiSpy = sinon.spy();
+
+        const config = {
+          user: {
+            api: {
+              getUsers: () => { apiSpy(); return Promise.resolve([]); },
+              createUser: () => Promise.resolve({ id: 'x' })
+            }
+          }
+        };
+        config.user.api.getUsers.operation = 'READ';
+        config.user.api.createUser.operation = 'CREATE';
+        const api = build(config, [plugin()]);
+        const observable1 = api.user.getUsers.createObservable();
+        const observable2 = api.user.getUsers.createObservable();
+
+        observable1.subscribe(() => {});
+        observable2.subscribe(() => {});
+
+        return delay().then(() => {
+          expect(apiSpy).to.have.been.calledOnce;
+
+          return api.user.createUser().then(() => {
+            return delay().then(() => {
+              expect(apiSpy).to.have.been.calledOnce;
             });
           });
         });
