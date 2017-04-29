@@ -1,8 +1,9 @@
 import sinon from 'sinon';
-import {decorateCreate} from './create';
-import {createEntityStore, get} from '../entity-store';
-import {createQueryCache} from '../query-cache';
-import {createApiFunction} from '../test-helper';
+import {decorateDelete} from './delete';
+import {createEntityStore, get, put} from './entity-store';
+import {createQueryCache} from './query-cache';
+import {addId} from './id-helper';
+import {createApiFunction} from './test-helper';
 
 const config = [
   {
@@ -38,20 +39,19 @@ const config = [
   }
 ];
 
-describe('Create', () => {
-  describe('decorateCreate', () => {
-    it('Adds value to entity store', (done) => {
+describe('Delete', () => {
+  describe('decorateDelete', () => {
+    it('Removes cache', (done) => {
       const es = createEntityStore(config);
       const qc = createQueryCache(es);
       const e = config[0];
-      const xOrg = {name: 'Kalle'};
-      const response = {...xOrg, id: 1};
-      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(response));
+      const xOrg = {id: 1, name: 'Kalle'};
+      const aFnWithoutSpy = createApiFunction(() => Promise.resolve({}));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateCreate({}, es, qc, e, aFn);
-      res(xOrg).then((newX) => {
-        expect(newX).to.equal(response);
-        expect(get(es, e, 1).value).to.deep.equal({...response, __ladda__id: 1});
+      put(es, e, addId({}, undefined, undefined, xOrg));
+      const res = decorateDelete({}, es, qc, e, aFn);
+      res(1).then(() => {
+        expect(get(es, e, 1)).to.equal(undefined);
         done();
       });
     });

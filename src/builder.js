@@ -2,8 +2,8 @@ import {mapObject, mapValues, compose, toObject, reduce, toPairs,
         prop, filterObject, isEqual, not, curry, copyFunction
       } from 'ladda-fp';
 
-import {decorator} from './decorator';
-import {dedup} from './dedup';
+import {cachePlugin} from './plugins/cache';
+import {dedupPlugin} from './plugins/dedup';
 import {createListenerStore} from './listener-store';
 import {validateConfig} from './validator';
 
@@ -136,5 +136,5 @@ export const build = (c, ps = []) => {
   const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, config);
   const applyPlugins = reduce(applyPlugin_, entityConfigs);
   const createApi = compose(toApi, applyPlugins);
-  return createApi([decorator(listenerStore.onChange), ...ps, dedup]);
+  return createApi([cachePlugin(listenerStore.onChange), ...ps, dedupPlugin]);
 };

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 
 import sinon from 'sinon';
-import { dedup } from '.';
+import { dedupPlugin } from '.';
 
 const delay = (cb, t = 5) => new Promise((res, rej) => {
   setTimeout(() => cb().then(res, rej), t);
@@ -13,7 +13,7 @@ describe('dedup', () => {
       const user = { id: 'x' };
       const fn = sinon.spy(() => Promise.resolve({ ...user }));
       fn.operation = 'UPDATE';
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
       expect(wrappedApiFn).to.equal(fn);
     });
   });
@@ -23,7 +23,7 @@ describe('dedup', () => {
       const user = { id: 'x' };
       const fn = sinon.spy(() => Promise.resolve(user));
       fn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
       expect(wrappedApiFn).not.to.equal(fn);
     });
 
@@ -31,7 +31,7 @@ describe('dedup', () => {
       const user = { id: 'x' };
       const fn = sinon.spy(() => Promise.resolve({ ...user }));
       fn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
       return Promise.all([
         wrappedApiFn('x'),
         wrappedApiFn('y')
@@ -44,7 +44,7 @@ describe('dedup', () => {
       const user = { id: 'x' };
       const fn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       fn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
       return Promise.all([
         wrappedApiFn('x'),
         wrappedApiFn('x')
@@ -57,7 +57,7 @@ describe('dedup', () => {
       const user = { id: 'x' };
       const fn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       fn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
       return Promise.all([
         wrappedApiFn({ a: 1, b: [2, 3] }, 'a'),
         wrappedApiFn({ a: 1, b: [2, 3] }, 'a')
@@ -70,7 +70,7 @@ describe('dedup', () => {
       const user = { id: 'x' };
       const fn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       fn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
       return Promise.all([
         wrappedApiFn(),
         wrappedApiFn()
@@ -85,7 +85,7 @@ describe('dedup', () => {
       const user = { id: 'x' };
       const fn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       fn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
 
       return wrappedApiFn().then(() => {
         return wrappedApiFn().then(() => {
@@ -98,7 +98,7 @@ describe('dedup', () => {
       const user = { id: 'x' };
       const fn = sinon.spy(() => delay(() => Promise.reject({ ...user })));
       fn.operation = 'READ';
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
 
       return wrappedApiFn().catch(() => {
         return wrappedApiFn().catch(() => {
@@ -110,7 +110,7 @@ describe('dedup', () => {
     it('propagates errors to all callees', () => {
       const error = { error: 'ERROR' };
       const fn = sinon.spy(() => delay(() => Promise.reject(error)));
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
       return Promise.all([
         wrappedApiFn().catch((err) => err),
         wrappedApiFn().catch((err) => err)
@@ -125,7 +125,7 @@ describe('dedup', () => {
       const fn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       fn.operation = 'READ';
       const config = { enableDeduplication: false };
-      const wrappedApiFn = dedup({ config })({ fn });
+      const wrappedApiFn = dedupPlugin({ config })({ fn });
 
       return Promise.all([
         wrappedApiFn(),
@@ -140,7 +140,7 @@ describe('dedup', () => {
       const fn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       fn.operation = 'READ';
       const entity = { enableDeduplication: false };
-      const wrappedApiFn = dedup({})({ fn, entity });
+      const wrappedApiFn = dedupPlugin({})({ fn, entity });
 
       return Promise.all([
         wrappedApiFn(),
@@ -155,7 +155,7 @@ describe('dedup', () => {
       const fn = sinon.spy(() => delay(() => Promise.resolve({ ...user })));
       fn.operation = 'READ';
       fn.enableDeduplication = false;
-      const wrappedApiFn = dedup({})({ fn });
+      const wrappedApiFn = dedupPlugin({})({ fn });
 
       return Promise.all([
         wrappedApiFn(),

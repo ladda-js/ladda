@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-expressions */
 
 import {decorate} from './index';
-import {createEntityStore} from '../entity-store';
-import {createQueryCache, put, contains} from '../query-cache';
-import {addId} from '../id-helper';
-import {createApiFunction} from '../test-helper';
+import {createEntityStore} from './entity-store';
+import {createQueryCache, put, contains} from './query-cache';
+import {addId} from './id-helper';
+import {createApiFunction} from './test-helper';
 
 const config = [
   {

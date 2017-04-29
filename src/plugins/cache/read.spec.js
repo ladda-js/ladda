@@ -3,9 +3,9 @@
 import sinon from 'sinon';
 import {map} from 'ladda-fp';
 import {decorateRead} from './read';
-import {createEntityStore} from '../entity-store';
-import {createQueryCache} from '../query-cache';
-import {createSampleConfig, createApiFunction} from '../test-helper';
+import {createEntityStore} from './entity-store';
+import {createQueryCache} from './query-cache';
+import {createSampleConfig, createApiFunction} from './test-helper';
 
 const config = createSampleConfig();
 

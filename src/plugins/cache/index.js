@@ -1,6 +1,6 @@
 import {compose, values} from 'ladda-fp';
-import {createEntityStore} from '../entity-store';
-import {createQueryCache} from '../query-cache';
+import {createEntityStore} from './entity-store';
+import {createQueryCache} from './query-cache';
 import {decorateCreate} from './create';
 import {decorateRead} from './read';
 import {decorateUpdate} from './update';
@@ -15,7 +15,7 @@ const HANDLERS = {
   NO_OPERATION: decorateNoOperation
 };
 
-export const decorator = (onChange) => ({ config, entityConfigs }) => {
+export const cachePlugin = (onChange) => ({ config, entityConfigs }) => {
   const entityStore = compose((c) => createEntityStore(c, onChange), values)(entityConfigs);
   const queryCache = createQueryCache(entityStore, onChange);
   return ({ entity, fn }) => {
@@ -23,4 +23,3 @@ export const decorator = (onChange) => ({ config, entityConfigs }) => {
     return handler(config, entityStore, queryCache, entity, fn);
   };
 };
-

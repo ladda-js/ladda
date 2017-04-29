@@ -2,13 +2,13 @@ import {passThrough, compose, curry, reduce, toIdMap, map, concat, zip} from 'la
 import {get as getFromEs,
         put as putInEs,
         mPut as mPutInEs,
-        contains as inEs} from '../entity-store';
+        contains as inEs} from './entity-store';
 import {get as getFromQc,
         invalidate,
         put as putInQc,
         contains as inQc,
-        getValue} from '../query-cache';
-import {addId, removeId} from '../id-helper';
+        getValue} from './query-cache';
+import {addId, removeId} from './id-helper';
 
 const getTtl = e => e.ttl * 1000;
 

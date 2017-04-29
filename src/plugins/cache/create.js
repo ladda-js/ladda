@@ -1,7 +1,7 @@
 import {passThrough, compose} from 'ladda-fp';
-import {put} from '../entity-store';
-import {invalidate} from '../query-cache';
-import {addId} from '../id-helper';
+import {put} from './entity-store';
+import {invalidate} from './query-cache';
+import {addId} from './id-helper';
 
 export function decorateCreate(c, es, qc, e, aFn) {
   return (...args) => {
