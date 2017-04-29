@@ -1,12 +1,11 @@
 import {passThrough} from 'ladda-fp';
-import {put} from '../entity-store';
-import {invalidate} from '../query-cache';
+import * as Cache from '../cache';
 import {addId} from '../id-helper';
 
-export function decorateUpdate(c, es, qc, e, aFn) {
+export function decorateUpdate(c, cache, e, aFn) {
   return (eValue, ...args) => {
     return aFn(eValue, ...args)
-      .then(passThrough(() => invalidate(qc, e, aFn)))
-      .then(passThrough(() => put(es, e, addId(c, undefined, undefined, eValue))));
+      .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
+      .then(passThrough(() => Cache.storeEntity(cache, e, addId(c, undefined, undefined, eValue))));
   };
 }

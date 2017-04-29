@@ -1,7 +1,6 @@
 import sinon from 'sinon';
 import {decorateUpdate} from './update';
-import {createEntityStore, get} from '../entity-store';
-import {createQueryCache} from '../query-cache';
+import * as Cache from '../cache';
 import {createApiFunction} from '../test-helper';
 
 const config = [
@@ -41,16 +40,15 @@ const config = [
 describe('Update', () => {
   describe('decorateUpdate', () => {
     it('Updates cache based on argument', (done) => {
-      const es = createEntityStore(config);
-      const qc = createQueryCache(es);
+      const cache = Cache.createCache(config);
       const e = config[0];
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
 
-      const res = decorateUpdate({}, es, qc, e, aFn);
+      const res = decorateUpdate({}, cache, e, aFn);
       res(xOrg, 'other args').then(() => {
-        expect(get(es, e, 1).value).to.deep.equal({...xOrg, __ladda__id: 1});
+        expect(Cache.getEntity(cache, e, 1).value).to.deep.equal({...xOrg, __ladda__id: 1});
         done();
       });
     });
