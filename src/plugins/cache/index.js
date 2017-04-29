@@ -1,6 +1,5 @@
 import {values} from 'ladda-fp';
-import {createEntityStore} from './entity-store';
-import {createQueryCache} from './query-cache';
+import {createCache} from './cache';
 import {decorateCreate} from './operations/create';
 import {decorateRead} from './operations/read';
 import {decorateUpdate} from './operations/update';
@@ -16,10 +15,9 @@ const HANDLERS = {
 };
 
 export const cachePlugin = (onChange) => ({ config, entityConfigs }) => {
-  const entityStore = createEntityStore(values(entityConfigs), onChange);
-  const queryCache = createQueryCache(entityStore, onChange);
+  const cache = createCache(values(entityConfigs), onChange);
   return ({ entity, fn }) => {
     const handler = HANDLERS[fn.operation];
-    return handler(config, entityStore, queryCache, entity, fn);
+    return handler(config, cache, entity, fn);
   };
 };
