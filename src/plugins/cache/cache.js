@@ -1,3 +1,4 @@
+import {curry} from 'ladda-fp';
 import * as QueryCache from './query-cache';
 import * as EntityStore from './entity-store';
 
@@ -21,26 +22,26 @@ export const containsQueryResponse = ({queryCache}, ...args) => {
     return QueryCache.contains(queryCache, ...args)
 };
 
-export const invalidateQueryCache = ({queryCache}) => {
+export const invalidateQuery = ({queryCache}, ...args) => {
     return QueryCache.invalidate(queryCache, ...args)
 };
 
-export const storeEntity = ({entityStore}, ...args) => {
-    return EntityStore.put(queryCache, ...args)
-};
+export const storeEntity = curry(({entityStore}, ...args) => {
+    return EntityStore.put(entityStore, ...args)
+});
 
 export const storeEntities = ({entityStore}, ...args) => {
-    return EntityStore.mPut(queryCache, ...args)
+    return EntityStore.mPut(entityStore, ...args)
 };
 
-export const getEntity = ({entityStore}, ...args) => {
-    return EntityStore.get(queryCache, ...args)
-};
+export const getEntity = curry(({entityStore}, ...args) => {
+    return EntityStore.get(entityStore, ...args)
+});
 
 export const removeEntity = ({entityStore}, ...args) => {
-    return EntityStore.remove(queryCache, ...args)
+    return EntityStore.remove(entityStore, ...args)
 };
 
 export const containsEntity = ({entityStore}, ...args) => {
-    return EntityStore.contains(queryCache, ...args)
+    return EntityStore.contains(entityStore, ...args)
 };
