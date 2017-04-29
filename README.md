@@ -1,7 +1,7 @@
 ![Ladda](https://smallimprovementstech.files.wordpress.com/2017/03/laddalogo-horiz-color-21.png)
 
 ![Build status](https://api.travis-ci.org/ladda-js/ladda.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/ladda-js/ladda/badge.svg?branch=master&cache=1)](https://coveralls.io/github/ladda-cache/ladda?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/petercrona/ladda/badge.svg?branch=master)](https://coveralls.io/github/petercrona/ladda?branch=master)
 
 Ladda is a library that helps you with caching, invalidation of caches and to handle different representations of the same data in a **performant** and **memory efficient** way. It is written in **JavaScript** (ES2015) and designed to be used by **single-page applications**. It is framework agnostic, so it works equally well with React, Vue, Angular or just vanilla JavaScript.
 
