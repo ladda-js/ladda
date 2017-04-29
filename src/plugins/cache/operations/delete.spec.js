@@ -1,7 +1,6 @@
 import sinon from 'sinon';
 import {decorateDelete} from './delete';
-import {createEntityStore, get, put} from '../entity-store';
-import {createQueryCache} from '../query-cache';
+import * as Cache from '../cache';
 import {addId} from '../id-helper';
 import {createApiFunction} from '../test-helper';
 
@@ -42,16 +41,15 @@ const config = [
 describe('Delete', () => {
   describe('decorateDelete', () => {
     it('Removes cache', (done) => {
-      const es = createEntityStore(config);
-      const qc = createQueryCache(es);
+      const cache = Cache.createCache(config);
       const e = config[0];
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve({}));
       const aFn = sinon.spy(aFnWithoutSpy);
-      put(es, e, addId({}, undefined, undefined, xOrg));
-      const res = decorateDelete({}, es, qc, e, aFn);
+      Cache.storeEntity(cache, e, addId({}, undefined, undefined, xOrg));
+      const res = decorateDelete({}, cache, e, aFn);
       res(1).then(() => {
-        expect(get(es, e, 1)).to.equal(undefined);
+        expect(Cache.getEntity(cache, e, 1)).to.equal(undefined);
         done();
       });
     });
