@@ -71,7 +71,9 @@ const decorateReadQuery = (c, cache, e, aFn) => {
     }
 
     return aFn(...args)
-      .then(passThrough(compose(Cache.storeQueryResponse(cache, e, aFn, args), addId(c, aFn, args))))
+      .then(passThrough(
+            compose(Cache.storeQueryResponse(cache, e, aFn, args),
+                    addId(c, aFn, args))))
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)));
   };
 };
