@@ -8,7 +8,7 @@ const isActive = reduce(
     true
 );
 
-export const dedup = ({ config }) => ({ entity, fn }) => {
+export const dedupPlugin = ({ config }) => ({ entity, fn }) => {
   if (fn.operation !== 'READ') { return fn; }
   const cache = {};
 
