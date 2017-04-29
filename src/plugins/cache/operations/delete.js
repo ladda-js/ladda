@@ -1,7 +1,7 @@
 import {passThrough} from 'ladda-fp';
-import {remove} from './entity-store';
-import {invalidate} from './query-cache';
-import {serialize} from './serializer';
+import {remove} from '../entity-store';
+import {invalidate} from '../query-cache';
+import {serialize} from '../serializer';
 
 export function decorateDelete(c, es, qc, e, aFn) {
   return (...args) => {

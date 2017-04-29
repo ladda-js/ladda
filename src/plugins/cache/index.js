@@ -1,11 +1,11 @@
 import {compose, values} from 'ladda-fp';
 import {createEntityStore} from './entity-store';
 import {createQueryCache} from './query-cache';
-import {decorateCreate} from './create';
-import {decorateRead} from './read';
-import {decorateUpdate} from './update';
-import {decorateDelete} from './delete';
-import {decorateNoOperation} from './no-operation';
+import {decorateCreate} from './operations/create';
+import {decorateRead} from './operations/read';
+import {decorateUpdate} from './operations/update';
+import {decorateDelete} from './operations/delete';
+import {decorateNoOperation} from './operations/no-operation';
 
 const HANDLERS = {
   CREATE: decorateCreate,

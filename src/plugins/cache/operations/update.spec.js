@@ -1,8 +1,8 @@
 import sinon from 'sinon';
 import {decorateUpdate} from './update';
-import {createEntityStore, get} from './entity-store';
-import {createQueryCache} from './query-cache';
-import {createApiFunction} from './test-helper';
+import {createEntityStore, get} from '../entity-store';
+import {createQueryCache} from '../query-cache';
+import {createApiFunction} from '../test-helper';
 
 const config = [
   {

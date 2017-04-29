@@ -2,9 +2,9 @@
 
 import sinon from 'sinon';
 import {decorateNoOperation} from './no-operation';
-import {createEntityStore} from './entity-store';
-import {createQueryCache, contains, put} from './query-cache';
-import {createSampleConfig, createApiFunction} from './test-helper';
+import {createEntityStore} from '../entity-store';
+import {createQueryCache, contains, put} from '../query-cache';
+import {createSampleConfig, createApiFunction} from '../test-helper';
 
 const config = createSampleConfig();
 
