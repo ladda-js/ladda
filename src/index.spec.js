@@ -16,6 +16,9 @@ const createUserApi = (container) => {
   const getUsers = () => Promise.resolve(values(container));
   getUsers.operation = 'READ';
 
+  const getUsers2 = () => Promise.resolve(values(container));
+  getUsers2.operation = 'READ';
+
   const updateUser = (nextUser) => {
     const { id } = nextUser;
     const user = container[id];
@@ -36,7 +39,27 @@ const createUserApi = (container) => {
   };
   removeUser.operation = 'DELETE';
 
-  return { getUser, getUsers, createUser, updateUser, removeUser };
+  const noopUser = () => Promise.resolve(values(container));
+  noopUser.operation = 'NO_OPERATION';
+  const noopGetUsers = () => Promise.resolve(values(container));
+  noopGetUsers.operation = 'NO_OPERATION';
+  noopGetUsers.invalidates = ['getUsers'];
+  const noopGetUsers2 = () => Promise.resolve(values(container));
+  noopGetUsers2.operation = 'NO_OPERATION';
+  noopGetUsers2.invalidates = ['getUsers2'];
+
+  return {
+    getUser,
+    getUsers,
+    getUsers2,
+    createUser,
+    updateUser,
+    removeUser,
+
+    noopUser,
+    noopGetUsers,
+    noopGetUsers2
+  };
 };
 
 const createConfig = () => {
@@ -159,6 +182,60 @@ describe('observable plugin', () => {
 
           return api.activity.getActivities().then(() => {
             expect(spy).to.have.been.calledOnce;
+          });
+        });
+      });
+
+      it('does not trigger on normal NO_OPERATIONs', () => {
+        const spy = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+        const observable = api.user.getUsers.createObservable();
+
+        observable.subscribe(spy);
+
+        return delay().then(() => {
+          expect(spy).to.have.been.calledOnce;
+
+          return api.user.noopUser().then(() => {
+            return delay().then(() => {
+              expect(spy).to.have.been.calledOnce;
+            });
+          });
+        });
+      });
+
+      it('does trigger when NO_OPERATION invalidates a function', () => {
+        const spy = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+        const observable = api.user.getUsers.createObservable();
+
+        observable.subscribe(spy);
+
+        return delay().then(() => {
+          expect(spy).to.have.been.calledOnce;
+
+          return api.user.noopGetUsers().then(() => {
+            return delay().then(() => {
+              expect(spy).to.have.been.calledTwice;
+            });
+          });
+        });
+      });
+
+      it('does not trigger when NO_OPERATION invalidates another function', () => {
+        const spy = sinon.spy();
+        const api = build(createConfig(), [plugin()]);
+        const observable = api.user.getUsers.createObservable();
+
+        observable.subscribe(spy);
+
+        return delay().then(() => {
+          expect(spy).to.have.been.calledOnce;
+
+          return api.user.noopGetUsers2().then(() => {
+            return delay().then(() => {
+              expect(spy).to.have.been.calledOnce;
+            });
           });
         });
       });

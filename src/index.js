@@ -1,10 +1,26 @@
 import { map_, noop, removeElement } from 'ladda-fp';
 import { analyzeEntityRelationships } from './helper';
 
-const isChangeOfSameEntity = (entity, change) => entity.name === change.entity;
-const isChangeOfView = (rel, change) => rel.views.indexOf(change.entity) !== -1;
-const isChangeOfParent = (rel, change) => rel.parents.indexOf(change.entity) !== -1;
-const isInvalidatedByChange = (rel, change) => rel.invalidatedBy.indexOf(change.entity) !== -1;
+const isNoOperation = (change) => change.operation === 'NO_OPERATION';
+const isChangeOfSameEntity = (entity, change) => {
+  return !isNoOperation(change) && entity.name === change.entity;
+};
+const isChangeOfView = (rel, change) => {
+  return !isNoOperation(change) && rel.views.indexOf(change.entity) !== -1;
+};
+const isChangeOfParent = (rel, change) => {
+  return !isNoOperation(change) && rel.parents.indexOf(change.entity) !== -1;
+};
+const isInvalidatedByChange = (rel, change) => {
+  return rel.invalidatedBy.indexOf(change.entity) !== -1;
+};
+const isInvalidatedByFunction = (entity, fn, change) => {
+  if (change.entity !== entity.name) {
+    return false;
+  }
+  const invalidations = entity.api[change.apiFn].invalidates;
+  return invalidations.length && invalidations.indexOf(fn.name) !== -1;
+};
 
 const isRelevantChange = (relationships, entity, fn, change) => {
   // TODO
@@ -28,7 +44,8 @@ const isRelevantChange = (relationships, entity, fn, change) => {
   return isChangeOfSameEntity(entity, change) ||
     isChangeOfView(rel, change) ||
     isChangeOfParent(rel, change) ||
-    isInvalidatedByChange(rel, change);
+    isInvalidatedByChange(rel, change) ||
+    isInvalidatedByFunction(entity, fn, change);
 };
 
 const createObservableFactory = (
