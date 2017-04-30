@@ -3,6 +3,8 @@ import {decorateUpdate} from './update';
 import * as Cache from '../cache';
 import {createApiFunction} from '../test-helper';
 
+const curryNoop = () => () => {};
+
 const config = [
   {
     name: 'user',
@@ -46,7 +48,7 @@ describe('Update', () => {
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
 
-      const res = decorateUpdate({}, cache, e, aFn);
+      const res = decorateUpdate({}, cache, curryNoop, e, aFn);
       res(xOrg, 'other args').then(() => {
         expect(Cache.getEntity(cache, e, 1).value).to.deep.equal({...xOrg, __ladda__id: 1});
         done();

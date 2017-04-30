@@ -3,6 +3,8 @@ import {decorateCreate} from './create';
 import {createCache, getEntity} from '../cache';
 import {createApiFunction} from '../test-helper';
 
+const curryNoop = () => () => {};
+
 const config = [
   {
     name: 'user',
@@ -46,7 +48,7 @@ describe('Create', () => {
       const response = {...xOrg, id: 1};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(response));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateCreate({}, cache, e, aFn);
+      const res = decorateCreate({}, cache, curryNoop, e, aFn);
       res(xOrg).then((newX) => {
         expect(newX).to.equal(response);
         expect(getEntity(cache, e, 1).value).to.deep.equal({...response, __ladda__id: 1});

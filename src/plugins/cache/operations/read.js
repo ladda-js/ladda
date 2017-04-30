@@ -78,7 +78,7 @@ const decorateReadQuery = (c, cache, e, aFn) => {
   };
 };
 
-export function decorateRead(c, cache, e, aFn) {
+export function decorateRead(c, cache, notify, e, aFn) {
   if (aFn.byId) {
     return decorateReadSingle(c, cache, e, aFn);
   }

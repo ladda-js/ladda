@@ -5,6 +5,8 @@ import {decorateNoOperation} from './no-operation';
 import * as Cache from '../cache';
 import {createSampleConfig, createApiFunction} from '../test-helper';
 
+const curryNoop = () => () => {};
+
 const config = createSampleConfig();
 
 describe('DecorateNoOperation', () => {
@@ -16,7 +18,7 @@ describe('DecorateNoOperation', () => {
     const getUsers = () => Promise.resolve(xOrg);
     aFn.invalidates = ['getUsers'];
     Cache.storeQueryResponse(cache, e, getUsers, ['args'], xOrg);
-    const res = decorateNoOperation({}, cache, e, aFn);
+    const res = decorateNoOperation({}, cache, curryNoop, e, aFn);
     res(xOrg).then(() => {
       const killedCache = !Cache.containsQueryResponse(cache, e, getUsers, ['args']);
       expect(killedCache).to.be.true;
@@ -29,7 +31,7 @@ describe('DecorateNoOperation', () => {
     const aFn = sinon.spy(() => {
       return Promise.resolve({});
     });
-    decorateNoOperation({}, cache, e, aFn);
+    decorateNoOperation({}, cache, curryNoop, e, aFn);
     expect(aFn.operation).to.be.undefined;
   });
   it('Ignored inherited invalidation config', (done) => {
@@ -41,7 +43,7 @@ describe('DecorateNoOperation', () => {
     const getUsers = createApiFunction(() => Promise.resolve(xOrg));
     aFn.hasOwnProperty = () => false;
     Cache.storeQueryResponse(cache, e, getUsers, ['args'], xOrg);
-    const res = decorateNoOperation({}, cache, e, aFn);
+    const res = decorateNoOperation({}, cache, curryNoop, e, aFn);
     res(xOrg).then(() => {
       const killedCache = !Cache.containsQueryResponse(cache, e, getUsers, ['args']);
       expect(killedCache).to.be.false;

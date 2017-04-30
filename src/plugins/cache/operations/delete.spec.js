@@ -4,6 +4,8 @@ import * as Cache from '../cache';
 import {addId} from '../id-helper';
 import {createApiFunction} from '../test-helper';
 
+const curryNoop = () => () => {};
+
 const config = [
   {
     name: 'user',
@@ -47,7 +49,7 @@ describe('Delete', () => {
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve({}));
       const aFn = sinon.spy(aFnWithoutSpy);
       Cache.storeEntity(cache, e, addId({}, undefined, undefined, xOrg));
-      const res = decorateDelete({}, cache, e, aFn);
+      const res = decorateDelete({}, cache, curryNoop, e, aFn);
       res(1).then(() => {
         expect(Cache.getEntity(cache, e, 1)).to.equal(undefined);
         done();

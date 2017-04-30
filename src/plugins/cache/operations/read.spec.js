@@ -6,6 +6,7 @@ import {decorateRead} from './read';
 import {createCache} from '../cache';
 import {createSampleConfig, createApiFunction} from '../test-helper';
 
+const curryNoop = () => () => {};
 const config = createSampleConfig();
 
 describe('Read', () => {
@@ -16,7 +17,7 @@ describe('Read', () => {
       const xOrg = [{name: 'Kalle'}, {name: 'Anka'}];
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {idFrom: 'ARGS'});
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
       res(1).then(x => {
         expect(x).to.deep.equal(xOrg);
         done();
@@ -28,7 +29,7 @@ describe('Read', () => {
       const xOrg = {name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {idFrom: 'ARGS'});
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
       res({hello: 'hej', other: 'svej'}).then(x => {
         expect(x).to.deep.equal({name: 'Kalle'});
         done();
@@ -40,7 +41,7 @@ describe('Read', () => {
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
       res(1).then(() => {
         expect(aFn.callCount).to.equal(1);
         done();
@@ -54,7 +55,7 @@ describe('Read', () => {
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
       const delay = () => new Promise((resolve) => setTimeout(resolve, 1));
       res(1).then(delay).then(res.bind(null, 1)).then(() => {
         expect(aFn.callCount).to.equal(2);
@@ -67,7 +68,7 @@ describe('Read', () => {
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
       res(1).then(res.bind(null, 1)).then(() => {
         expect(aFn.callCount).to.equal(1);
         done();
@@ -87,7 +88,7 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         return apiFn(['a', 'b']).then((res) => {
           expect(res).to.deep.equal([users.a, users.b]);
         });
@@ -97,7 +98,7 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         return apiFn(['a', 'b']).then((res) => {
           expect(res).to.deep.equal([users.a, users.b]);
         });
@@ -107,7 +108,7 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         const args = ['a', 'b'];
         return apiFn(args).then(() => {
           return apiFn(args).then((res) => {
@@ -121,7 +122,7 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         return apiFn(['a', 'b']).then(() => {
           return apiFn(['b', 'c']).then(() => {
             expect(fnWithSpy).to.have.been.calledTwice;
@@ -135,7 +136,7 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         return apiFn(['a', 'b']).then(() => {
           return apiFn(['a', 'b', 'c']).then((res) => {
             expect(res).to.deep.equal([users.a, users.b, users.c]);
@@ -149,7 +150,7 @@ describe('Read', () => {
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
       res(1).then(() => {
         expect(aFn.callCount).to.equal(1);
         done();
@@ -161,7 +162,7 @@ describe('Read', () => {
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
       const firstCall = res(1);
 
@@ -178,7 +179,7 @@ describe('Read', () => {
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
       const firstCall = res(1);
 
@@ -195,7 +196,7 @@ describe('Read', () => {
       const xOrg = [{id: 1, name: 'Kalle'}];
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
       res(1).then((x) => {
         expect(x).to.equal(xOrg);
         done();
@@ -207,7 +208,7 @@ describe('Read', () => {
       const xOrg = [{id: 1, name: 'Kalle'}];
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
       const firstCall = res(1);
 
@@ -224,7 +225,7 @@ describe('Read', () => {
       const xOrg = [{id: 1, name: 'Kalle'}];
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
       const firstCall = res(1);
 
@@ -241,7 +242,7 @@ describe('Read', () => {
       const xOrg = {name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
       res().catch(err => {
         expect(err).to.be.a('Error');
