@@ -13,6 +13,7 @@
 
 import {curry, reduce, map_, clone} from 'ladda-fp';
 import {merge} from './merger';
+import {removeId} from './id-helper';
 
 // Value -> StoreValue
 const toStoreValue = v => ({value: v, timestamp: Date.now()});
@@ -122,7 +123,10 @@ export const remove = (es, e, id) => {
   const x = get(es, e, id);
   rm(es, createEntityKey(e, {__ladda__id: id}));
   rmViews(es, e);
-  return x;
+  if (x) {
+    return removeId(x.value);
+  }
+  return undefined;
 };
 
 // EntityStore -> Entity -> String -> Bool

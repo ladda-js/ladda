@@ -6,6 +6,11 @@ export function decorateDelete(c, cache, notify, e, aFn) {
   return (...args) => {
     return aFn(...args)
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
-      .then(() => Cache.removeEntity(cache, e, serialize(args)));
+      .then(() => {
+        const removed = Cache.removeEntity(cache, e, serialize(args));
+        if (removed) {
+          notify('DELETE', args, removed);
+        }
+      });
   };
 }
