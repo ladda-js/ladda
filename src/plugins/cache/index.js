@@ -11,13 +11,22 @@ const HANDLERS = {
   READ: decorateRead,
   UPDATE: decorateUpdate,
   DELETE: decorateDelete,
-  NO_OPERATION: decorateNoOperation
+  NO_OPERATION: decorateNoOperation,
+  NOTIFIER: decorateNoOperation
+};
+
+const getHandler = (fn) => {
+  if (fn.isNotifier === true) {
+    return HANDLERS.NOTIFIER;
+  }
+
+  return HANDLERS[fn.operation];
 };
 
 export const cachePlugin = (onChange) => ({ config, entityConfigs }) => {
   const cache = createCache(values(entityConfigs), onChange);
   return ({ entity, fn }) => {
-    const handler = HANDLERS[fn.operation];
+    const handler = getHandler(fn);
     return handler(config, cache, entity, fn);
   };
 };

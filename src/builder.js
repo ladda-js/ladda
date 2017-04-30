@@ -102,16 +102,38 @@ const setApiConfigDefaults = ec => {
 
   return {
     ...ec,
-    api: ec.api ? mapValues(setDefaults, ec.api) : ec.api
+    api: mapValues(setDefaults, ec.api)
   };
 };
 
+const createNotifyFunction = (operation) => {
+  const fn = (x) => Promise.resolve(x);
+  fn.operation = operation;
+  fn.isNotifier = true;
+  fn.invalidates = [];
+  return fn;
+};
+
+const addNotifyFunctions = (entityConfig) => {
+  if (!entityConfig.api) {
+    entityConfig.api = {};
+  }
+
+  entityConfig.api._notifyCreate = createNotifyFunction('CREATE');
+  entityConfig.api._notifyRead = createNotifyFunction('READ');
+  entityConfig.api._notifyUpdate = createNotifyFunction('UPDATE');
+  entityConfig.api._notifyDelete = createNotifyFunction('DELETE');
+
+  return entityConfig;
+};
+
 // Config -> Map String EntityConfig
-export const getEntityConfigs = compose( // exported for testing
+export const createEntityConfigs = compose( // exported for testing
   toObject(prop('name')),
   mapObject(toEntity),
   mapValues(setApiConfigDefaults),
   mapValues(setEntityConfigDefaults),
+  mapValues(addNotifyFunctions),
   filterObject(compose(not, isEqual('__config')))
 );
 
@@ -128,13 +150,13 @@ const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => 
 });
 
 // Config -> Api
-export const build = (c, ps = []) => {
-  const config = getGlobalConfig(c);
-  const entityConfigs = getEntityConfigs(c);
-  validateConfig(console, entityConfigs, config);
-  const listenerStore = createListenerStore(config);
-  const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, config);
+export const build = (config, plugins = []) => {
+  const globalConfig = getGlobalConfig(config);
+  const entityConfigs = createEntityConfigs(config);
+  validateConfig(console, entityConfigs, globalConfig);
+  const listenerStore = createListenerStore(globalConfig);
+  const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, globalConfig);
   const applyPlugins = reduce(applyPlugin_, entityConfigs);
   const createApi = compose(toApi, applyPlugins);
-  return createApi([cachePlugin(listenerStore.onChange), ...ps, dedupPlugin]);
+  return createApi([cachePlugin(listenerStore.onChange), ...plugins, dedupPlugin]);
 };

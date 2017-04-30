@@ -14,11 +14,6 @@ const isValidLogger = (logger) => logger && typeof logger.error === 'function';
 const getEntityNames = (entityConfigs) => Object.keys(entityConfigs);
 
 const checkApiDeclaration = (logger, entityConfigs, entityName, entity) => {
-  if (typeof entity.api !== 'object') {
-    warn(logger, `No api definition found for entity ${entityName}`);
-    return;
-  }
-
   const warnApi = (msg, ...args) => warn(
     logger,
     `Invalid api config. ${msg}`,

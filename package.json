@@ -21,7 +21,7 @@
     "eslint-plugin-import": "^2.2.0",
     "gitbook-cli": "^2.3.0",
     "mocha": "^2.5.3",
-    "nyc": "^10.1.2",
+    "nyc": "10.2.0",
     "sinon": "^1.17.7",
     "sinon-chai": "^2.8.0",
     "webpack": "^2.4.1"
