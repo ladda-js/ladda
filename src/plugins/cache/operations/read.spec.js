@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 
 import sinon from 'sinon';
-import {map} from 'ladda-fp';
+import {curry, map} from 'ladda-fp';
 import {decorateRead} from './read';
 import {createCache} from '../cache';
 import {createSampleConfig, createApiFunction} from '../test-helper';
@@ -74,6 +74,34 @@ describe('Read', () => {
           expect(aFn.callCount).to.equal(1);
         });
       });
+
+      it('triggers notify when not in cache', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b, c) => spy(a, b, c));
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, n, e, aFn);
+        return res(1).then((r) => {
+          expect(spy).to.have.been.calledWith('CREATE', [1], r);
+        });
+      });
+
+      it('does not trigger notify when in cache', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b, c) => spy(a, b, c));
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, n, e, aFn);
+        return res(1).then(res.bind(null, 1)).then(() => {
+          expect(spy).to.have.been.calledOnce; // and not a second time for the cache hit
+        });
+      });
     });
 
     describe('with byIds', () => {
@@ -142,6 +170,50 @@ describe('Read', () => {
         return apiFn(['a', 'b']).then(() => {
           return apiFn(['a', 'b', 'c']).then((res) => {
             expect(res).to.deep.equal([users.a, users.b, users.c]);
+          });
+        });
+      });
+
+      it('triggers notify when not in cache', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b, c) => spy(a, b, c));
+        const cache = createCache(config);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, cache, n, e, fnWithSpy);
+        return apiFn(['a', 'b']).then((r) => {
+          expect(spy).to.have.been.calledOnce;
+          expect(spy).to.have.been.calledWith('CREATE', [['a', 'b']], r);
+        });
+      });
+
+      it('triggers notify when not in cache for partial request', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b, c) => spy(a, b, c));
+        const cache = createCache(config);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, cache, n, e, fnWithSpy);
+        return apiFn(['a', 'b']).then(() => {
+          spy.reset();
+          return apiFn(['a', 'b', 'c']).then((r) => {
+            expect(spy).to.have.been.calledOnce;
+            expect(spy).to.have.been.calledWith('CREATE', [['c']], r);
+          });
+        });
+      });
+
+      it('does not trigger notify when in cache', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b, c) => spy(a, b, c));
+        const cache = createCache(config);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, cache, n, e, fnWithSpy);
+        return apiFn(['a', 'b']).then(() => {
+          spy.reset();
+          return apiFn(['a', 'b']).then(() => {
+            expect(spy).not.to.have.been.called;
           });
         });
       });
@@ -249,6 +321,42 @@ describe('Read', () => {
 
       return res().catch(err => {
         expect(err).to.be.a('Error');
+      });
+    });
+
+    it('triggers notify when not in cache', () => {
+      const spy = sinon.spy();
+      const n = curry((a, b, c) => spy(a, b, c));
+      const cache = createCache(config);
+      const e = config[0];
+      const xOrg = [{id: 1, name: 'Kalle'}];
+      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+      const aFn = sinon.spy(aFnWithoutSpy);
+      const res = decorateRead({}, cache, n, e, aFn);
+
+      return res(1).then((r) => {
+        expect(spy).to.have.been.calledOnce;
+        expect(spy).to.have.been.calledWith('CREATE', [1], r);
+      });
+    });
+
+    it('does not trigger notify when in cache', () => {
+      const spy = sinon.spy();
+      const n = curry((a, b, c) => spy(a, b, c));
+      const cache = createCache(config);
+      const e = config[0];
+      const xOrg = [{id: 1, name: 'Kalle'}];
+      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+      const aFn = sinon.spy(aFnWithoutSpy);
+      const res = decorateRead({}, cache, n, e, aFn);
+
+      const firstCall = res(1);
+
+      return firstCall.then(() => {
+        spy.reset();
+        return res(1).then(() => {
+          expect(spy).not.to.have.been.called;
+        });
       });
     });
   });
