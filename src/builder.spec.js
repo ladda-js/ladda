@@ -11,12 +11,16 @@ getUsers.operation = 'READ';
 const deleteUser = () => Promise.resolve();
 deleteUser.operation = 'DELETE';
 
+const noopUser = () => Promise.resolve(['a', 'b']);
+noopUser.operation = 'NO_OPERATION';
+
 const config = () => ({
   user: {
     ttl: 300,
     api: {
       getUsers,
-      deleteUser
+      deleteUser,
+      noopUser
     },
     invalidates: ['alles']
   },
@@ -179,6 +183,22 @@ describe('builder', () => {
       build(config(), [plugin]);
     });
 
+    it('returns a deregistration fn', () => {
+      const spy = sinon.spy();
+
+      const plugin = ({ addChangeListener }) => {
+        const deregister = addChangeListener(spy);
+        deregister();
+        return ({ fn }) => fn;
+      };
+
+      const api = build(config(), [plugin]);
+
+      return api.user.getUsers().then(() => {
+        expect(spy).not.to.have.been.called;
+      });
+    });
+
     describe('allows plugins to add a listener, which gets notified on all cache changes', () => {
       it('on READ operations', () => {
         const spy = sinon.spy();
@@ -198,6 +218,27 @@ describe('builder', () => {
           expect(changeObject.operation).to.equal('READ');
           expect(changeObject.values).to.deep.equal(users);
           expect(changeObject.args).to.deep.equal([]);
+        });
+      });
+
+      it('on NO_OPERATION operations', () => {
+        const spy = sinon.spy();
+
+        const plugin = ({ addChangeListener }) => {
+          addChangeListener(spy);
+          return ({ fn }) => fn;
+        };
+
+        const api = build(config(), [plugin]);
+
+        return api.user.noopUser('x').then(() => {
+          expect(spy).to.have.been.calledOnce;
+          const changeObject = spy.args[0][0];
+          expect(changeObject.entity).to.equal('user');
+          expect(changeObject.apiFn).to.equal('noopUser');
+          expect(changeObject.operation).to.equal('NO_OPERATION');
+          expect(changeObject.values).to.deep.equal(null);
+          expect(changeObject.args).to.deep.equal(['x']);
         });
       });
     });
