@@ -118,7 +118,7 @@ describe('Ladda logger', () => {
       expect(l.log).to.have.been.calledOnce;
 
       return api.user.getUsers().then(() => {
-        expect(l.log).to.have.been.calledThrice;
+        expect(l.log).to.have.calledThrice;
       });
     });
 
@@ -138,7 +138,7 @@ describe('Ladda logger', () => {
       expect(l.log).to.have.been.called;
 
       return api.user.getUsers().then(() => {
-        expect(l.log).to.have.been.calledThrice;
+        expect(l.log).to.have.calledThrice;
       });
     });
   });
@@ -184,7 +184,7 @@ describe('Ladda logger', () => {
 
       return api.user.getUsers().then(() => {
         expect(l.groupCollapsed).to.have.been.calledTwice;
-        expect(l.log).to.have.been.calledThrice;
+        expect(l.log).to.have.callCount(4);
         expect(l.groupEnd).to.have.been.calledTwice;
       });
     });
@@ -211,7 +211,7 @@ describe('Ladda logger', () => {
 
       return api.user.getUsers().then(() => {
         expect(l.groupCollapsed).to.have.been.calledTwice;
-        expect(l.log).to.have.been.calledThrice;
+        expect(l.log).to.have.callCount(4);
         expect(l.groupEnd).to.have.been.calledTwice;
       });
     });

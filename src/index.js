@@ -71,12 +71,13 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
         impl.log(text, change);
       } else {
         const args = [
-          `%c${text} %c${change.type} ${change.entity}`,
+          `%c${text} %c${change.operation} ${change.entity} by ${change.apiFn}`,
           inBoldStyle(colors.subText),
           inBoldStyle(colors.info)
         ];
         logGroup(impl, collapse, ...args);
-        impl.log('entities', change.entities);
+        impl.log('args', change.args);
+        impl.log('values', change.values);
         impl.groupEnd();
       }
     },
