@@ -1,9 +1,9 @@
 import {passThrough} from 'ladda-fp';
-import {invalidate} from '../query-cache';
+import {invalidateQuery} from '../cache';
 
-export function decorateNoOperation(c, es, qc, e, aFn) {
+export function decorateNoOperation(c, cache, e, aFn) {
   return (...args) => {
     return aFn(...args)
-      .then(passThrough(() => invalidate(qc, e, aFn)));
+      .then(passThrough(() => invalidateQuery(cache, e, aFn)));
   };
 }

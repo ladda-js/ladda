@@ -1,12 +1,11 @@
 import {passThrough, compose} from 'ladda-fp';
-import {put} from '../entity-store';
-import {invalidate} from '../query-cache';
+import {storeEntity, invalidateQuery} from '../cache';
 import {addId} from '../id-helper';
 
-export function decorateCreate(c, es, qc, e, aFn) {
+export function decorateCreate(c, cache, e, aFn) {
   return (...args) => {
     return aFn(...args)
-      .then(passThrough(() => invalidate(qc, e, aFn)))
-      .then(passThrough(compose(put(es, e), addId(c, aFn, args))));
+      .then(passThrough(() => invalidateQuery(cache, e, aFn)))
+      .then(passThrough(compose(storeEntity(cache, e), addId(c, aFn, args))));
   };
 }

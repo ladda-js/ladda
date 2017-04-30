@@ -1,13 +1,5 @@
 import {passThrough, compose, curry, reduce, toIdMap, map, concat, zip} from 'ladda-fp';
-import {get as getFromEs,
-        put as putInEs,
-        mPut as mPutInEs,
-        contains as inEs} from '../entity-store';
-import {get as getFromQc,
-        invalidate,
-        put as putInQc,
-        contains as inQc,
-        getValue} from '../query-cache';
+import * as Cache from '../cache';
 import {addId, removeId} from '../id-helper';
 
 const getTtl = e => e.ttl * 1000;
@@ -17,9 +9,9 @@ const hasExpired = (e, timestamp) => {
   return (Date.now() - timestamp) > getTtl(e);
 };
 
-const readFromCache = curry((es, e, aFn, id) => {
-  if (inEs(es, e, id) && !aFn.alwaysGetFreshData) {
-    const v = getFromEs(es, e, id);
+const readFromCache = curry((cache, e, aFn, id) => {
+  if (Cache.containsEntity(cache, e, id) && !aFn.alwaysGetFreshData) {
+    const v = Cache.getEntity(cache, e, id);
     if (!hasExpired(e, v.timestamp)) {
       return removeId(v.value);
     }
@@ -27,22 +19,22 @@ const readFromCache = curry((es, e, aFn, id) => {
   return undefined;
 });
 
-const decorateReadSingle = (c, es, qc, e, aFn) => {
+const decorateReadSingle = (c, cache, e, aFn) => {
   return (id) => {
-    const fromCache = readFromCache(es, e, aFn, id);
+    const fromCache = readFromCache(cache, e, aFn, id);
     if (fromCache) {
       return Promise.resolve(fromCache);
     }
 
     return aFn(id)
-      .then(passThrough(compose(putInEs(es, e), addId(c, aFn, id))))
-      .then(passThrough(() => invalidate(qc, e, aFn)));
+      .then(passThrough(compose(Cache.storeEntity(cache, e), addId(c, aFn, id))))
+      .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)));
   };
 };
 
-const decorateReadSome = (c, es, qc, e, aFn) => {
+const decorateReadSome = (c, cache, e, aFn) => {
   return (ids) => {
-    const readFromCache_ = readFromCache(es, e, aFn);
+    const readFromCache_ = readFromCache(cache, e, aFn);
     const [cached, remaining] = reduce(([c_, r], id) => {
       const fromCache = readFromCache_(id);
       if (fromCache) {
@@ -60,8 +52,8 @@ const decorateReadSome = (c, es, qc, e, aFn) => {
     const addIds = map(([id, item]) => addId(c, aFn, id, item));
 
     return aFn(remaining)
-      .then(passThrough(compose(mPutInEs(es, e), addIds, zip(remaining))))
-      .then(passThrough(() => invalidate(qc, e, aFn)))
+      .then(passThrough(compose(Cache.storeEntities(cache, e), addIds, zip(remaining))))
+      .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
       .then((other) => {
         const asMap = compose(toIdMap, concat)(cached, other);
         return map((id) => asMap[id], ids);
@@ -69,27 +61,29 @@ const decorateReadSome = (c, es, qc, e, aFn) => {
   };
 };
 
-const decorateReadQuery = (c, es, qc, e, aFn) => {
+const decorateReadQuery = (c, cache, e, aFn) => {
   return (...args) => {
-    if (inQc(qc, e, aFn, args) && !aFn.alwaysGetFreshData) {
-      const v = getFromQc(qc, e, aFn, args);
+    if (Cache.containsQueryResponse(cache, e, aFn, args) && !aFn.alwaysGetFreshData) {
+      const v = Cache.getQueryResponseWithMeta(cache, e, aFn, args);
       if (!hasExpired(e, v.timestamp)) {
-        return Promise.resolve(removeId(getValue(v.value)));
+        return Promise.resolve(removeId(Cache.getQueryResponse(v.value)));
       }
     }
 
     return aFn(...args)
-      .then(passThrough(compose(putInQc(qc, e, aFn, args), addId(c, aFn, args))))
-      .then(passThrough(() => invalidate(qc, e, aFn)));
+      .then(passThrough(
+            compose(Cache.storeQueryResponse(cache, e, aFn, args),
+                    addId(c, aFn, args))))
+      .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)));
   };
 };
 
-export function decorateRead(c, es, qc, e, aFn) {
+export function decorateRead(c, cache, e, aFn) {
   if (aFn.byId) {
-    return decorateReadSingle(c, es, qc, e, aFn);
+    return decorateReadSingle(c, cache, e, aFn);
   }
   if (aFn.byIds) {
-    return decorateReadSome(c, es, qc, e, aFn);
+    return decorateReadSome(c, cache, e, aFn);
   }
-  return decorateReadQuery(c, es, qc, e, aFn);
+  return decorateReadQuery(c, cache, e, aFn);
 }

@@ -1,12 +1,11 @@
 import {passThrough} from 'ladda-fp';
-import {remove} from '../entity-store';
-import {invalidate} from '../query-cache';
+import * as Cache from '../cache';
 import {serialize} from '../serializer';
 
-export function decorateDelete(c, es, qc, e, aFn) {
+export function decorateDelete(c, cache, e, aFn) {
   return (...args) => {
     return aFn(...args)
-      .then(passThrough(() => invalidate(qc, e, aFn)))
-      .then(() => remove(es, e, serialize(args)));
+      .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
+      .then(() => Cache.removeEntity(cache, e, serialize(args)));
   };
 }
