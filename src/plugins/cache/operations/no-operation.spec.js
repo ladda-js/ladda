@@ -24,6 +24,7 @@ describe('DecorateNoOperation', () => {
       expect(killedCache).to.be.true;
     });
   });
+
   it('Does not change original function', () => {
     const cache = Cache.createCache(config);
     const e = config[0];
@@ -33,6 +34,7 @@ describe('DecorateNoOperation', () => {
     decorateNoOperation({}, cache, curryNoop, e, aFn);
     expect(aFn.operation).to.be.undefined;
   });
+
   it('Ignored inherited invalidation config', () => {
     const cache = Cache.createCache(config);
     const e = config[0];
@@ -46,6 +48,21 @@ describe('DecorateNoOperation', () => {
     return res(xOrg).then(() => {
       const killedCache = !Cache.containsQueryResponse(cache, e, getUsers, ['args']);
       expect(killedCache).to.be.false;
+    });
+  });
+
+  it('does not trigger notify', () => {
+    const spy = sinon.spy();
+    const cache = Cache.createCache(config);
+    const e = config[0];
+    const xOrg = {__ladda__id: 1, name: 'Kalle'};
+    const aFn = sinon.spy(() => Promise.resolve({}));
+    const getUsers = () => Promise.resolve(xOrg);
+    aFn.invalidates = ['getUsers'];
+    Cache.storeQueryResponse(cache, e, getUsers, ['args'], xOrg);
+    const res = decorateNoOperation({}, cache, spy, e, aFn);
+    return res(xOrg).then(() => {
+      expect(spy).not.to.have.been.called;
     });
   });
 });
