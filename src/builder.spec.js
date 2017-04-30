@@ -248,7 +248,6 @@ describe('builder', () => {
       const conf = config();
       delete conf.__config;
       const api = build(conf);
-      console.log(api);
       expect(api).to.be.defined;
     });
   });
