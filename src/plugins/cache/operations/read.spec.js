@@ -23,6 +23,7 @@ describe('Read', () => {
         done();
       });
     });
+
     it('does set id to serialized args if idFrom ARGS', (done) => {
       const cache = createCache(config);
       const e = config[0];
@@ -35,45 +36,51 @@ describe('Read', () => {
         done();
       });
     });
-    it('calls api fn if not in cache with byId set', (done) => {
-      const cache = createCache(config);
-      const e = config[0];
-      const xOrg = {id: 1, name: 'Kalle'};
-      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
-      const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, curryNoop, e, aFn);
-      res(1).then(() => {
-        expect(aFn.callCount).to.equal(1);
-        done();
+
+    describe('with byId set', () => {
+      it('calls api fn if not in cache', (done) => {
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        res(1).then(() => {
+          expect(aFn.callCount).to.equal(1);
+          done();
+        });
+      });
+
+      it('calls api fn if in cache, but expired', (done) => {
+        const myConfig = createSampleConfig();
+        myConfig[0].ttl = 0;
+        const cache = createCache(myConfig);
+        const e = myConfig[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        const delay = () => new Promise((resolve) => setTimeout(resolve, 1));
+        res(1).then(delay).then(res.bind(null, 1)).then(() => {
+          expect(aFn.callCount).to.equal(2);
+          done();
+        });
+      });
+
+      it('does not call api fn if in cache', (done) => {
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        res(1).then(res.bind(null, 1)).then(() => {
+          expect(aFn.callCount).to.equal(1);
+          done();
+        });
       });
     });
-    it('calls api fn if in cache, but expired, with byId set', (done) => {
-      const myConfig = createSampleConfig();
-      myConfig[0].ttl = 0;
-      const cache = createCache(myConfig);
-      const e = myConfig[0];
-      const xOrg = {id: 1, name: 'Kalle'};
-      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
-      const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, curryNoop, e, aFn);
-      const delay = () => new Promise((resolve) => setTimeout(resolve, 1));
-      res(1).then(delay).then(res.bind(null, 1)).then(() => {
-        expect(aFn.callCount).to.equal(2);
-        done();
-      });
-    });
-    it('does not call api fn if in cache with byId set', (done) => {
-      const cache = createCache(config);
-      const e = config[0];
-      const xOrg = {id: 1, name: 'Kalle'};
-      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
-      const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, curryNoop, e, aFn);
-      res(1).then(res.bind(null, 1)).then(() => {
-        expect(aFn.callCount).to.equal(1);
-        done();
-      });
-    });
+
     describe('with byIds', () => {
       const users = {
         a: { id: 'a' },
@@ -144,6 +151,7 @@ describe('Read', () => {
         });
       });
     });
+
     it('calls api fn if not in cache', (done) => {
       const cache = createCache(config);
       const e = config[0];
@@ -156,6 +164,7 @@ describe('Read', () => {
         done();
       });
     });
+
     it('does not call api fn if in cache', (done) => {
       const cache = createCache(config);
       const e = config[0];
@@ -173,6 +182,7 @@ describe('Read', () => {
         });
       });
     });
+
     it('does call api fn if in cache but expired', (done) => {
       const cache = createCache(config);
       const e = {...config[0], ttl: -1};
@@ -190,6 +200,7 @@ describe('Read', () => {
         });
       });
     });
+
     it('calls api fn if not in cache (plural)', (done) => {
       const cache = createCache(config);
       const e = config[0];
@@ -202,6 +213,7 @@ describe('Read', () => {
         done();
       });
     });
+
     it('does not call api fn if in cache (plural)', (done) => {
       const cache = createCache(config);
       const e = config[0];
@@ -219,6 +231,7 @@ describe('Read', () => {
         });
       });
     });
+
     it('does call api fn if in cache but expired (plural)', (done) => {
       const cache = createCache(config);
       const e = {...config[0], ttl: -1};
@@ -236,6 +249,7 @@ describe('Read', () => {
         });
       });
     });
+
     it('throws if id is missing', (done) => {
       const cache = createCache(config);
       const e = {...config[0], ttl: 300};
