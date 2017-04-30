@@ -42,7 +42,7 @@ const config = [
 
 describe('Delete', () => {
   describe('decorateDelete', () => {
-    it('Removes cache', (done) => {
+    it('Removes cache', () => {
       const cache = Cache.createCache(config);
       const e = config[0];
       const xOrg = {id: 1, name: 'Kalle'};
@@ -50,9 +50,8 @@ describe('Delete', () => {
       const aFn = sinon.spy(aFnWithoutSpy);
       Cache.storeEntity(cache, e, addId({}, undefined, undefined, xOrg));
       const res = decorateDelete({}, cache, curryNoop, e, aFn);
-      res(1).then(() => {
+      return res(1).then(() => {
         expect(Cache.getEntity(cache, e, 1)).to.equal(undefined);
-        done();
       });
     });
   });

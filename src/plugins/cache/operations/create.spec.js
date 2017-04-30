@@ -41,7 +41,7 @@ const config = [
 
 describe('Create', () => {
   describe('decorateCreate', () => {
-    it('Adds value to entity store', (done) => {
+    it('Adds value to entity store', () => {
       const cache = createCache(config);
       const e = config[0];
       const xOrg = {name: 'Kalle'};
@@ -49,10 +49,9 @@ describe('Create', () => {
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(response));
       const aFn = sinon.spy(aFnWithoutSpy);
       const res = decorateCreate({}, cache, curryNoop, e, aFn);
-      res(xOrg).then((newX) => {
+      return res(xOrg).then((newX) => {
         expect(newX).to.equal(response);
         expect(getEntity(cache, e, 1).value).to.deep.equal({...response, __ladda__id: 1});
-        done();
       });
     });
   });
