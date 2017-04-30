@@ -199,6 +199,24 @@ describe('builder', () => {
       });
     });
 
+    it('can call deregistration fn several times without harm', () => {
+      const spy = sinon.spy();
+
+      const plugin = ({ addChangeListener }) => {
+        const deregister = addChangeListener(spy);
+        deregister();
+        deregister();
+        deregister();
+        return ({ fn }) => fn;
+      };
+
+      const api = build(config(), [plugin]);
+
+      return api.user.getUsers().then(() => {
+        expect(spy).not.to.have.been.called;
+      });
+    });
+
     describe('allows plugins to add a listener, which gets notified on all cache changes', () => {
       it('on READ operations', () => {
         const spy = sinon.spy();
