@@ -16,9 +16,9 @@ const HANDLERS = {
 
 const normalizeFnName = (fnName) => fnName.replace(/^bound /, '');
 
-const notify = curry((onChange, entity, fn, changeType, args, payload) => {
+const notify = curry((onChange, entity, fn, args, payload) => {
   onChange({
-    type: changeType,
+    operation: fn.operation,
     entity: entity.name,
     apiFn: normalizeFnName(fn.name),
     values: Array.isArray(payload) ? payload : [payload],

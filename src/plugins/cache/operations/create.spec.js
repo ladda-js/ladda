@@ -60,7 +60,7 @@ describe('Create', () => {
 
     it('triggers a CREATE notification', () => {
       const spy = sinon.spy();
-      const n = curry((a, b, c) => spy(a, b, c));
+      const n = curry((a, b) => spy(a, b));
       const cache = createCache(config);
       const e = config[0];
       const xOrg = {name: 'Kalle'};
@@ -70,7 +70,7 @@ describe('Create', () => {
       const res = decorateCreate({}, cache, n, e, aFn);
       return res(xOrg).then((newX) => {
         expect(spy).to.have.been.calledOnce;
-        expect(spy).to.have.been.calledWith('CREATE', [xOrg], newX);
+        expect(spy).to.have.been.calledWith([xOrg], newX);
       });
     });
   });

@@ -77,7 +77,7 @@ describe('Read', () => {
 
       it('triggers notify when not in cache', () => {
         const spy = sinon.spy();
-        const n = curry((a, b, c) => spy(a, b, c));
+        const n = curry((a, b) => spy(a, b));
         const cache = createCache(config);
         const e = config[0];
         const xOrg = {id: 1, name: 'Kalle'};
@@ -85,13 +85,13 @@ describe('Read', () => {
         const aFn = sinon.spy(aFnWithoutSpy);
         const res = decorateRead({}, cache, n, e, aFn);
         return res(1).then((r) => {
-          expect(spy).to.have.been.calledWith('CREATE', [1], r);
+          expect(spy).to.have.been.calledWith([1], r);
         });
       });
 
       it('does not trigger notify when in cache', () => {
         const spy = sinon.spy();
-        const n = curry((a, b, c) => spy(a, b, c));
+        const n = curry((a, b) => spy(a, b));
         const cache = createCache(config);
         const e = config[0];
         const xOrg = {id: 1, name: 'Kalle'};
@@ -176,20 +176,20 @@ describe('Read', () => {
 
       it('triggers notify when not in cache', () => {
         const spy = sinon.spy();
-        const n = curry((a, b, c) => spy(a, b, c));
+        const n = curry((a, b) => spy(a, b));
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
         const apiFn = decorateRead({}, cache, n, e, fnWithSpy);
         return apiFn(['a', 'b']).then((r) => {
           expect(spy).to.have.been.calledOnce;
-          expect(spy).to.have.been.calledWith('CREATE', [['a', 'b']], r);
+          expect(spy).to.have.been.calledWith([['a', 'b']], r);
         });
       });
 
       it('triggers notify when not in cache for partial request', () => {
         const spy = sinon.spy();
-        const n = curry((a, b, c) => spy(a, b, c));
+        const n = curry((a, b) => spy(a, b));
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
@@ -198,14 +198,14 @@ describe('Read', () => {
           spy.reset();
           return apiFn(['a', 'b', 'c']).then((r) => {
             expect(spy).to.have.been.calledOnce;
-            expect(spy).to.have.been.calledWith('CREATE', [['c']], r);
+            expect(spy).to.have.been.calledWith([['c']], r);
           });
         });
       });
 
       it('does not trigger notify when in cache', () => {
         const spy = sinon.spy();
-        const n = curry((a, b, c) => spy(a, b, c));
+        const n = curry((a, b) => spy(a, b));
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
@@ -326,7 +326,7 @@ describe('Read', () => {
 
     it('triggers notify when not in cache', () => {
       const spy = sinon.spy();
-      const n = curry((a, b, c) => spy(a, b, c));
+      const n = curry((a, b) => spy(a, b));
       const cache = createCache(config);
       const e = config[0];
       const xOrg = [{id: 1, name: 'Kalle'}];
@@ -336,13 +336,13 @@ describe('Read', () => {
 
       return res(1).then((r) => {
         expect(spy).to.have.been.calledOnce;
-        expect(spy).to.have.been.calledWith('CREATE', [1], r);
+        expect(spy).to.have.been.calledWith([1], r);
       });
     });
 
     it('does not trigger notify when in cache', () => {
       const spy = sinon.spy();
-      const n = curry((a, b, c) => spy(a, b, c));
+      const n = curry((a, b) => spy(a, b));
       const cache = createCache(config);
       const e = config[0];
       const xOrg = [{id: 1, name: 'Kalle'}];

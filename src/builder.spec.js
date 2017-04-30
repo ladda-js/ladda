@@ -195,7 +195,7 @@ describe('builder', () => {
           const changeObject = spy.args[0][0];
           expect(changeObject.entity).to.equal('user');
           expect(changeObject.apiFn).to.equal('getUsers');
-          expect(changeObject.type).to.equal('CREATE');
+          expect(changeObject.operation).to.equal('READ');
           expect(changeObject.values).to.deep.equal(users);
           expect(changeObject.args).to.deep.equal([]);
         });

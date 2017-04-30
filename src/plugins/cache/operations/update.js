@@ -7,6 +7,6 @@ export function decorateUpdate(c, cache, notify, e, aFn) {
     return aFn(eValue, ...args)
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
       .then(passThrough(() => Cache.storeEntity(cache, e, addId(c, undefined, undefined, eValue))))
-      .then(passThrough(() => notify('UPDATE', [eValue, ...args], eValue)));
+      .then(passThrough(() => notify([eValue, ...args], eValue)));
   };
 }

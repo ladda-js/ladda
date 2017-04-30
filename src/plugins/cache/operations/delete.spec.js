@@ -60,7 +60,7 @@ describe('Delete', () => {
 
     it('triggers DELETE notification', () => {
       const spy = sinon.spy();
-      const n = curry((a, b, c) => spy(a, b, c));
+      const n = curry((a, b) => spy(a, b));
       const cache = Cache.createCache(config);
       const e = config[0];
       const xOrg = {id: 1, name: 'Kalle'};
@@ -70,13 +70,13 @@ describe('Delete', () => {
       const res = decorateDelete({}, cache, n, e, aFn);
       return res(1).then(() => {
         expect(spy).to.have.been.calledOnce;
-        expect(spy).to.have.been.calledWith('DELETE', [1], xOrg);
+        expect(spy).to.have.been.calledWith([1], xOrg);
       });
     });
 
     it('does not trigger notification when item was not in cache', () => {
       const spy = sinon.spy();
-      const n = curry((a, b, c) => spy(a, b, c));
+      const n = curry((a, b) => spy(a, b));
       const cache = Cache.createCache(config);
       const e = config[0];
       const xOrg = {id: 1, name: 'Kalle'};

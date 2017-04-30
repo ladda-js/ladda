@@ -59,7 +59,7 @@ describe('Update', () => {
 
     it('triggers an UPDATE notification', () => {
       const spy = sinon.spy();
-      const n = curry((a, b, c) => spy(a, b, c));
+      const n = curry((a, b) => spy(a, b));
 
       const cache = Cache.createCache(config);
       const e = config[0];
@@ -70,7 +70,7 @@ describe('Update', () => {
       const res = decorateUpdate({}, cache, n, e, aFn);
       return res(xOrg, 'other args').then(() => {
         expect(spy).to.have.been.calledOnce;
-        expect(spy).to.have.been.calledWith('UPDATE', [xOrg, 'other args'], xOrg);
+        expect(spy).to.have.been.calledWith([xOrg, 'other args'], xOrg);
       });
     });
   });

@@ -29,7 +29,7 @@ const decorateReadSingle = (c, cache, notify, e, aFn) => {
     return aFn(id)
       .then(passThrough(compose(Cache.storeEntity(cache, e), addId(c, aFn, id))))
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
-      .then(passThrough(notify('CREATE', [id])));
+      .then(passThrough(notify([id])));
   };
 };
 
@@ -59,7 +59,7 @@ const decorateReadSome = (c, cache, notify, e, aFn) => {
         const asMap = compose(toIdMap, concat)(cached, other);
         return map((id) => asMap[id], ids);
       })
-      .then(passThrough(notify('CREATE', [remaining])));
+      .then(passThrough(notify([remaining])));
   };
 };
 
@@ -77,7 +77,7 @@ const decorateReadQuery = (c, cache, notify, e, aFn) => {
             compose(Cache.storeQueryResponse(cache, e, aFn, args),
                     addId(c, aFn, args))))
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
-      .then(passThrough(notify('CREATE', args)));
+      .then(passThrough(notify(args)));
   };
 };
 

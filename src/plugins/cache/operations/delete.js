@@ -9,7 +9,7 @@ export function decorateDelete(c, cache, notify, e, aFn) {
       .then(() => {
         const removed = Cache.removeEntity(cache, e, serialize(args));
         if (removed) {
-          notify('DELETE', args, removed);
+          notify(args, removed);
         }
       });
   };
