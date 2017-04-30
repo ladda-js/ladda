@@ -15,13 +15,19 @@ const HANDLERS = {
 };
 
 const normalizeFnName = (fnName) => fnName.replace(/^bound /, '');
+const normalizePayload = payload => {
+  if (payload === null) {
+    return payload;
+  }
+  return Array.isArray(payload) ? payload : [payload];
+};
 
 const notify = curry((onChange, entity, fn, args, payload) => {
   onChange({
     operation: fn.operation,
     entity: entity.name,
     apiFn: normalizeFnName(fn.name),
-    values: Array.isArray(payload) ? payload : [payload],
+    values: normalizePayload(payload),
     args
   });
 });

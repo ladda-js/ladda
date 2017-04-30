@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-expressions */
 
 import sinon from 'sinon';
+import {curry} from 'ladda-fp';
 import {decorateNoOperation} from './no-operation';
 import * as Cache from '../cache';
 import {createSampleConfig, createApiFunction} from '../test-helper';
@@ -51,8 +52,9 @@ describe('DecorateNoOperation', () => {
     });
   });
 
-  it('does not trigger notify', () => {
+  it('trigger notification', () => {
     const spy = sinon.spy();
+    const n = curry((a, b) => spy(a, b));
     const cache = Cache.createCache(config);
     const e = config[0];
     const xOrg = {__ladda__id: 1, name: 'Kalle'};
@@ -60,9 +62,10 @@ describe('DecorateNoOperation', () => {
     const getUsers = () => Promise.resolve(xOrg);
     aFn.invalidates = ['getUsers'];
     Cache.storeQueryResponse(cache, e, getUsers, ['args'], xOrg);
-    const res = decorateNoOperation({}, cache, spy, e, aFn);
+    const res = decorateNoOperation({}, cache, n, e, aFn);
     return res(xOrg).then(() => {
-      expect(spy).not.to.have.been.called;
+      expect(spy).to.have.been.calledOnce;
+      expect(spy).to.have.been.calledWith([xOrg], null);
     });
   });
 });
