@@ -45,6 +45,24 @@ describe('builder', () => {
       .then(() => api.user.getUsers())
       .then(expectOnlyOneApiCall);
   });
+  it('Adds notifiers to APIs', () => {
+    const myConfig = config();
+    myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
+    const api = build(myConfig);
+    expect(api.user._notifyCreate).to.not.be.undefined;
+    expect(api.user._notifyRead).to.not.be.undefined;
+    expect(api.user._notifyUpdate).to.not.be.undefined;
+    expect(api.user._notifyDelete).to.not.be.undefined;
+  });
+  it('Notifiers are just identity functions lifted to promises', (done) => {
+    const myConfig = config();
+    myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
+    const api = build(myConfig);
+    api.user._notifyCreate('hello').then((value) => {
+      expect(value).to.be.equal('hello');
+      done();
+    });
+  });
   it('Two read api calls will return the same output', (done) => {
     const myConfig = config();
     myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
@@ -214,6 +232,14 @@ describe('builder', () => {
       return api.user.getUsers().then(() => {
         expect(spy).not.to.have.been.called;
       });
+    });
+
+    it('works without global config', () => {
+      const conf = config();
+      delete conf.__config;
+      const api = build(conf);
+      console.log(api);
+      expect(api).to.be.defined;
     });
   });
 });

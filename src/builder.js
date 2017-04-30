@@ -102,7 +102,7 @@ const setApiConfigDefaults = ec => {
 
   return {
     ...ec,
-    api: ec.api ? mapValues(setDefaults, ec.api) : ec.api
+    api: mapValues(setDefaults, ec.api)
   };
 };
 
