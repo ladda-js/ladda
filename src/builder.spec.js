@@ -54,6 +54,16 @@ describe('builder', () => {
     expect(api.user._notifyUpdate).to.not.be.undefined;
     expect(api.user._notifyDelete).to.not.be.undefined;
   });
+  it('Adds notifiers to APIs even if no API is specified', () => {
+    const myConfig = config();
+    myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
+    const api = build(myConfig);
+    delete api.user.api;
+    expect(api.user._notifyCreate).to.not.be.undefined;
+    expect(api.user._notifyRead).to.not.be.undefined;
+    expect(api.user._notifyUpdate).to.not.be.undefined;
+    expect(api.user._notifyDelete).to.not.be.undefined;
+  });
   it('Notifiers are just identity functions lifted to promises', (done) => {
     const myConfig = config();
     myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
