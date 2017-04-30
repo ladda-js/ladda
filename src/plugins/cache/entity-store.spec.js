@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-expressions */
 
-import sinon from 'sinon';
 import {createEntityStore, put, mPut, get, contains, remove} from './entity-store';
 import {addId} from './id-helper';
 
@@ -230,61 +229,6 @@ describe('EntityStore', () => {
       const e = { name: 'user'};
       const fn = () => remove(s, e, v.id);
       expect(fn).to.not.throw();
-    });
-  });
-
-  describe('with a hook', () => {
-    describe('put', () => {
-      it('notifies with the put entity as singleton list', () => {
-        const hook = sinon.spy();
-        const s = createEntityStore(config, hook);
-        const v = {id: 'hello'};
-        const e = { name: 'user'};
-        put(s, e, addId({}, undefined, undefined, v));
-        expect(hook).to.have.been.called;
-
-        expect(hook).to.have.been.calledWith({
-          type: 'UPDATE',
-          entity: 'user',
-          entities: [v]
-        });
-      });
-    });
-
-    describe('mPut', () => {
-      it('notifies with the put entities', () => {
-        const hook = sinon.spy();
-        const s = createEntityStore(config, hook);
-        const v1 = {id: 'hello'};
-        const v2 = {id: 'there'};
-        const e = { name: 'user'};
-        const v1WithId = addId({}, undefined, undefined, v1);
-        const v2WithId = addId({}, undefined, undefined, v2);
-        mPut(s, e, [v1WithId, v2WithId]);
-
-        expect(hook).to.have.been.called;
-
-        const arg = hook.args[0][0];
-        expect(arg.type).to.equal('UPDATE');
-        expect(arg.entities).to.deep.equal([v1, v2]);
-      });
-    });
-
-    describe('rm', () => {
-      it('notifies with the removed entity as a singleton list', () => {
-        const hook = sinon.spy();
-        const s = createEntityStore(config, hook);
-        const v = {id: 'hello'};
-        const e = { name: 'user'};
-        put(s, e, addId({}, undefined, undefined, v));
-        remove(s, e, v.id);
-
-        expect(hook).to.have.been.calledTwice; // we also put!
-
-        const arg = hook.args[1][0];
-        expect(arg.type).to.equal('DELETE');
-        expect(arg.entities).to.deep.equal([v]);
-      });
     });
   });
 });

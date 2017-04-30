@@ -11,9 +11,8 @@
  * Of course, this also requiers the view to truly be a subset of the entity.
  */
 
-import {curry, reduce, map_, clone, noop} from 'ladda-fp';
+import {curry, reduce, map_, clone} from 'ladda-fp';
 import {merge} from './merger';
-import {removeId} from './id-helper';
 
 // Value -> StoreValue
 const toStoreValue = v => ({value: v, timestamp: Date.now()});
@@ -49,16 +48,6 @@ const createViewKey = (e, v) => {
 
 // Entity -> Bool
 const isView = e => !!e.viewOf;
-
-// EntityStore -> Hook
-const getHook = (es) => es[2];
-
-// EntityStore -> Type -> [Entity] -> ()
-const triggerHook = curry((es, e, type, xs) => getHook(es)({
-  type,
-  entity: e.name, // real name, not getEntityType, which takes views into account!
-  entities: removeId(xs)
-}));
 
 // Function -> Function -> EntityStore -> Entity -> Value -> a
 const handle = curry((viewHandler, entityHandler, s, e, v) => {
@@ -102,7 +91,6 @@ const setViewValue = (s, e, v) => {
 // EntityStore -> Entity -> [Value] -> ()
 export const mPut = curry((es, e, xs) => {
   map_(handle(setViewValue, setEntityValue)(es, e))(xs);
-  triggerHook(es, e, 'UPDATE', xs);
 });
 
 // EntityStore -> Entity -> Value -> ()
@@ -129,14 +117,12 @@ const getViewValue = (s, e, id) => {
 // EntityStore -> Entity -> String -> ()
 export const get = handle(getViewValue, getEntityValue);
 
-// EntityStore -> Entity -> String -> ()
+// EntityStore -> Entity -> String -> Value
 export const remove = (es, e, id) => {
   const x = get(es, e, id);
   rm(es, createEntityKey(e, {__ladda__id: id}));
   rmViews(es, e);
-  if (x) {
-    triggerHook(es, e, 'DELETE', [x.value]);
-  }
+  return x;
 };
 
 // EntityStore -> Entity -> String -> Bool
@@ -163,4 +149,4 @@ const registerEntity = ([eMap, ...other], e) => {
 const updateIndex = (m, e) => { return isView(e) ? registerView(m, e) : registerEntity(m, e); };
 
 // [Entity] -> EntityStore
-export const createEntityStore = (c, hook = noop) => reduce(updateIndex, [{}, {}, hook], c);
+export const createEntityStore = (c) => reduce(updateIndex, [{}, {}], c);
