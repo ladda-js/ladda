@@ -193,8 +193,10 @@ describe('builder', () => {
         expect(spy).to.have.been.calledOnce;
         const changeObject = spy.args[0][0];
         expect(changeObject.entity).to.equal('user');
-        expect(changeObject.type).to.equal('UPDATE');
-        expect(changeObject.entities).to.deep.equal(users);
+        expect(changeObject.apiFn).to.equal('getUsers');
+        expect(changeObject.type).to.equal('CREATE');
+        expect(changeObject.values).to.deep.equal(users);
+        expect(changeObject.args).to.deep.equal([]);
       });
     });
 
