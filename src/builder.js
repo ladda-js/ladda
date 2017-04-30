@@ -128,13 +128,13 @@ const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => 
 });
 
 // Config -> Api
-export const build = (c, ps = []) => {
-  const config = getGlobalConfig(c);
-  const entityConfigs = getEntityConfigs(c);
-  validateConfig(console, entityConfigs, config);
-  const listenerStore = createListenerStore(config);
-  const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, config);
+export const build = (config, plugins = []) => {
+  const globalConfig = getGlobalConfig(config);
+  const entityConfigs = getEntityConfigs(config);
+  validateConfig(console, entityConfigs, globalConfig);
+  const listenerStore = createListenerStore(globalConfig);
+  const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, globalConfig);
   const applyPlugins = reduce(applyPlugin_, entityConfigs);
   const createApi = compose(toApi, applyPlugins);
-  return createApi([cachePlugin(listenerStore.onChange), ...ps, dedupPlugin]);
+  return createApi([cachePlugin(listenerStore.onChange), ...plugins, dedupPlugin]);
 };
