@@ -179,24 +179,26 @@ describe('builder', () => {
       build(config(), [plugin]);
     });
 
-    it('allows plugins to add a listener, which gets notified on all cache changes', () => {
-      const spy = sinon.spy();
+    describe('allows plugins to add a listener, which gets notified on all cache changes', () => {
+      it('on READ operations', () => {
+        const spy = sinon.spy();
 
-      const plugin = ({ addChangeListener }) => {
-        addChangeListener(spy);
-        return ({ fn }) => fn;
-      };
+        const plugin = ({ addChangeListener }) => {
+          addChangeListener(spy);
+          return ({ fn }) => fn;
+        };
 
-      const api = build(config(), [plugin]);
+        const api = build(config(), [plugin]);
 
-      return api.user.getUsers().then(() => {
-        expect(spy).to.have.been.calledOnce;
-        const changeObject = spy.args[0][0];
-        expect(changeObject.entity).to.equal('user');
-        expect(changeObject.apiFn).to.equal('getUsers');
-        expect(changeObject.type).to.equal('CREATE');
-        expect(changeObject.values).to.deep.equal(users);
-        expect(changeObject.args).to.deep.equal([]);
+        return api.user.getUsers().then(() => {
+          expect(spy).to.have.been.calledOnce;
+          const changeObject = spy.args[0][0];
+          expect(changeObject.entity).to.equal('user');
+          expect(changeObject.apiFn).to.equal('getUsers');
+          expect(changeObject.type).to.equal('CREATE');
+          expect(changeObject.values).to.deep.equal(users);
+          expect(changeObject.args).to.deep.equal([]);
+        });
       });
     });
 
