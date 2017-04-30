@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 import sinon from 'sinon';
 import { validateConfig } from './validator';
-import { getEntityConfigs } from './builder';
+import { createEntityConfigs } from './builder';
 
 const createLogger = () => ({
   error: sinon.spy()
@@ -17,7 +17,7 @@ const createGlobalConfig = (conf) => ({
 describe('validateConfig', () => {
   it('does not do anything when using production build', () => {
     const logger = createLogger();
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {}
     });
     const config = createGlobalConfig({ useProductionBuild: true });
@@ -29,7 +29,7 @@ describe('validateConfig', () => {
   it('does not do anything when invalid logger is passed', () => {
     const invalidLogger = { x: sinon.spy() };
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {}
     });
     const config = createGlobalConfig({ useProductionBuild: true });
@@ -41,7 +41,7 @@ describe('validateConfig', () => {
   it('checks the global config object - idField', () => {
     const logger = createLogger();
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: {
           getAll: () => {}
@@ -58,7 +58,7 @@ describe('validateConfig', () => {
   it('checks the global config object - enableDeduplication', () => {
     const logger = createLogger();
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: {
           getAll: () => {}
@@ -72,28 +72,10 @@ describe('validateConfig', () => {
     expect(logger.error.args[0][0]).to.match(/enableDeduplication.*boolean.*was.*string/);
   });
 
-  it('checks for missing api declarations', () => {
-    const logger = createLogger();
-
-    const eConfigs = getEntityConfigs({
-      user: {
-        api: {
-          getAll: () => {}
-        }
-      },
-      activity: {}
-    });
-    const config = createGlobalConfig({});
-
-    validateConfig(logger, eConfigs, config);
-    expect(logger.error).to.have.been.called;
-    expect(logger.error.args[0][0]).to.match(/No api definition.*activity/);
-  });
-
   it('checks for non-configured views', () => {
     const logger = createLogger();
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: {
           getAll: () => {}
@@ -122,7 +104,7 @@ describe('validateConfig', () => {
   it('checks for wrong invalidation targets', () => {
     const logger = createLogger();
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll: () => {} },
         invalidates: ['activity', 'ntification'] // typo!
@@ -146,7 +128,7 @@ describe('validateConfig', () => {
   it('checks for wrong invalidation operations', () => {
     const logger = createLogger();
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll: () => {} }
       },
@@ -170,7 +152,7 @@ describe('validateConfig', () => {
   it('checks for wrong ttl values', () => {
     const logger = createLogger();
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll: () => {} },
         ttl: 300
@@ -190,7 +172,7 @@ describe('validateConfig', () => {
   it('checks for wrong enableDeduplication value', () => {
     const logger = createLogger();
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll: () => {} },
         enableDeduplication: true
@@ -216,7 +198,7 @@ describe('validateConfig', () => {
     const getAll = () => {};
     getAll.operation = 'X';
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll }
       }
@@ -235,7 +217,7 @@ describe('validateConfig', () => {
     getAll.operation = 'READ';
     getAll.byId = 'xxx';
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll }
       }
@@ -254,7 +236,7 @@ describe('validateConfig', () => {
     getAll.operation = 'READ';
     getAll.byIds = 'xxx';
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll }
       }
@@ -273,7 +255,7 @@ describe('validateConfig', () => {
     getAll.operation = 'READ';
     getAll.enableDeduplication = 'X';
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll }
       }
@@ -292,7 +274,7 @@ describe('validateConfig', () => {
     getAll.operation = 'READ';
     getAll.idFrom = true;
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll }
       }
@@ -311,7 +293,7 @@ describe('validateConfig', () => {
     getAll.operation = 'READ';
     getAll.idFrom = 'X';
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll }
       }
@@ -336,7 +318,7 @@ describe('validateConfig', () => {
     const getSome = () => {};
     getSome.operation = 'READ';
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll, getSome, getOne }
       }
@@ -355,7 +337,7 @@ describe('validateConfig', () => {
     getAll.operation = 'READ';
     getAll.idFrom = 'X';
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll },
         invalidates: ['X']
@@ -374,7 +356,7 @@ describe('validateConfig', () => {
     getAll.operation = 'READ';
     getAll.idFrom = 'ENTITY';
 
-    const eConfigs = getEntityConfigs({
+    const eConfigs = createEntityConfigs({
       user: {
         api: { getAll },
         invalidates: ['activity']
