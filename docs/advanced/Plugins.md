@@ -126,16 +126,18 @@ following shape:
 
 ```javascript
 {
-  type: 'UPDATE' | 'REMOVE',
+  operation: 'CREATE' | 'READ' | 'UPDATE' | 'DELETE',
   entity: EntityName,
-  entities: EntityValue[]
+  apiFn: ApiFunctionName,
+  args: Any[]
+  values: EntityValue[],
 }
 ```
 
-At this point in time there is no difference made between adding new
-EntityValues and updating already present ones: Both events lead to a
-change of the type `UPDATE`.
-The `entities` field is guaranteed to be a list of EntityValues, even if
+It provides all information about which call triggered a change,
+including the arguments array.
+
+The `values` field is guaranteed to be a list of EntityValues, even if
 a change only affects a single entity.
 
 `addChangeListener` returns a deregistration function. Call it to stop
