@@ -126,10 +126,10 @@ following shape:
 
 ```javascript
 {
-  operation: 'CREATE' | 'READ' | 'UPDATE' | 'DELETE',
+  operation: 'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'NO_OPERATION',
   entity: EntityName,
   apiFn: ApiFunctionName,
-  args: Any[]
+  args: Any[] | null
   values: EntityValue[],
 }
 ```
@@ -138,7 +138,8 @@ It provides all information about which call triggered a change,
 including the arguments array.
 
 The `values` field is guaranteed to be a list of EntityValues, even if
-a change only affects a single entity.
+a change only affects a single entity. The only expection are
+`NO_OPERATION` operations, which will always return `null` here.
 
 `addChangeListener` returns a deregistration function. Call it to stop
 listening for changes.
