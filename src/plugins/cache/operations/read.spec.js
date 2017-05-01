@@ -1,78 +1,109 @@
 /* eslint-disable no-unused-expressions */
 
 import sinon from 'sinon';
-import {map} from 'ladda-fp';
+import {curry, map} from 'ladda-fp';
 import {decorateRead} from './read';
 import {createCache} from '../cache';
 import {createSampleConfig, createApiFunction} from '../test-helper';
 
+const curryNoop = () => () => {};
 const config = createSampleConfig();
 
 describe('Read', () => {
   describe('decorateRead', () => {
-    it('stores and returns an array with elements that lack id', (done) => {
+    it('stores and returns an array with elements that lack id', () => {
       const cache = createCache(config);
       const e = config[0];
       const xOrg = [{name: 'Kalle'}, {name: 'Anka'}];
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {idFrom: 'ARGS'});
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
-      res(1).then(x => {
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
+      return res(1).then(x => {
         expect(x).to.deep.equal(xOrg);
-        done();
       });
     });
-    it('does set id to serialized args if idFrom ARGS', (done) => {
+
+    it('does set id to serialized args if idFrom ARGS', () => {
       const cache = createCache(config);
       const e = config[0];
       const xOrg = {name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {idFrom: 'ARGS'});
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
-      res({hello: 'hej', other: 'svej'}).then(x => {
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
+      return res({hello: 'hej', other: 'svej'}).then(x => {
         expect(x).to.deep.equal({name: 'Kalle'});
-        done();
       });
     });
-    it('calls api fn if not in cache with byId set', (done) => {
-      const cache = createCache(config);
-      const e = config[0];
-      const xOrg = {id: 1, name: 'Kalle'};
-      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
-      const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
-      res(1).then(() => {
-        expect(aFn.callCount).to.equal(1);
-        done();
+
+    describe('with byId set', () => {
+      it('calls api fn if not in cache', () => {
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        return res(1).then(() => {
+          expect(aFn.callCount).to.equal(1);
+        });
+      });
+
+      it('calls api fn if in cache, but expired', () => {
+        const myConfig = createSampleConfig();
+        myConfig[0].ttl = 0;
+        const cache = createCache(myConfig);
+        const e = myConfig[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        const delay = () => new Promise((resolve) => setTimeout(resolve, 1));
+        return res(1).then(delay).then(res.bind(null, 1)).then(() => {
+          expect(aFn.callCount).to.equal(2);
+        });
+      });
+
+      it('does not call api fn if in cache', () => {
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        return res(1).then(res.bind(null, 1)).then(() => {
+          expect(aFn.callCount).to.equal(1);
+        });
+      });
+
+      it('triggers notify when not in cache', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b) => spy(a, b));
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, n, e, aFn);
+        return res(1).then((r) => {
+          expect(spy).to.have.been.calledWith([1], r);
+        });
+      });
+
+      it('does not trigger notify when in cache', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b) => spy(a, b));
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = {id: 1, name: 'Kalle'};
+        const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
+        const aFn = sinon.spy(aFnWithoutSpy);
+        const res = decorateRead({}, cache, n, e, aFn);
+        return res(1).then(res.bind(null, 1)).then(() => {
+          expect(spy).to.have.been.calledOnce; // and not a second time for the cache hit
+        });
       });
     });
-    it('calls api fn if in cache, but expired, with byId set', (done) => {
-      const myConfig = createSampleConfig();
-      myConfig[0].ttl = 0;
-      const cache = createCache(myConfig);
-      const e = myConfig[0];
-      const xOrg = {id: 1, name: 'Kalle'};
-      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
-      const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
-      const delay = () => new Promise((resolve) => setTimeout(resolve, 1));
-      res(1).then(delay).then(res.bind(null, 1)).then(() => {
-        expect(aFn.callCount).to.equal(2);
-        done();
-      });
-    });
-    it('does not call api fn if in cache with byId set', (done) => {
-      const cache = createCache(config);
-      const e = config[0];
-      const xOrg = {id: 1, name: 'Kalle'};
-      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg), {byId: true});
-      const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
-      res(1).then(res.bind(null, 1)).then(() => {
-        expect(aFn.callCount).to.equal(1);
-        done();
-      });
-    });
+
     describe('with byIds', () => {
       const users = {
         a: { id: 'a' },
@@ -87,7 +118,7 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         return apiFn(['a', 'b']).then((res) => {
           expect(res).to.deep.equal([users.a, users.b]);
         });
@@ -97,7 +128,7 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         return apiFn(['a', 'b']).then((res) => {
           expect(res).to.deep.equal([users.a, users.b]);
         });
@@ -107,7 +138,7 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         const args = ['a', 'b'];
         return apiFn(args).then(() => {
           return apiFn(args).then((res) => {
@@ -121,7 +152,7 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         return apiFn(['a', 'b']).then(() => {
           return apiFn(['b', 'c']).then(() => {
             expect(fnWithSpy).to.have.been.calledTwice;
@@ -135,117 +166,197 @@ describe('Read', () => {
         const cache = createCache(config);
         const e = config[0];
         const fnWithSpy = sinon.spy(decoratedFn);
-        const apiFn = decorateRead({}, cache, e, fnWithSpy);
+        const apiFn = decorateRead({}, cache, curryNoop, e, fnWithSpy);
         return apiFn(['a', 'b']).then(() => {
           return apiFn(['a', 'b', 'c']).then((res) => {
             expect(res).to.deep.equal([users.a, users.b, users.c]);
           });
         });
       });
+
+      it('triggers notify when not in cache', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b) => spy(a, b));
+        const cache = createCache(config);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, cache, n, e, fnWithSpy);
+        return apiFn(['a', 'b']).then((r) => {
+          expect(spy).to.have.been.calledOnce;
+          expect(spy).to.have.been.calledWith([['a', 'b']], r);
+        });
+      });
+
+      it('triggers notify when not in cache for partial request', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b) => spy(a, b));
+        const cache = createCache(config);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, cache, n, e, fnWithSpy);
+        return apiFn(['a', 'b']).then(() => {
+          spy.reset();
+          return apiFn(['a', 'b', 'c']).then((r) => {
+            expect(spy).to.have.been.calledOnce;
+            expect(spy).to.have.been.calledWith([['c']], r);
+          });
+        });
+      });
+
+      it('does not trigger notify when in cache', () => {
+        const spy = sinon.spy();
+        const n = curry((a, b) => spy(a, b));
+        const cache = createCache(config);
+        const e = config[0];
+        const fnWithSpy = sinon.spy(decoratedFn);
+        const apiFn = decorateRead({}, cache, n, e, fnWithSpy);
+        return apiFn(['a', 'b']).then(() => {
+          spy.reset();
+          return apiFn(['a', 'b']).then(() => {
+            expect(spy).not.to.have.been.called;
+          });
+        });
+      });
     });
-    it('calls api fn if not in cache', (done) => {
+
+    it('calls api fn if not in cache', () => {
       const cache = createCache(config);
       const e = config[0];
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
-      res(1).then(() => {
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
+      return res(1).then(() => {
         expect(aFn.callCount).to.equal(1);
-        done();
       });
     });
-    it('does not call api fn if in cache', (done) => {
+
+    it('does not call api fn if in cache', () => {
       const cache = createCache(config);
       const e = config[0];
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
       const firstCall = res(1);
 
-      firstCall.then(() => {
-        res(1).then(() => {
+      return firstCall.then(() => {
+        return res(1).then(() => {
           expect(aFn.callCount).to.equal(1);
-          done();
         });
       });
     });
-    it('does call api fn if in cache but expired', (done) => {
+
+    it('does call api fn if in cache but expired', () => {
       const cache = createCache(config);
       const e = {...config[0], ttl: -1};
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
       const firstCall = res(1);
 
-      firstCall.then(() => {
-        res(1).then(() => {
+      return firstCall.then(() => {
+        return res(1).then(() => {
           expect(aFn.callCount).to.equal(2);
-          done();
         });
       });
     });
-    it('calls api fn if not in cache (plural)', (done) => {
+
+    it('calls api fn if not in cache (plural)', () => {
       const cache = createCache(config);
       const e = config[0];
       const xOrg = [{id: 1, name: 'Kalle'}];
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
-      res(1).then((x) => {
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
+      return res(1).then((x) => {
         expect(x).to.equal(xOrg);
-        done();
       });
     });
-    it('does not call api fn if in cache (plural)', (done) => {
+
+    it('does not call api fn if in cache (plural)', () => {
       const cache = createCache(config);
       const e = config[0];
       const xOrg = [{id: 1, name: 'Kalle'}];
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
       const firstCall = res(1);
 
-      firstCall.then(() => {
-        res(1).then(() => {
+      return firstCall.then(() => {
+        return res(1).then(() => {
           expect(aFn.callCount).to.equal(1);
-          done();
         });
       });
     });
-    it('does call api fn if in cache but expired (plural)', (done) => {
+
+    it('does call api fn if in cache but expired (plural)', () => {
       const cache = createCache(config);
       const e = {...config[0], ttl: -1};
       const xOrg = [{id: 1, name: 'Kalle'}];
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
       const firstCall = res(1);
 
-      firstCall.then(() => {
-        res(1).then(() => {
+      return firstCall.then(() => {
+        return res(1).then(() => {
           expect(aFn.callCount).to.equal(2);
-          done();
         });
       });
     });
-    it('throws if id is missing', (done) => {
+
+    it('throws if id is missing', () => {
       const cache = createCache(config);
       const e = {...config[0], ttl: 300};
       const xOrg = {name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
       const aFn = sinon.spy(aFnWithoutSpy);
-      const res = decorateRead({}, cache, e, aFn);
+      const res = decorateRead({}, cache, curryNoop, e, aFn);
 
-      res().catch(err => {
+      return res().catch(err => {
         expect(err).to.be.a('Error');
-        done();
+      });
+    });
+
+    it('triggers notify when not in cache', () => {
+      const spy = sinon.spy();
+      const n = curry((a, b) => spy(a, b));
+      const cache = createCache(config);
+      const e = config[0];
+      const xOrg = [{id: 1, name: 'Kalle'}];
+      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+      const aFn = sinon.spy(aFnWithoutSpy);
+      const res = decorateRead({}, cache, n, e, aFn);
+
+      return res(1).then((r) => {
+        expect(spy).to.have.been.calledOnce;
+        expect(spy).to.have.been.calledWith([1], r);
+      });
+    });
+
+    it('does not trigger notify when in cache', () => {
+      const spy = sinon.spy();
+      const n = curry((a, b) => spy(a, b));
+      const cache = createCache(config);
+      const e = config[0];
+      const xOrg = [{id: 1, name: 'Kalle'}];
+      const aFnWithoutSpy = createApiFunction(() => Promise.resolve(xOrg));
+      const aFn = sinon.spy(aFnWithoutSpy);
+      const res = decorateRead({}, cache, n, e, aFn);
+
+      const firstCall = res(1);
+
+      return firstCall.then(() => {
+        spy.reset();
+        return res(1).then(() => {
+          expect(spy).not.to.have.been.called;
+        });
       });
     });
   });

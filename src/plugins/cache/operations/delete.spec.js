@@ -1,8 +1,13 @@
+/* eslint-disable no-unused-expressions */
+
 import sinon from 'sinon';
+import {curry} from 'ladda-fp';
 import {decorateDelete} from './delete';
 import * as Cache from '../cache';
 import {addId} from '../id-helper';
 import {createApiFunction} from '../test-helper';
+
+const curryNoop = () => () => {};
 
 const config = [
   {
@@ -40,17 +45,47 @@ const config = [
 
 describe('Delete', () => {
   describe('decorateDelete', () => {
-    it('Removes cache', (done) => {
+    it('Removes cache', () => {
       const cache = Cache.createCache(config);
       const e = config[0];
       const xOrg = {id: 1, name: 'Kalle'};
       const aFnWithoutSpy = createApiFunction(() => Promise.resolve({}));
       const aFn = sinon.spy(aFnWithoutSpy);
       Cache.storeEntity(cache, e, addId({}, undefined, undefined, xOrg));
-      const res = decorateDelete({}, cache, e, aFn);
-      res(1).then(() => {
+      const res = decorateDelete({}, cache, curryNoop, e, aFn);
+      return res(1).then(() => {
         expect(Cache.getEntity(cache, e, 1)).to.equal(undefined);
-        done();
+      });
+    });
+
+    it('triggers DELETE notification', () => {
+      const spy = sinon.spy();
+      const n = curry((a, b) => spy(a, b));
+      const cache = Cache.createCache(config);
+      const e = config[0];
+      const xOrg = {id: 1, name: 'Kalle'};
+      const aFnWithoutSpy = createApiFunction(() => Promise.resolve({}));
+      const aFn = sinon.spy(aFnWithoutSpy);
+      Cache.storeEntity(cache, e, addId({}, undefined, undefined, xOrg));
+      const res = decorateDelete({}, cache, n, e, aFn);
+      return res(1).then(() => {
+        expect(spy).to.have.been.calledOnce;
+        expect(spy).to.have.been.calledWith([1], xOrg);
+      });
+    });
+
+    it('does not trigger notification when item was not in cache', () => {
+      const spy = sinon.spy();
+      const n = curry((a, b) => spy(a, b));
+      const cache = Cache.createCache(config);
+      const e = config[0];
+      const xOrg = {id: 1, name: 'Kalle'};
+      const aFnWithoutSpy = createApiFunction(() => Promise.resolve({}));
+      const aFn = sinon.spy(aFnWithoutSpy);
+      Cache.storeEntity(cache, e, addId({}, undefined, undefined, xOrg));
+      const res = decorateDelete({}, cache, n, e, aFn);
+      return res(2).then(() => {
+        expect(spy).not.to.have.been.called;
       });
     });
   });

@@ -19,7 +19,7 @@ const readFromCache = curry((cache, e, aFn, id) => {
   return undefined;
 });
 
-const decorateReadSingle = (c, cache, e, aFn) => {
+const decorateReadSingle = (c, cache, notify, e, aFn) => {
   return (id) => {
     const fromCache = readFromCache(cache, e, aFn, id);
     if (fromCache) {
@@ -28,11 +28,12 @@ const decorateReadSingle = (c, cache, e, aFn) => {
 
     return aFn(id)
       .then(passThrough(compose(Cache.storeEntity(cache, e), addId(c, aFn, id))))
-      .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)));
+      .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
+      .then(passThrough(notify([id])));
   };
 };
 
-const decorateReadSome = (c, cache, e, aFn) => {
+const decorateReadSome = (c, cache, notify, e, aFn) => {
   return (ids) => {
     const readFromCache_ = readFromCache(cache, e, aFn);
     const [cached, remaining] = reduce(([c_, r], id) => {
@@ -57,11 +58,12 @@ const decorateReadSome = (c, cache, e, aFn) => {
       .then((other) => {
         const asMap = compose(toIdMap, concat)(cached, other);
         return map((id) => asMap[id], ids);
-      });
+      })
+      .then(passThrough(notify([remaining])));
   };
 };
 
-const decorateReadQuery = (c, cache, e, aFn) => {
+const decorateReadQuery = (c, cache, notify, e, aFn) => {
   return (...args) => {
     if (Cache.containsQueryResponse(cache, e, aFn, args) && !aFn.alwaysGetFreshData) {
       const v = Cache.getQueryResponseWithMeta(cache, e, aFn, args);
@@ -74,16 +76,17 @@ const decorateReadQuery = (c, cache, e, aFn) => {
       .then(passThrough(
             compose(Cache.storeQueryResponse(cache, e, aFn, args),
                     addId(c, aFn, args))))
-      .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)));
+      .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
+      .then(passThrough(notify(args)));
   };
 };
 
-export function decorateRead(c, cache, e, aFn) {
+export function decorateRead(c, cache, notify, e, aFn) {
   if (aFn.byId) {
-    return decorateReadSingle(c, cache, e, aFn);
+    return decorateReadSingle(c, cache, notify, e, aFn);
   }
   if (aFn.byIds) {
-    return decorateReadSome(c, cache, e, aFn);
+    return decorateReadSome(c, cache, notify, e, aFn);
   }
-  return decorateReadQuery(c, cache, e, aFn);
+  return decorateReadQuery(c, cache, notify, e, aFn);
 }

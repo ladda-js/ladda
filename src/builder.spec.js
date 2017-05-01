@@ -11,12 +11,16 @@ getUsers.operation = 'READ';
 const deleteUser = () => Promise.resolve();
 deleteUser.operation = 'DELETE';
 
+const noopUser = () => Promise.resolve(['a', 'b']);
+noopUser.operation = 'NO_OPERATION';
+
 const config = () => ({
   user: {
     ttl: 300,
     api: {
       getUsers,
-      deleteUser
+      deleteUser,
+      noopUser
     },
     invalidates: ['alles']
   },
@@ -152,6 +156,23 @@ describe('builder', () => {
       .then(() => done());
   });
 
+  it('applies dedup before and after the plugins, if there are any', () => {
+    const getAll = sinon.stub().returns(Promise.resolve([]));
+    getAll.operation = 'READ';
+    const conf = { test: { api: { getAll } } };
+    const plugin = () => ({ fn }) => () => {
+      fn();
+      fn();
+      return fn();
+    };
+    const api = build(conf, [plugin]);
+    api.test.getAll();
+    api.test.getAll();
+    return api.test.getAll().then(() => {
+      expect(getAll).to.have.been.calledOnce;
+    });
+  });
+
   describe('change listener', () => {
     it('exposes Ladda\'s listener/onChange interface to plugins', () => {
       const plugin = ({ addChangeListener }) => {
@@ -162,22 +183,81 @@ describe('builder', () => {
       build(config(), [plugin]);
     });
 
-    it('allows plugins to add a listener, which gets notified on all cache changes', () => {
+    it('returns a deregistration fn', () => {
       const spy = sinon.spy();
 
       const plugin = ({ addChangeListener }) => {
-        addChangeListener(spy);
+        const deregister = addChangeListener(spy);
+        deregister();
         return ({ fn }) => fn;
       };
 
       const api = build(config(), [plugin]);
 
       return api.user.getUsers().then(() => {
-        expect(spy).to.have.been.calledOnce;
-        const changeObject = spy.args[0][0];
-        expect(changeObject.entity).to.equal('user');
-        expect(changeObject.type).to.equal('UPDATE');
-        expect(changeObject.entities).to.deep.equal(users);
+        expect(spy).not.to.have.been.called;
+      });
+    });
+
+    it('can call deregistration fn several times without harm', () => {
+      const spy = sinon.spy();
+
+      const plugin = ({ addChangeListener }) => {
+        const deregister = addChangeListener(spy);
+        deregister();
+        deregister();
+        deregister();
+        return ({ fn }) => fn;
+      };
+
+      const api = build(config(), [plugin]);
+
+      return api.user.getUsers().then(() => {
+        expect(spy).not.to.have.been.called;
+      });
+    });
+
+    describe('allows plugins to add a listener, which gets notified on all cache changes', () => {
+      it('on READ operations', () => {
+        const spy = sinon.spy();
+
+        const plugin = ({ addChangeListener }) => {
+          addChangeListener(spy);
+          return ({ fn }) => fn;
+        };
+
+        const api = build(config(), [plugin]);
+
+        return api.user.getUsers().then(() => {
+          expect(spy).to.have.been.calledOnce;
+          const changeObject = spy.args[0][0];
+          expect(changeObject.entity).to.equal('user');
+          expect(changeObject.apiFn).to.equal('getUsers');
+          expect(changeObject.operation).to.equal('READ');
+          expect(changeObject.values).to.deep.equal(users);
+          expect(changeObject.args).to.deep.equal([]);
+        });
+      });
+
+      it('on NO_OPERATION operations', () => {
+        const spy = sinon.spy();
+
+        const plugin = ({ addChangeListener }) => {
+          addChangeListener(spy);
+          return ({ fn }) => fn;
+        };
+
+        const api = build(config(), [plugin]);
+
+        return api.user.noopUser('x').then(() => {
+          expect(spy).to.have.been.calledOnce;
+          const changeObject = spy.args[0][0];
+          expect(changeObject.entity).to.equal('user');
+          expect(changeObject.apiFn).to.equal('noopUser');
+          expect(changeObject.operation).to.equal('NO_OPERATION');
+          expect(changeObject.values).to.deep.equal(null);
+          expect(changeObject.args).to.deep.equal(['x']);
+        });
       });
     });
 

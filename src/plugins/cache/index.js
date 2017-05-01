@@ -1,4 +1,4 @@
-import {values} from 'ladda-fp';
+import {curry, values} from 'ladda-fp';
 import {createCache} from './cache';
 import {decorateCreate} from './operations/create';
 import {decorateRead} from './operations/read';
@@ -14,10 +14,29 @@ const HANDLERS = {
   NO_OPERATION: decorateNoOperation
 };
 
+const normalizeFnName = (fnName) => fnName.replace(/^bound /, '');
+const normalizePayload = payload => {
+  if (payload === null) {
+    return payload;
+  }
+  return Array.isArray(payload) ? payload : [payload];
+};
+
+const notify = curry((onChange, entity, fn, args, payload) => {
+  onChange({
+    operation: fn.operation,
+    entity: entity.name,
+    apiFn: normalizeFnName(fn.name),
+    values: normalizePayload(payload),
+    args
+  });
+});
+
 export const cachePlugin = (onChange) => ({ config, entityConfigs }) => {
-  const cache = createCache(values(entityConfigs), onChange);
+  const cache = createCache(values(entityConfigs));
   return ({ entity, fn }) => {
     const handler = HANDLERS[fn.operation];
-    return handler(config, cache, entity, fn);
+    const notify_ = notify(onChange, entity, fn);
+    return handler(config, cache, notify_, entity, fn);
   };
 };
