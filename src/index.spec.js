@@ -142,7 +142,9 @@ describe('observable plugin', () => {
           disposable.unsubscribe();
 
           return api.user.updateUser({ id: 'peter', name: 'PEter' }).then(() => {
-            expect(spy).to.have.been.calledOnce;
+            return delay().then(() => {
+              expect(spy).to.have.been.calledOnce;
+            });
           });
         });
       });
@@ -181,7 +183,9 @@ describe('observable plugin', () => {
           expect(spy).to.have.been.calledOnce;
 
           return api.activity.getActivities().then(() => {
-            expect(spy).to.have.been.calledOnce;
+            return delay().then(() => {
+              expect(spy).to.have.been.calledOnce;
+            });
           });
         });
       });
