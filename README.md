@@ -19,11 +19,11 @@ The easiest way to get a glimpse of what Ladda can do is checking out our [demos
 
 # Get Started
 
-Check out the [guide](/docs/GettingStarted.md) for getting started. In addition, you can have a look in the [examples folder](https://github.com/petercrona/ladda/tree/master/examples). These are standalone examples where you only need to follow the README.md to setup the project. There is an addtional minimal example, where you can find everything in one file, that you can clone and run: Check out [ladda-example-mini-project](https://github.com/petercrona/ladda-example-mini-project) ([code](https://github.com/petercrona/ladda-example-mini-project/blob/master/script.js)).
+Check out the [guide](/docs/GettingStarted.md) for getting started. In addition, you can have a look in the [examples folder](https://github.com/ladda-js/ladda/tree/master/examples). These are standalone examples where you only need to follow the README.md to setup the project. There is an addtional minimal example, where you can find everything in one file, that you can clone and run: Check out [ladda-example-mini-project](https://github.com/petercrona/ladda-example-mini-project) ([code](https://github.com/petercrona/ladda-example-mini-project/blob/master/script.js)).
 
 # Documentation
 
-The documentation gives you an [exhaustive overview of Ladda](https://petercrona.gitbooks.io/ladda/content/).
+The documentation gives you an [exhaustive overview of Ladda](https://www.ladda.io/).
 
 # Why Use Ladda?
 
@@ -35,7 +35,7 @@ Ladda is a lightweight library and comes with no additional dependencies. The li
 
 ## Quality
 
-Ladda has a high test coverage (**100%** line coverage) with tests constantly being added. And yes, we know that high test coverage is a "feel good" number, our focus is still on meaningful and good tests. It has a reasonably simple architecture and often tries to stay [tacit](https://www.youtube.com/watch?v=seVSlKazsNk&feature=youtu.be) and concise by taking inspiration from [functional programming](https://drboolean.gitbooks.io/mostly-adequate-guide/content/). We urge you to check out the [source code](https://github.com/petercrona/ladda/tree/master/src). You can help us to improve it further or just enjoy reading functional JavaScript.
+Ladda has a high test coverage (**100%** line coverage) with tests constantly being added. And yes, we know that high test coverage is a "feel good" number, our focus is still on meaningful and good tests. It has a reasonably simple architecture and often tries to stay [tacit](https://www.youtube.com/watch?v=seVSlKazsNk&feature=youtu.be) and concise by taking inspiration from [functional programming](https://drboolean.gitbooks.io/mostly-adequate-guide/content/). We urge you to check out the [source code](https://github.com/ladda-js/ladda/tree/master/src). You can help us to improve it further or just enjoy reading functional JavaScript.
 
 ## Standalone
 
