@@ -1,6 +1,6 @@
 {
   "name": "ladda-cache",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Data fetching layer with support for caching",
   "main": "dist/bundle.js",
   "dependencies": {
