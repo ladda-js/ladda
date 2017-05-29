@@ -19,7 +19,7 @@ const isInvalidatedByFunction = (entity, fn, change) => {
     return false;
   }
   const invalidations = entity.api[change.apiFn].invalidates;
-  return invalidations.length && invalidations.indexOf(fn.name) !== -1;
+  return invalidations.length && invalidations.indexOf(fn.fnName) !== -1;
 };
 
 const isRelevantChange = (relationships, entity, fn, change) => {

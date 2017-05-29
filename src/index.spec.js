@@ -219,8 +219,11 @@ describe('observable plugin', () => {
           expect(spy).to.have.been.calledOnce;
 
           return api.user.noopGetUsers().then(() => {
+            // ideally this next block would fail and we'd be calling
+            // only twice, but the read operation which followed the
+            // nvalidation triggers it again!
             return delay().then(() => {
-              expect(spy).to.have.been.calledTwice;
+              expect(spy).to.have.been.calledThrice;
             });
           });
         });
