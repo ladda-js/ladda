@@ -23,7 +23,7 @@ const KNOWN_STATICS = {
 };
 
 const setFnName = curry((name, fn) => {
-  Object.defineProperty(fn, 'name', { writable: true });
+  Object.defineProperty(fn, 'name', { writable: true, configurable: true });
   fn.name = name;
   Object.defineProperty(fn, 'name', { writable: false });
   return fn;
