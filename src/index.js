@@ -8,7 +8,7 @@ const defaultColors = {
   subText: 'gray'
 };
 
-const toFnName = (entity, fn) => `${entity.name}.${fn.name}`;
+const toFnName = (entity, fn) => `${entity.name}.${fn.fnName}`;
 
 /* eslint-disable no-undef */
 /* eslint-disable max-len */
@@ -123,6 +123,7 @@ export const logger = ({
   return ({ addChangeListener, entityConfigs, config }) => {
     addChangeListener((change) => l.logChange(change));
     l.logSetup(entityConfigs, config);
+
 
     return ({ entity, fn }) => {
       const fnName = toFnName(entity, fn);
