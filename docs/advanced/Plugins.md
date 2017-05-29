@@ -212,7 +212,8 @@ with two fields:
   applied and an additional `name` property is present to identify it.
 - `fn` is the original __ApiFunction__ we want to act on. It has all
   meta data attached, that was defined in the build configuration,
-including defaults.
+including defaults. In addition Ladda's `build` function also added the
+property `fnName`, so that we can easily identify it.
 
 With this comprehensive information we can easily add additional
 behavior to an ApiFunction.
