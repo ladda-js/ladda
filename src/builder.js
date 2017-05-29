@@ -91,7 +91,7 @@ const setApiConfigDefaults = ec => {
   };
 
   const setFnName = ([name, apiFn]) => {
-    apiFn.fnName = apiFn.fnName || name;
+    apiFn.fnName = name;
     return [name, apiFn];
   };
 
