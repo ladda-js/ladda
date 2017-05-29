@@ -143,7 +143,7 @@ describe('builder', () => {
       const pName = pConfig.name;
       pluginTracker[pName] = {};
       return curry(({ config: c, entityConfigs }, { fn }) => {
-        pluginTracker[pName][fn.name] = true;
+        pluginTracker[pName][fn.fnName] = true;
         return fn;
       });
     };

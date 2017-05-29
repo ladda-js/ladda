@@ -14,7 +14,6 @@ const HANDLERS = {
   NO_OPERATION: decorateNoOperation
 };
 
-const normalizeFnName = (fnName) => fnName.replace(/^bound /, '');
 const normalizePayload = payload => {
   if (payload === null) {
     return payload;
@@ -26,7 +25,7 @@ const notify = curry((onChange, entity, fn, args, payload) => {
   onChange({
     operation: fn.operation,
     entity: entity.name,
-    apiFn: normalizeFnName(fn.name),
+    apiFn: fn.fnName,
     values: normalizePayload(payload),
     args
   });

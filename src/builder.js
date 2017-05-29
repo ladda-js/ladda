@@ -1,5 +1,5 @@
-import {mapObject, mapValues, compose, toObject, reduce, toPairs,
-        prop, filterObject, isEqual, not, curry, copyFunction
+import {map, mapObject, mapValues, compose, toObject, reduce, fromPairs,
+        toPairs, prop, filterObject, isEqual, not, curry, copyFunction
       } from 'ladda-fp';
 
 import {cachePlugin} from './plugins/cache';
@@ -22,13 +22,6 @@ const KNOWN_STATICS = {
   arity: true
 };
 
-const setFnName = curry((name, fn) => {
-  Object.defineProperty(fn, 'name', { writable: true, configurable: true });
-  fn.name = name;
-  Object.defineProperty(fn, 'name', { writable: false });
-  return fn;
-});
-
 const hoistMetaData = (a, b) => {
   const keys = Object.getOwnPropertyNames(a);
   for (let i = keys.length - 1; i >= 0; i--) {
@@ -37,7 +30,6 @@ const hoistMetaData = (a, b) => {
       b[k] = a[k];
     }
   }
-  setFnName(a.name, b);
   return b;
 };
 
@@ -52,9 +44,7 @@ export const mapApiFunctions = (fn, entityConfigs) => {
         // containing a "bound" prefix.
         (apiM, [apiFnName, apiFn]) => {
           const getFn = compose(prop(apiFnName), prop('api'));
-          const nextFn = hoistMetaData(getFn(entity), fn({ entity, fn: apiFn }));
-          setFnName(apiFnName, nextFn);
-          apiM[apiFnName] = nextFn;
+          apiM[apiFnName] = hoistMetaData(getFn(entity), fn({ entity, fn: apiFn }));
           return apiM;
         },
         {},
@@ -100,9 +90,21 @@ const setApiConfigDefaults = ec => {
     return copy;
   };
 
+  const setFnName = ([name, apiFn]) => {
+    apiFn.fnName = apiFn.fnName || name;
+    return [name, apiFn];
+  };
+
+  const mapApi = compose(
+    fromPairs,
+    map(setFnName),
+    toPairs,
+    mapValues(setDefaults)
+  );
+
   return {
     ...ec,
-    api: ec.api ? mapValues(setDefaults, ec.api) : ec.api
+    api: ec.api ? mapApi(ec.api) : ec.api
   };
 };
 

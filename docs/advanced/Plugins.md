@@ -231,14 +231,14 @@ export const logger = (pluginConfig = {}) => {
 
     return ({ entity, fn }) => {
       return (...args) => {
-        console.log(`Ladda: Calling ${entity.name}.${fn.name} with args`, args);
+        console.log(`Ladda: Calling ${entity.name}.${fn.fnName} with args`, args);
         return fn(...args).then(
           (res) => {
-            console.log(`Ladda: Resolved ${entity.name}.${fn.name} with`, res);
+            console.log(`Ladda: Resolved ${entity.name}.${fn.fnName} with`, res);
             return res;
           },
           (err) => {
-            console.log(`Ladda: Rejected ${entity.name}.${fn.name} with`, err)
+            console.log(`Ladda: Rejected ${entity.name}.${fn.fnName} with`, err)
             return Promise.reject(err);
           }
         );
@@ -252,7 +252,7 @@ We issue a first log statement immediately when the function is invoked
 and print out the arguments we received. By using the entity
 configuration we got passed in and the meta data of the ApiFunction we
 can produce a nice string to reveal which function just got called:
-`${entity.name}.${fn.name}`. This could for example produce
+`${entity.name}.${fn.fnName}`. This could for example produce
 something like `user.getAll`.
 
 We then use Promise chaining to intercept the result of our original
@@ -285,14 +285,14 @@ export const logger = (pluginConfig = {}) => {
 
     return ({ entity, fn }) => {
       return (...args) => {
-        console.log(`Ladda: Calling ${entity.name}.${fn.name} with args`, args);
+        console.log(`Ladda: Calling ${entity.name}.${fn.fnName} with args`, args);
         return fn(...args).then(
           (res) => {
-            console.log(`Ladda: Resolved ${entity.name}.${fn.name} with`, res);
+            console.log(`Ladda: Resolved ${entity.name}.${fn.fnName} with`, res);
             return res;
           },
           (err) => {
-            console.log(`Ladda: Rejected ${entity.name}.${fn.name} with`, err)
+            console.log(`Ladda: Rejected ${entity.name}.${fn.fnName} with`, err)
             return Promise.reject(err);
           }
         );

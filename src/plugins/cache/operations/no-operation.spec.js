@@ -17,6 +17,7 @@ describe('DecorateNoOperation', () => {
     const xOrg = {__ladda__id: 1, name: 'Kalle'};
     const aFn = sinon.spy(() => Promise.resolve({}));
     const getUsers = () => Promise.resolve(xOrg);
+    getUsers.fnName = 'getUsers';
     aFn.invalidates = ['getUsers'];
     Cache.storeQueryResponse(cache, e, getUsers, ['args'], xOrg);
     const res = decorateNoOperation({}, cache, curryNoop, e, aFn);
