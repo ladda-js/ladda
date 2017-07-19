@@ -17,7 +17,7 @@ An example of how a function of operation CREATE might look is:
 ```javascript
 createUser.operation = 'CREATE';
 function createUser(user) {
-    return performPostRequst('/api/user', user);
+    return performPostRequest('/api/user', user);
 }
 ```
 
