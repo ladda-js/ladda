@@ -106,15 +106,20 @@ export const get = (qc, c, e, aFn, args) => {
     const id = plainCacheValue.createEvents.shift();
     const cachedValue = getFromCache(qc, e, k);
     const entityValue = getFromEs(qc.entityStore, e, id);
+    if (!entityValue) {
+      // the item could have been deleted in the meantime
+      continue; // eslint-disable-line no-continue
+    }
     const getVal = compose(removeId, getValue);
     const nextEntities = aFn.updateOnCreate(args, getVal(entityValue), getVal(cachedValue.value));
-    if (nextEntities) {
-      const nextCachedValue = compose(
-        (xs) => toCacheValue(map(prop('__ladda__id'), xs, plainCacheValue.createEvents)),
-        addId(c, aFn, args)
-      )(nextEntities);
-      qc.cache[k] = nextCachedValue;
+    if (!nextEntities) {
+      continue; // eslint-disable-line no-continue
     }
+    const nextCachedValue = compose(
+      (xs) => toCacheValue(map(prop('__ladda__id'), xs, plainCacheValue.createEvents)),
+      addId(c, aFn, args)
+    )(nextEntities);
+    qc.cache[k] = nextCachedValue;
   }
   return getFromCache(qc, e, k);
 };
