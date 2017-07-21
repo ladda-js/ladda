@@ -373,5 +373,33 @@ describe('builder', () => {
         });
       });
     });
+
+    it('works fine when created element is removed before we try to access the list again', () => {
+      const xs = [{ id: 1 }, { id: 2 }];
+
+      const createX = (newX) => Promise.resolve(newX);
+      createX.operation = 'CREATE';
+
+      const getXs = () => Promise.resolve(xs);
+      getXs.operation = 'READ';
+      getXs.updateOnCreate = (args, newX, cachedXs) => [...cachedXs, newX];
+
+      const deleteX = () => Promise.resolve();
+      deleteX.operation = 'DELETE';
+
+      const api = build({ x: { api: { getXs, createX, deleteX } } });
+
+      return api.x.getXs().then((cachedXs) => {
+        expect(cachedXs).to.deep.equal(xs);
+
+        return api.x.createX({ id: 3 }).then(() => {
+          return api.x.deleteX(3).then(() => {
+            return api.x.getXs().then((nextXs) => {
+              expect(nextXs).to.deep.equal(xs);
+            });
+          });
+        });
+      });
+    });
   });
 });

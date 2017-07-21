@@ -107,7 +107,7 @@ export const get = (qc, c, e, aFn, args) => {
     const cachedValue = getFromCache(qc, e, k);
     const entityValue = getFromEs(qc.entityStore, e, id);
     if (!entityValue) {
-      // the item could have been deleted in the meantime
+      // the item might have been deleted in the meantime
       continue; // eslint-disable-line no-continue
     }
     const getVal = compose(removeId, getValue);
