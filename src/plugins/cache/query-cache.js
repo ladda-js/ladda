@@ -3,19 +3,49 @@
  * Only ids are stored here.
  */
 
-import {on2, prop, join, reduce, identity,
+import {on2, prop, join, reduce, identity, toPairs, flatten,
         curry, map, map_, startsWith, compose, filter} from 'ladda-fp';
 import {mPut as mPutInEs, get as getFromEs} from './entity-store';
 import {serialize} from './serializer';
+import {removeId, addId} from './id-helper';
 
 // Entity -> [String] -> String
 const createKey = on2(reduce(join('-')), prop('name'), map(serialize));
 
 // Value -> CacheValue
-const toCacheValue = (args, xs) => ({value: xs, args, timestamp: Date.now()});
+const toCacheValue = (xs, createEvents = []) => ({value: xs, timestamp: Date.now(), createEvents });
 
 // CacheValue -> Value
 const toValue = prop('value');
+
+// Entity -> [ApiFnName]
+const getApiFnNamesWhichUpdateOnCreate = compose(
+  reduce((mem, [fnName, fn]) => (fn.updateOnCreate ? [...mem, fnName] : mem), []),
+  toPairs,
+  prop('api')
+);
+
+// QueryCache -> Entity -> ApiFnName
+const getCacheValuesForFn = curry((queryCache, entity, name) => {
+  const key = createKey(entity, [name]);
+  return compose(
+    reduce((mem, [cacheKey, cacheValue]) => {
+      return cacheKey.indexOf(key) === 0 ? [...mem, cacheValue] : mem;
+    }, []),
+    toPairs,
+    prop('cache')
+  )(queryCache);
+});
+
+// QueryCache -> Entity -> Id -> void
+export const storeCreateEvent = (queryCache, entity, id) => {
+  return compose(
+    map_((cacheValue) => cacheValue.createEvents.push(id)),
+    flatten,
+    map(getCacheValuesForFn(queryCache, entity)),
+    getApiFnNamesWhichUpdateOnCreate,
+  )(entity);
+};
 
 // QueryCache -> String -> Bool
 const inCache = (qc, k) => !!qc.cache[k];
@@ -37,9 +67,9 @@ const getFromCache = (qc, e, k) => {
 export const put = curry((qc, e, aFn, args, xs) => {
   const k = createKey(e, [aFn.fnName, ...filter(identity, args)]);
   if (Array.isArray(xs)) {
-    qc.cache[k] = toCacheValue(args, map(prop('__ladda__id'), xs));
+    qc.cache[k] = toCacheValue(map(prop('__ladda__id'), xs));
   } else {
-    qc.cache[k] = toCacheValue(args, prop('__ladda__id', xs));
+    qc.cache[k] = toCacheValue(prop('__ladda__id', xs));
   }
   mPutInEs(qc.entityStore, e, Array.isArray(xs) ? xs : [xs]);
   return xs;
@@ -62,14 +92,29 @@ const getTtl = e => e.ttl * 1000;
 // QueryCache -> Entity -> CacheValue -> Bool
 export const hasExpired = (qc, e, cv) => (Date.now() - cv.timestamp) > getTtl(e);
 
-// QueryCache -> Entity -> ApiFunction -> [a] -> Bool
-export const get = (qc, e, aFn, args) => {
+// QueryCache -> Config -> Entity -> ApiFunction -> [a] -> Bool
+export const get = (qc, c, e, aFn, args) => {
   const k = createKey(e, [aFn.fnName, ...filter(identity, args)]);
   if (!inCache(qc, k)) {
     throw new Error(
       `Tried to access ${e.name} with key ${k} which doesn't exist.
       Do a contains check first!`
     );
+  }
+  const plainCacheValue = qc.cache[k];
+  while (aFn.updateOnCreate && plainCacheValue.createEvents.length) {
+    const id = plainCacheValue.createEvents.shift();
+    const cachedValue = getFromCache(qc, e, k);
+    const entityValue = getFromEs(qc.entityStore, e, id);
+    const getVal = compose(removeId, getValue);
+    const nextEntities = aFn.updateOnCreate(args, getVal(entityValue), getVal(cachedValue.value));
+    if (nextEntities) {
+      const nextCachedValue = compose(
+        (xs) => toCacheValue(map(prop('__ladda__id'), xs, plainCacheValue.createEvents)),
+        addId(c, aFn, args)
+      )(nextEntities);
+      qc.cache[k] = nextCachedValue;
+    }
   }
   return getFromCache(qc, e, k);
 };

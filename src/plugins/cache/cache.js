@@ -28,7 +28,11 @@ export const invalidateQuery = ({queryCache}, ...args) => {
 
 export const hasExpired = ({queryCache}, ...args) => {
   return QueryCache.hasExpired(queryCache, ...args);
-}
+};
+
+export const storeCreateEvent = curry(({queryCache}, entity, id) => {
+  return QueryCache.storeCreateEvent(queryCache, entity, id);
+});
 
 export const storeEntity = curry(({entityStore}, ...args) => {
   return EntityStore.put(entityStore, ...args);

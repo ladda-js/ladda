@@ -5,7 +5,6 @@ import {addId, removeId} from '../id-helper';
 const readFromCache = curry((cache, e, aFn, id) => {
   if (Cache.containsEntity(cache, e, id) && !aFn.alwaysGetFreshData) {
     const v = Cache.getEntity(cache, e, id);
-    console.log(Cache.hasExpired);
     if (!Cache.hasExpired(cache, e, v)) {
       return removeId(v.value);
     }
@@ -60,7 +59,7 @@ const decorateReadSome = (c, cache, notify, e, aFn) => {
 const decorateReadQuery = (c, cache, notify, e, aFn) => {
   return (...args) => {
     if (Cache.containsQueryResponse(cache, e, aFn, args) && !aFn.alwaysGetFreshData) {
-      const v = Cache.getQueryResponseWithMeta(cache, e, aFn, args);
+      const v = Cache.getQueryResponseWithMeta(cache, c, e, aFn, args);
       if (!Cache.hasExpired(cache, e, v)) {
         return Promise.resolve(removeId(Cache.getQueryResponse(v.value)));
       }
