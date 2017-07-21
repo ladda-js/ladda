@@ -12,7 +12,7 @@ import {serialize} from './serializer';
 const createKey = on2(reduce(join('-')), prop('name'), map(serialize));
 
 // Value -> CacheValue
-const toCacheValue = xs => ({value: xs, timestamp: Date.now()});
+const toCacheValue = (args, xs) => ({value: xs, args, timestamp: Date.now()});
 
 // CacheValue -> Value
 const toValue = prop('value');
@@ -37,9 +37,9 @@ const getFromCache = (qc, e, k) => {
 export const put = curry((qc, e, aFn, args, xs) => {
   const k = createKey(e, [aFn.fnName, ...filter(identity, args)]);
   if (Array.isArray(xs)) {
-    qc.cache[k] = toCacheValue(map(prop('__ladda__id'), xs));
+    qc.cache[k] = toCacheValue(args, map(prop('__ladda__id'), xs));
   } else {
-    qc.cache[k] = toCacheValue(prop('__ladda__id', xs));
+    qc.cache[k] = toCacheValue(args, prop('__ladda__id', xs));
   }
   mPutInEs(qc.entityStore, e, Array.isArray(xs) ? xs : [xs]);
   return xs;
