@@ -56,6 +56,12 @@ export const contains = (qc, e, aFn, args) => {
   return inCache(qc, k);
 };
 
+// Entity -> Milliseconds
+const getTtl = e => e.ttl * 1000;
+
+// QueryCache -> Entity -> CacheValue -> Bool
+export const hasExpired = (qc, e, cv) => (Date.now() - cv.timestamp) > getTtl(e);
+
 // QueryCache -> Entity -> ApiFunction -> [a] -> Bool
 export const get = (qc, e, aFn, args) => {
   const k = createKey(e, [aFn.fnName, ...filter(identity, args)]);

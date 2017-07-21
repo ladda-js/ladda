@@ -2,17 +2,11 @@ import {passThrough, compose, curry, reduce, toIdMap, map, concat, zip} from 'la
 import * as Cache from '../cache';
 import {addId, removeId} from '../id-helper';
 
-const getTtl = e => e.ttl * 1000;
-
-// Entity -> Int -> Bool
-const hasExpired = (e, timestamp) => {
-  return (Date.now() - timestamp) > getTtl(e);
-};
-
 const readFromCache = curry((cache, e, aFn, id) => {
   if (Cache.containsEntity(cache, e, id) && !aFn.alwaysGetFreshData) {
     const v = Cache.getEntity(cache, e, id);
-    if (!hasExpired(e, v.timestamp)) {
+    console.log(Cache.hasExpired);
+    if (!Cache.hasExpired(cache, e, v)) {
       return removeId(v.value);
     }
   }
@@ -67,7 +61,7 @@ const decorateReadQuery = (c, cache, notify, e, aFn) => {
   return (...args) => {
     if (Cache.containsQueryResponse(cache, e, aFn, args) && !aFn.alwaysGetFreshData) {
       const v = Cache.getQueryResponseWithMeta(cache, e, aFn, args);
-      if (!hasExpired(e, v.timestamp)) {
+      if (!Cache.hasExpired(cache, e, v)) {
         return Promise.resolve(removeId(Cache.getQueryResponse(v.value)));
       }
     }
