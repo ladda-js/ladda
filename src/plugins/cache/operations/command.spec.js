@@ -18,26 +18,6 @@ const config = [
     },
     invalidates: ['user'],
     invalidatesOn: ['GET']
-  },
-  {
-    name: 'userPreview',
-    ttl: 200,
-    api: {
-      getPreviews: (x) => x,
-      updatePreview: (x) => x
-    },
-    invalidates: ['fda'],
-    viewOf: 'user'
-  },
-  {
-    name: 'listUser',
-    ttl: 200,
-    api: {
-      getPreviews: (x) => x,
-      updatePreview: (x) => x
-    },
-    invalidates: ['fda'],
-    viewOf: 'user'
   }
 ];
 
