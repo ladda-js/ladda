@@ -4,6 +4,7 @@ import {decorateCreate} from './operations/create';
 import {decorateRead} from './operations/read';
 import {decorateUpdate} from './operations/update';
 import {decorateDelete} from './operations/delete';
+import {decorateCommand} from './operations/command';
 import {decorateNoOperation} from './operations/no-operation';
 
 const HANDLERS = {
@@ -11,6 +12,7 @@ const HANDLERS = {
   READ: decorateRead,
   UPDATE: decorateUpdate,
   DELETE: decorateDelete,
+  COMMAND: decorateCommand,
   NO_OPERATION: decorateNoOperation
 };
 
