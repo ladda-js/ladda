@@ -5,7 +5,7 @@ const warn = (logger, msg, ...args) => {
   logger.error(`Ladda Config Error: ${msg}`, ...args);
 };
 
-const OPERATIONS = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'NO_OPERATION'];
+const OPERATIONS = ['CREATE', 'READ', 'UPDATE', 'COMMAND', 'DELETE', 'NO_OPERATION'];
 const isOperation = (op) => OPERATIONS.indexOf(op) !== -1;
 const isConfigured = (entityName, entityConfigs) => !!entityConfigs[entityName];
 const isIdFromString = (idFrom) => typeof idFrom === 'string' && ['ENTITY', 'ARGS'].indexOf(idFrom) !== -1;

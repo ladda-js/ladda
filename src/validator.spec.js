@@ -348,6 +348,24 @@ describe('validateConfig', () => {
     expect(logger.error.args[0][0]).to.match(/user.getAll.*invalidate.*getSme/);
   });
 
+  it('checks for correct operation', () => {
+    const logger = createLogger();
+
+    const getAll = () => {};
+    getAll.operation = 'RAD';
+
+    const eConfigs = getEntityConfigs({
+      user: {
+        api: { getAll }
+      }
+    });
+    const config = createGlobalConfig({});
+
+    validateConfig(logger, eConfigs, config);
+    expect(logger.error).to.have.been.calledOnce;
+    expect(logger.error.args[0][0]).to.match(/user.getAll.*operation is RAD.*use one of/);
+  });
+
   it('informs about several errors', () => {
     const logger = createLogger();
 
@@ -374,9 +392,24 @@ describe('validateConfig', () => {
     getAll.operation = 'READ';
     getAll.idFrom = 'ENTITY';
 
+    const createUser = () => {};
+    createUser.operation = 'CREATE';
+
+    const updateUser = () => {};
+    updateUser.operation = 'UPDATE';
+
+    const deleteUser = () => {};
+    deleteUser.operation = 'DELETE';
+
+    const commandForUser = () => {};
+    commandForUser.operation = 'COMMAND';
+
+    const noopUser = () => {};
+    noopUser.operation = 'NO_OPERATION';
+
     const eConfigs = getEntityConfigs({
       user: {
-        api: { getAll },
+        api: { getAll, createUser, updateUser, deleteUser, commandForUser, noopUser },
         invalidates: ['activity']
       },
       activity: {
