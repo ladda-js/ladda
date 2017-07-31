@@ -296,4 +296,110 @@ describe('builder', () => {
       });
     });
   });
+
+  describe('updateOnCreate', () => {
+    it('allows to define a hook, which updates the query cache on create', () => {
+      const xs = [{ id: 1 }, { id: 2 }];
+
+      const createX = (newX) => Promise.resolve(newX);
+      createX.operation = 'CREATE';
+
+      const getXs = () => Promise.resolve(xs);
+      getXs.operation = 'READ';
+      getXs.updateOnCreate = (args, newX, cachedXs) => [...cachedXs, newX];
+
+      const api = build({ x: { api: { getXs, createX } } });
+
+      return api.x.getXs().then((cachedXs) => {
+        expect(cachedXs).to.deep.equal(xs);
+
+        return api.x.createX({ id: 3 }).then((nextX) => {
+          return api.x.getXs().then((nextXs) => {
+            expect(nextXs).to.deep.equal([...xs, nextX]);
+          });
+        });
+      });
+    });
+
+    it('can decide how to update based on prior arguments', () => {
+      const xs = [{ id: 1 }, { id: 2 }];
+
+      const createX = (newX) => Promise.resolve(newX);
+      createX.operation = 'CREATE';
+
+      const getXs = () => Promise.resolve(xs);
+      getXs.operation = 'READ';
+      getXs.updateOnCreate = (args, newX, cachedXs) => {
+        return args[0] ? [newX, ...cachedXs] : [...cachedXs, newX];
+      };
+
+      const api = build({ x: { api: { getXs, createX } } });
+
+      return Promise.all([
+        api.x.getXs(true),
+        api.x.getXs(false)
+      ]).then(() => {
+        return api.x.createX({ id: 3 }).then((nextX) => {
+          return Promise.all([
+            api.x.getXs(true),
+            api.x.getXs(false)
+          ]).then(([prepended, appended]) => {
+            expect(prepended).to.deep.equal([nextX, ...xs]);
+            expect(appended).to.deep.equal([...xs, nextX]);
+          });
+        });
+      });
+    });
+
+    it('can decide not to update anything', () => {
+      const xs = [{ id: 1 }, { id: 2 }];
+
+      const createX = (newX) => Promise.resolve(newX);
+      createX.operation = 'CREATE';
+
+      const getXs = () => Promise.resolve(xs);
+      getXs.operation = 'READ';
+      getXs.updateOnCreate = () => {};
+
+      const api = build({ x: { api: { getXs, createX } } });
+
+      return api.x.getXs().then((cachedXs) => {
+        expect(cachedXs).to.deep.equal(xs);
+
+        return api.x.createX({ id: 3 }).then(() => {
+          return api.x.getXs().then((nextXs) => {
+            expect(nextXs).to.deep.equal(xs);
+          });
+        });
+      });
+    });
+
+    it('works fine when created element is removed before we try to access the list again', () => {
+      const xs = [{ id: 1 }, { id: 2 }];
+
+      const createX = (newX) => Promise.resolve(newX);
+      createX.operation = 'CREATE';
+
+      const getXs = () => Promise.resolve(xs);
+      getXs.operation = 'READ';
+      getXs.updateOnCreate = (args, newX, cachedXs) => [...cachedXs, newX];
+
+      const deleteX = () => Promise.resolve();
+      deleteX.operation = 'DELETE';
+
+      const api = build({ x: { api: { getXs, createX, deleteX } } });
+
+      return api.x.getXs().then((cachedXs) => {
+        expect(cachedXs).to.deep.equal(xs);
+
+        return api.x.createX({ id: 3 }).then(() => {
+          return api.x.deleteX(3).then(() => {
+            return api.x.getXs().then((nextXs) => {
+              expect(nextXs).to.deep.equal(xs);
+            });
+          });
+        });
+      });
+    });
+  });
 });

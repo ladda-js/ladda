@@ -8,6 +8,13 @@ const getIdGetter = (c, aFn) => {
   return prop(c.idField || 'id');
 };
 
+export const getId = curry((c, aFn, args, o) => {
+  if (aFn && aFn.idFrom === 'ARGS') {
+    return serialize(args);
+  }
+  return getIdGetter(c, aFn)(o);
+});
+
 export const addId = curry((c, aFn, args, o) => {
   if (aFn && aFn.idFrom === 'ARGS') {
     return {
@@ -15,16 +22,16 @@ export const addId = curry((c, aFn, args, o) => {
       __ladda__id: serialize(args)
     };
   }
-  const getId = getIdGetter(c, aFn);
+  const getId_ = getIdGetter(c, aFn);
   if (Array.isArray(o)) {
     return map(x => ({
       ...x,
-      __ladda__id: getId(x)
+      __ladda__id: getId_(x)
     }), o);
   }
   return {
     ...o,
-    __ladda__id: getId(o)
+    __ladda__id: getId_(o)
   };
 });
 
