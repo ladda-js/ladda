@@ -321,6 +321,44 @@ describe('builder', () => {
       });
     });
 
+    it('makes sure that updateOnCreate hook is applied only when needed', () => {
+      // we're testing here whether our detection on where to apply a create event
+      // actually works. We had a bug here, where a create event was applied twice,
+      // when several updateOnCreate fns where defined, on api functions, where
+      // the name of one was a substring of another (like getList and getList2)
+      const xs = [{ id: 1 }, { id: 2 }];
+
+      const createX = (newX) => Promise.resolve(newX);
+      createX.operation = 'CREATE';
+
+      const getList = () => Promise.resolve(xs);
+      getList.operation = 'READ';
+      getList.updateOnCreate = (args, newX, cachedXs) => [...cachedXs, newX];
+
+      // eslint-disable-next-line no-unused-vars
+      const getList2 = (someArg) => Promise.resolve(xs);
+      getList2.operation = 'READ';
+      getList2.updateOnCreate = (args, newX, cachedXs) => [...cachedXs, newX];
+
+      const getList3 = () => Promise.resolve(xs);
+      getList3.operation = 'READ';
+      getList3.updateOnCreate = (args, newX, cachedXs) => [...cachedXs, newX];
+
+      const api = build({ x: { api: { getList, getList2, getList3, createX } } });
+      return api.x.getList2('x').then(() => {
+        return api.x.getList3().then(() => {
+          return api.x.createX({ id: 3 }).then((nextX) => {
+            return api.x.getList2('x').then((nextXs) => {
+              expect(nextXs).to.deep.equal([...xs, nextX]);
+              return api.x.getList3().then((otherNextXs) => {
+                expect(otherNextXs).to.deep.equal([...xs, nextX]);
+              });
+            });
+          });
+        });
+      });
+    });
+
     it('can decide how to update based on prior arguments', () => {
       const xs = [{ id: 1 }, { id: 2 }];
 

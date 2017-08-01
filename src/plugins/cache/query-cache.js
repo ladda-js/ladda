@@ -28,9 +28,12 @@ const getApiFnNamesWhichUpdateOnCreate = compose(
 // QueryCache -> Entity -> ApiFnName
 const getCacheValuesForFn = curry((queryCache, entity, name) => {
   const key = createKey(entity, [name]);
+  // for fns without arguments: check for direct match
+  // for fns with arguments: check, but ignore the arguments, which are added behind a -
+  const regexp = new RegExp(`^${key}(-|$)`);
   return compose(
     reduce((mem, [cacheKey, cacheValue]) => {
-      return cacheKey.indexOf(key) === 0 ? [...mem, cacheValue] : mem;
+      return regexp.test(cacheKey) ? [...mem, cacheValue] : mem;
     }, []),
     toPairs,
     prop('cache')
