@@ -1,14 +1,19 @@
 /* eslint-disable no-unused-expressions */
 
 import sinon from 'sinon';
-import {curry} from 'ladda-fp';
+import {curry, toIdMap} from 'ladda-fp';
 import {build} from './builder';
 
 const users = [{ id: 1 }, { id: 2 }];
+const usersMap = toIdMap(users);
+
+const getUser = (id) => Promise.resolve(usersMap[id]);
+getUser.operation = 'READ';
+
 const getUsers = () => Promise.resolve(users);
 getUsers.operation = 'READ';
 
-const deleteUser = () => Promise.resolve();
+const deleteUser = (id) => Promise.resolve(usersMap[id]);
 deleteUser.operation = 'DELETE';
 
 const noopUser = () => Promise.resolve(['a', 'b']);
@@ -18,6 +23,7 @@ const config = () => ({
   user: {
     ttl: 300,
     api: {
+      getUser,
       getUsers,
       deleteUser,
       noopUser
@@ -257,6 +263,31 @@ describe('builder', () => {
           expect(changeObject.operation).to.equal('NO_OPERATION');
           expect(changeObject.values).to.deep.equal(null);
           expect(changeObject.args).to.deep.equal(['x']);
+        });
+      });
+
+      it('on DELETE operations', () => {
+        const spy = sinon.spy();
+
+        const plugin = ({ addChangeListener }) => {
+          addChangeListener(spy);
+          return ({ fn }) => fn;
+        };
+
+        const api = build(config(), [plugin]);
+
+        // fill the cache with users so that we can delete something
+        return api.user.getUsers().then(() => {
+          spy.reset();
+          return api.user.deleteUser('1').then(() => {
+            expect(spy).to.have.been.calledOnce;
+            const changeObject = spy.args[0][0];
+            expect(changeObject.entity).to.equal('user');
+            expect(changeObject.apiFn).to.equal('deleteUser');
+            expect(changeObject.operation).to.equal('DELETE');
+            expect(changeObject.values).to.deep.equal([{ id: 1 }]);
+            expect(changeObject.args).to.deep.equal(['1']);
+          });
         });
       });
     });
