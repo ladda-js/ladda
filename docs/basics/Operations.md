@@ -6,9 +6,11 @@ Ladda shows its whole potential in a create, read, update & delete application. 
 
 * **READ**: An API call which returns an EntityValue, or a list of EntityValues (eg. a user or list of users).
 
-* **UPDATE**: Takes the updated EntityValue as the first argument (eg. a user). No assumptions on what is returned by the server are made.
+* **UPDATE**: Takes the updated EntityValue as the first argument (eg. a user). No assumptions on what is returned by the server are made. The first argument provided is used to update the cache.
 
 * **DELETE**: Takes an ID as the first argument. No assumptions on what is returned by the server are made.
+
+* **COMMAND**: Takes any arguments and expects an updated EntityValue, or a list of them, as return value. This return value is used to update the cache.
 
 * **NO_OPERATION** : When no operation is specified Ladda will not do anything by default. However, you can still use the invalidation logic of Ladda, see EntityConfig. No assumptions on what is returned by the server are made.
 

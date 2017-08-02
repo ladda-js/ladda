@@ -33,7 +33,7 @@ const config = {
         ttl: 300,
         api: gameApi,
         invalidates: ['topList'],
-        invalidatesOn: ['UPDATE'] // Default: ['CREATE', 'UPDATE', 'DELETE']
+        invalidatesOn: ['UPDATE'] // Default: ['CREATE', 'UPDATE', 'DELETE', 'COMMAND']
     }
 };
 ```

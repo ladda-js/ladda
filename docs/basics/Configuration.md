@@ -6,7 +6,7 @@ There are a handful optional options to configure Ladda. In a minimal configurat
 
 * **ttl**: How long to cache in seconds. Default is `300` seconds.
 
-* **invalidatesOn**: `[Operation]` where `Operation := "CREATE" | "READ" | "UPDATE" | "DELETE" | "NO_OPERATION"`. Default is `["CREATE", "UPDATE", "DELETE"]`.
+* **invalidatesOn**: `[Operation]` where `Operation := "CREATE" | "READ" | "UPDATE" | "DELETE" | "COMMAND" | "NO_OPERATION"`. Default is `["CREATE", "UPDATE", "DELETE", "COMMAND"]`.
 
 * **invalidates**: `[EntityName]` where EntityName is the key of your EntityConfig. By default an empty list `[]`.
 
@@ -19,7 +19,7 @@ There are a handful optional options to configure Ladda. In a minimal configurat
 
 ## Method Configuration
 
-* **operation**: `"CREATE" | "READ" | "UPDATE" | "DELETE" | "NO_OPERATION"`. Default is `"NO_OPERATION"`.
+* **operation**: `"CREATE" | "READ" | "UPDATE" | "DELETE" | "COMMAND" | "NO_OPERATION"`. Default is `"NO_OPERATION"`.
 
 * **invalidates**: `[ApiFunctionName]` where ApiFunctionName is a name of another function in the same api (see Entity Configuration - api). By default this is the empty list `[]`.
 

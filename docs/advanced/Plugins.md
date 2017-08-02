@@ -126,7 +126,7 @@ following shape:
 
 ```javascript
 {
-  operation: 'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'NO_OPERATION',
+  operation: 'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'COMMAND' | 'NO_OPERATION',
   entity: EntityName,
   apiFn: ApiFunctionName,
   args: Any[] | null
