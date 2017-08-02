@@ -62,7 +62,7 @@ const setEntityConfigDefaults = ec => {
   return {
     ttl: 300,
     invalidates: [],
-    invalidatesOn: ['CREATE', 'UPDATE', 'DELETE'],
+    invalidatesOn: ['CREATE', 'UPDATE', 'DELETE', 'COMMAND'],
     enableDeduplication: true,
     ...ec
   };
