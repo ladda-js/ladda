@@ -55,6 +55,7 @@ describe('builder', () => {
       .then(() => api.user.getUsers())
       .then(expectOnlyOneApiCall);
   });
+
   it('Two read api calls will return the same output', (done) => {
     const myConfig = config();
     myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
@@ -70,6 +71,7 @@ describe('builder', () => {
       .then(() => api.user.getUsers())
       .then(expectOnlyOneApiCall);
   });
+
   it('1000 calls is not slow', (done) => {
     const myConfig = config();
     myConfig.user.api.getUsers = sinon.spy(myConfig.user.api.getUsers);
@@ -87,6 +89,7 @@ describe('builder', () => {
     }
     bc.then(checkTimeConstraint);
   });
+
   it('Works with non default id set', (done) => {
     const myConfig = config();
     myConfig.__config = {idField: 'mySecretId', useProductionBuild: true};
@@ -106,6 +109,7 @@ describe('builder', () => {
       .then(() => api.user.getUsers())
       .then(expectOnlyOneApiCall);
   });
+
   it('Delete removes value from cached array', (done) => {
     const myConfig = config();
     myConfig.user.api.getUsers = sinon.spy(() => Promise.resolve([{id: 1}, {id: 2}]));
@@ -122,6 +126,7 @@ describe('builder', () => {
       .then(() => api.user.getUsers())
       .then(expectUserToBeRemoved);
   });
+
   it('TTL set to zero means we never get a cache hit', (done) => {
     const myConfig = config();
     myConfig.user.ttl = 0;
