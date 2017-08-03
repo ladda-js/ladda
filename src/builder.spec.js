@@ -122,10 +122,51 @@ describe('builder', () => {
 
     Promise.resolve()
       .then(() => api.user.getUsers())
-      .then(() => api.user.deleteUser(1))
+      .then(() => api.user.deleteUser('1'))
       .then(() => api.user.getUsers())
       .then(expectUserToBeRemoved);
   });
+
+  describe('after deletion', () => {
+    it('calls the apiFn again when marked as byId === true', () => {
+      const myConfig = config();
+      const spy = sinon.spy();
+
+      const getUserById = () => {
+        spy();
+        return Promise.resolve({ id: 4 });
+      };
+      getUserById.operation = 'READ';
+      getUserById.byId = true;
+
+      myConfig.user.api.getUserById = getUserById;
+
+      const api = build(myConfig);
+
+      return Promise.resolve()
+        .then(() => api.user.getUserById('1'))
+        .then(() => api.user.deleteUser('1'))
+        .then(() => api.user.getUserById('1'))
+        .then(() => {
+          expect(spy).to.have.been.calledTwice;
+        });
+    });
+
+    it('returns null for normal read operation when entity is requested again', () => {
+      const myConfig = config();
+
+      const api = build(myConfig);
+
+      return Promise.resolve()
+        .then(() => api.user.getUser('1'))
+        .then(() => api.user.deleteUser('1'))
+        .then(() => api.user.getUser('1'))
+        .then((user) => {
+          expect(user).to.be.null;
+        });
+    });
+  });
+
 
   it('TTL set to zero means we never get a cache hit', (done) => {
     const myConfig = config();

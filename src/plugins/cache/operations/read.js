@@ -61,7 +61,7 @@ const decorateReadQuery = (c, cache, notify, e, aFn) => {
     if (Cache.containsQueryResponse(cache, e, aFn, args) && !aFn.alwaysGetFreshData) {
       const v = Cache.getQueryResponseWithMeta(cache, c, e, aFn, args);
       if (!Cache.hasExpired(cache, e, v)) {
-        return Promise.resolve(removeId(Cache.getQueryResponse(v.value)));
+        return Promise.resolve(v.value ? removeId(Cache.getQueryResponse(v.value)) : null);
       }
     }
 
