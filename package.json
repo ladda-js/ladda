@@ -1,6 +1,6 @@
 {
   "name": "ladda-logger",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Logger plugin for Ladda",
   "main": "dist/bundle.js",
   "dependencies": {
