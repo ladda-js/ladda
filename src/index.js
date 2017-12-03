@@ -94,9 +94,9 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
         impl.groupEnd();
       }
     },
-    logReject: (fnName, startTime, start, err, args) => {
+    logReject: (fnName, start, err, args) => {
       const text = 'Ladda rejected';
-      const timeText = toTimeText(startTime, getDuration(start));
+      const timeText = toTimeText(getDuration(start));
       if (noFormat) {
         impl.log(`${text} ${fnName} ${timeText} with err`, err, 'from args', args);
       } else {

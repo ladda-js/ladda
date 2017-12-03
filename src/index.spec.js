@@ -8,6 +8,8 @@ import { logger } from '.';
 
 const toMiniUser = ({ id, name }) => ({ id, name });
 
+const ERROR = { err: 'error' };
+
 const createUserApi = (container) => {
   const getUser = (id) => Promise.resolve(container[id]);
   getUser.operation = 'READ';
@@ -15,7 +17,7 @@ const createUserApi = (container) => {
   const getUsers = () => Promise.resolve(values(container));
   getUsers.operation = 'READ';
 
-  const getUsersRejected = () => Promise.reject({ err: 'error' });
+  const getUsersRejected = () => Promise.reject(ERROR);
   getUsersRejected.operation = 'READ';
 
   const updateUser = (nextUser) => {
@@ -129,6 +131,11 @@ describe('Ladda logger', () => {
 
       return api.user.getUsersRejected().catch(() => {
         expect(l.log).to.have.been.calledTwice;
+        const { args } = l.log.getCall(1);
+        expect(args[0]).to.match(/user.getUsersRejected/);
+        expect(args[1]).to.equal(ERROR);
+        expect(args[2]).to.match(/args/);
+        expect(args[3]).to.be.empty;
       });
     });
 
