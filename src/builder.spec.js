@@ -542,7 +542,7 @@ describe('builder', () => {
       });
     });
 
-    fit('works when return value has no id and NO args are present', () => {
+    it('works when return value has no id and NO args are present', () => {
       const c = idFromArgsConfig();
       const api = build(c);
 
