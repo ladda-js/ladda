@@ -1,4 +1,4 @@
-import {addId, removeId} from './id-helper';
+import {addId, removeId, EMPTY_ARGS_PLACEHOLDER} from './id-helper';
 
 describe('IdHelper', () => {
   it('removeId is the inverse of addId', () => {
@@ -10,6 +10,13 @@ describe('IdHelper', () => {
     const aFn = {idFrom: 'ARGS'};
     expect(addId({}, aFn, [1, 2, 3], o)).to.deep.equal(
       {...o, __ladda__id: '1-2-3'}
+    );
+  });
+  it('addId handles empty args if idFrom is ARGS', () => {
+    const o = {name: 'kalle'};
+    const aFn = {idFrom: 'ARGS'};
+    expect(addId({}, aFn, [], o)).to.deep.equal(
+      {...o, __ladda__id: EMPTY_ARGS_PLACEHOLDER}
     );
   });
   it('removing id from undefined returns undefined', () => {

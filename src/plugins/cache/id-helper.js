@@ -1,6 +1,10 @@
 import {curry, map, prop} from 'ladda-fp';
 import {serialize} from './serializer';
 
+export const EMPTY_ARGS_PLACEHOLDER = '__EMPTY_ARGS__';
+
+const createIdFromArgs = (args) => serialize(args) || EMPTY_ARGS_PLACEHOLDER;
+
 const getIdGetter = (c, aFn) => {
   if (aFn && aFn.idFrom && typeof aFn.idFrom === 'function') {
     return aFn.idFrom;
@@ -10,7 +14,7 @@ const getIdGetter = (c, aFn) => {
 
 export const getId = curry((c, aFn, args, o) => {
   if (aFn && aFn.idFrom === 'ARGS') {
-    return serialize(args);
+    return createIdFromArgs(args);
   }
   return getIdGetter(c, aFn)(o);
 });
@@ -19,7 +23,7 @@ export const addId = curry((c, aFn, args, o) => {
   if (aFn && aFn.idFrom === 'ARGS') {
     return {
       ...o,
-      __ladda__id: serialize(args)
+      __ladda__id: createIdFromArgs(args)
     };
   }
   const getId_ = getIdGetter(c, aFn);
