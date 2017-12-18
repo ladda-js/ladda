@@ -517,4 +517,39 @@ describe('builder', () => {
       });
     });
   });
+
+  describe('idFrom ARGS', () => {
+    const getX = () => Promise.resolve({ x: 'x' });
+    getX.operation = 'READ';
+    getX.idFrom = 'ARGS';
+
+    const idFromArgsConfig = () => ({
+      x: {
+        ttl: 300,
+        api: { getX }
+      },
+      __config: {
+        useProductionBuild: true
+      }
+    });
+
+    it('works when return value has no id and args are present', () => {
+      const c = idFromArgsConfig();
+      const api = build(c);
+
+      return api.x.getX('some', 'random', false, 'args').then((x) => {
+        expect(x.x).to.equal('x'); // we basically just wanna know it doesn't throw
+      });
+    });
+
+    fit('works when return value has no id and NO args are present', () => {
+      const c = idFromArgsConfig();
+      const api = build(c);
+
+      return api.x.getX().then((x) => {
+        expect(x.x).to.equal('x'); // we basically just wanna know it doesn't throw
+      });
+    });
+  });
 });
+
