@@ -68,7 +68,7 @@ const getFromCache = (qc, e, k) => {
 
 // QueryCache -> Entity -> ApiFunction -> [a] -> [b] -> [b]
 export const put = curry((qc, e, aFn, args, xs) => {
-  const k = createKey(e, [aFn.fnName, ...filter(identity, args)]);
+  const k = createKey(e, [aFn.fnName, ...args]);
   if (Array.isArray(xs)) {
     qc.cache[k] = toCacheValue(map(prop('__ladda__id'), xs));
   } else {
@@ -85,7 +85,7 @@ export const getValue = (v) => {
 
 // QueryCache -> Entity -> ApiFunction -> [a] -> Bool
 export const contains = (qc, e, aFn, args) => {
-  const k = createKey(e, [aFn.fnName, ...filter(identity, args)]);
+  const k = createKey(e, [aFn.fnName, ...args]);
   return inCache(qc, k);
 };
 
@@ -97,7 +97,7 @@ export const hasExpired = (qc, e, cv) => (Date.now() - cv.timestamp) > getTtl(e)
 
 // QueryCache -> Config -> Entity -> ApiFunction -> [a] -> Bool
 export const get = (qc, c, e, aFn, args) => {
-  const k = createKey(e, [aFn.fnName, ...filter(identity, args)]);
+  const k = createKey(e, [aFn.fnName, ...args]);
   if (!inCache(qc, k)) {
     throw new Error(
       `Tried to access ${e.name} with key ${k} which doesn't exist.

@@ -517,4 +517,56 @@ describe('builder', () => {
       });
     });
   });
+
+  describe('idFrom ARGS', () => {
+    const getX = (a, b) => {
+      if (a === '' && b === '') {
+        return Promise.resolve({ x: 'xxx' });
+      }
+      return Promise.resolve({ x: 'x' });
+    };
+    getX.operation = 'READ';
+    getX.idFrom = 'ARGS';
+
+    const idFromArgsConfig = () => ({
+      x: {
+        ttl: 300,
+        api: { getX }
+      },
+      __config: {
+        useProductionBuild: true
+      }
+    });
+
+    it('works when return value has no id and args are present', () => {
+      const c = idFromArgsConfig();
+      const api = build(c);
+
+      return api.x.getX('some', 'random', false, 'args').then((x) => {
+        expect(x.x).to.equal('x'); // we basically just wanna know it doesn't throw
+      });
+    });
+
+    it('works when return value has no id and NO args are present', () => {
+      const c = idFromArgsConfig();
+      const api = build(c);
+
+      return api.x.getX().then((x) => {
+        expect(x.x).to.equal('x'); // we basically just wanna know it doesn't throw
+      });
+    });
+
+    it('deals properly with empty strings', () => {
+      const c = idFromArgsConfig();
+      const api = build(c);
+
+      return api.x.getX('').then((x) => {
+        expect(x.x).to.equal('x');
+        return api.x.getX('', '').then((secondX) => {
+          expect(secondX.x).to.equal('xxx');
+        });
+      });
+    });
+  });
 });
+
