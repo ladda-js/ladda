@@ -17,7 +17,14 @@ export default [
     external: ['ladda-fp'],
     plugins: [
       babel({
-        externalHelpers: true,
+        babelrc: false,
+        plugins: ['external-helpers'],
+        presets: [
+          ['env', {
+            modules: false
+          }],
+          'stage-1'
+        ],
         exclude: ['node_modules/**']
       })
     ]
