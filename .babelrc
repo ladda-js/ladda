@@ -1,8 +1,13 @@
 {
-    "presets": ["es2015", "stage-1"],
-    "env": {
-        "test": {
-            "plugins": [ "istanbul" ]
-        }
-     }
+  "env": {
+    "test": {
+      "presets": [
+        "env",
+        "stage-1"
+      ],
+      "plugins": [
+        "istanbul",
+      ]
+    }
+  }
 }
