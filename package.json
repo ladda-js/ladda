@@ -4,6 +4,7 @@
   "description": "Logger plugin for Ladda",
   "main": "dist/bundle.js",
   "module": "dist/modules.js",
+  "files": ["dist/modules.js"],
   "dependencies": {
     "ladda-fp": "^0.2.2"
   },
