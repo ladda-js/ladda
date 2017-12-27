@@ -9,7 +9,6 @@
   },
   "devDependencies": {
     "babel-core": "^6.9.0",
-    "babel-loader": "^7.0.0",
     "babel-plugin-istanbul": "^4.0.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-1": "^6.24.1",
