@@ -1,4 +1,4 @@
 node_modules
+dist/**
 _book
-bundle.js
 npm-debug.log
