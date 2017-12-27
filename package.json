@@ -4,8 +4,8 @@
   "description": "Observable plugin for Ladda",
   "main": "dist/bundle.js",
   "module": "dist/module.js",
-  "peerDependencies": {
-    "ladda-fp": "^0.2.0"
+  "dependencies": {
+    "ladda-fp": "^0.2.2"
   },
   "devDependencies": {
     "babel-core": "^6.9.0",

@@ -14,6 +14,7 @@ export default [
         format: 'es'
       }
     ],
+    external: ['ladda-fp'],
     plugins: [
       babel({
         exclude: ['node_modules/**']
