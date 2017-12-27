@@ -4,9 +4,11 @@
   "description": "Observable plugin for Ladda",
   "main": "dist/bundle.js",
   "module": "dist/module.js",
-  "files": ["dist/module.js"],
+  "files": [
+    "dist/module.js"
+  ],
   "dependencies": {
-    "ladda-fp": "^0.2.2"
+    "ladda-fp": "^0.2.3"
   },
   "devDependencies": {
     "babel-core": "^6.9.0",
@@ -21,7 +23,7 @@
     "eslint-config-airbnb-base": "^11.1.1",
     "eslint-plugin-import": "^2.2.0",
     "gitbook-cli": "^2.3.0",
-    "ladda-cache": "0.2.7",
+    "ladda-cache": "^0.2.15",
     "mocha": "^2.5.3",
     "nyc": "^10.1.2",
     "rollup": "^0.53.0",
