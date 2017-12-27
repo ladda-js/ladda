@@ -2,8 +2,8 @@ import {map, mapObject, mapValues, compose, toObject, reduce, fromPairs,
         toPairs, prop, filterObject, isEqual, not, curry, copyFunction
       } from 'ladda-fp';
 
-import {cachePlugin} from './plugins/cache';
-import {dedupPlugin} from './plugins/dedup';
+import {cachePlugin} from './plugins/cache/index';
+import {dedupPlugin} from './plugins/dedup/index';
 import {createListenerStore} from './listener-store';
 import {validateConfig} from './validator';
 
