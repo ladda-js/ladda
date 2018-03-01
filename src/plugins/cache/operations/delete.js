@@ -7,7 +7,7 @@ export function decorateDelete(c, cache, notify, e, aFn) {
     return aFn(...args)
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
       .then(() => {
-        const removed = Cache.removeEntity(cache, e, serialize(args));
+        const removed = Cache.removeEntity(cache, e, serialize(args[0]));
         if (removed) {
           notify(args, removed);
         }
