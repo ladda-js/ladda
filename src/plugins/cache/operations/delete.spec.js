@@ -59,16 +59,16 @@ describe('Delete', () => {
     });
 
     it('Removes cache only using first argument as id', () => {
-        const cache = Cache.createCache(config);
-        const e = config[0];
-        const xOrg = {id: 1, name: 'Kalle'};
-        const aFnWithoutSpy = createApiFunction(() => Promise.resolve({}));
-        const aFn = sinon.spy(aFnWithoutSpy);
-        Cache.storeEntity(cache, e, addId({}, undefined, undefined, xOrg));
-        const res = decorateDelete({}, cache, curryNoop, e, aFn);
-        return res(1, 2).then(() => {
-            expect(Cache.getEntity(cache, e, 1)).to.equal(undefined);
-        });
+      const cache = Cache.createCache(config);
+      const e = config[0];
+      const xOrg = {id: 1, name: 'Kalle'};
+      const aFnWithoutSpy = createApiFunction(() => Promise.resolve({}));
+      const aFn = sinon.spy(aFnWithoutSpy);
+      Cache.storeEntity(cache, e, addId({}, undefined, undefined, xOrg));
+      const res = decorateDelete({}, cache, curryNoop, e, aFn);
+      return res(1, 2).then(() => {
+        expect(Cache.getEntity(cache, e, 1)).to.equal(undefined);
+      });
     });
 
     it('triggers DELETE notification', () => {
