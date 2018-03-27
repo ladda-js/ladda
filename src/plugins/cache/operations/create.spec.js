@@ -5,6 +5,7 @@ import {curry} from 'ladda-fp';
 import {decorateCreate} from './create';
 import {createCache, getEntity} from '../cache';
 import {createApiFunction} from '../test-helper';
+import {withId} from '../id-helper';
 
 const curryNoop = () => () => {};
 
@@ -54,7 +55,7 @@ describe('Create', () => {
       const res = decorateCreate({}, cache, curryNoop, e, aFn);
       return res(xOrg).then((newX) => {
         expect(newX).to.equal(response);
-        expect(getEntity(cache, e, 1).value).to.deep.equal({...response, __ladda__id: 1});
+        expect(getEntity(cache, e, 1).value).to.deep.equal(withId(1, response));
       });
     });
 

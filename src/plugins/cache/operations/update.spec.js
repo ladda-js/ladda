@@ -5,6 +5,7 @@ import {curry} from 'ladda-fp';
 import {decorateUpdate} from './update';
 import * as Cache from '../cache';
 import {createApiFunction} from '../test-helper';
+import {withId} from '../id-helper';
 
 const curryNoop = () => () => {};
 
@@ -53,7 +54,7 @@ describe('Update', () => {
 
       const res = decorateUpdate({}, cache, curryNoop, e, aFn);
       return res(xOrg, 'other args').then(() => {
-        expect(Cache.getEntity(cache, e, 1).value).to.deep.equal({...xOrg, __ladda__id: 1});
+        expect(Cache.getEntity(cache, e, 1).value).to.deep.equal(withId(1, xOrg));
       });
     });
 
