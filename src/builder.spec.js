@@ -19,6 +19,9 @@ deleteUser.operation = 'DELETE';
 const noopUser = () => Promise.resolve(['a', 'b']);
 noopUser.operation = 'NO_OPERATION';
 
+const updateUser = (user) => Promise.resolve(user);
+updateUser.operation = 'UPDATE';
+
 const config = () => ({
   user: {
     ttl: 300,
@@ -26,7 +29,8 @@ const config = () => ({
       getUser,
       getUsers,
       deleteUser,
-      noopUser
+      noopUser,
+      updateUser
     },
     invalidates: ['alles']
   },
@@ -564,6 +568,32 @@ describe('builder', () => {
         expect(x.x).to.equal('x');
         return api.x.getX('', '').then((secondX) => {
           expect(secondX.x).to.equal('xxx');
+        });
+      });
+    });
+  });
+
+  describe('immutability', () => {
+    it('does return the same object twice when cache is hit', () => {
+      const myConfig = config();
+      const api = build(myConfig);
+
+      return api.user.getUser('1').then(firstUser => {
+        return api.user.getUser('1').then(secondUser => {
+          expect(firstUser).to.equal(secondUser);
+        });
+      });
+    });
+
+    it('does not return the same object after a cache update', () => {
+      const myConfig = config();
+      const api = build(myConfig);
+
+      return api.user.getUser('1').then(firstUser => {
+        return api.user.updateUser({ id: '1' }).then(() => {
+          return api.user.getUser('1').then(secondUser => {
+            expect(firstUser).not.to.equal(secondUser);
+          });
         });
       });
     });
