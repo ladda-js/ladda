@@ -64,15 +64,6 @@ describe('EntityStore', () => {
       const r = get(s, e, v.id);
       expect(r.value).to.deep.equal(withId('hello', v));
     });
-    it('altering an added value does not alter the stored value when doing a get later', () => {
-      const s = createEntityStore(config);
-      const v = {id: 'hello', name: 'kalle'};
-      const e = { name: 'user'};
-      put(s, e, addId({}, undefined, undefined, v));
-      v.name = 'ingvar';
-      const r = get(s, e, v.id);
-      expect(r.value.item.name).to.equal('kalle');
-    });
     it('an added value to a view is later returned when calling get for view', () => {
       const s = createEntityStore(config);
       const v = {id: 'hello'};
