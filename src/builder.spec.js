@@ -22,7 +22,7 @@ noopUser.operation = 'NO_OPERATION';
 const updateUser = (user) => Promise.resolve(user);
 updateUser.operation = 'UPDATE';
 
-const config = () => ({
+const config = (globals = {}) => ({
   user: {
     ttl: 300,
     api: {
@@ -35,7 +35,8 @@ const config = () => ({
     invalidates: ['alles']
   },
   __config: {
-    useProductionBuild: true
+    useProductionBuild: true,
+    ...globals
   }
 });
 
@@ -594,6 +595,42 @@ describe('builder', () => {
           return api.user.getUser('1').then(secondUser => {
             expect(firstUser).not.to.equal(secondUser);
           });
+        });
+      });
+    });
+  });
+
+  describe('strict mode', () => {
+    const testFreeze = () => {
+      const myConfig = config();
+      const api = build(myConfig);
+
+      return api.user.getUser('1').then(firstUser => {
+        return api.user.updateUser({ id: '1', data: { x: 'a' } }).then((secondUser) => {
+          expect(() => { firstUser.id = '2'; }).to.throw('read only');
+          expect(() => { secondUser.id = '2'; }).to.throw('read only');
+          expect(() => { secondUser.data.x = 'b'; }).to.throw('read only');
+        });
+      });
+    };
+
+    it('returns deep-frozen objects when in strict mode', () => {
+      testFreeze();
+    });
+
+    it('defaults to strict mode', () => {
+      testFreeze();
+    });
+
+    it('does not return frozen objects when not in strict mode', () => {
+      const myConfig = config({ strictMode: false });
+      const api = build(myConfig);
+
+      return api.user.getUser('1').then(firstUser => {
+        return api.user.updateUser({ id: '1', data: { x: 'a' } }).then((secondUser) => {
+          expect(() => { firstUser.id = '2'; }).not.to.throw('read only');
+          expect(() => { secondUser.id = '2'; }).not.to.throw('read only');
+          expect(() => { secondUser.data.x = 'b'; }).not.to.throw('read only');
         });
       });
     });
