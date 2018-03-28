@@ -20,7 +20,7 @@ const decorateReadSingle = (c, cache, notify, e, aFn) => {
     }
 
     return aFn(id)
-      .then(passThrough(compose(Cache.storeEntity(cache, e), addId(c, aFn, id))))
+      .then(compose(Cache.storeEntity(cache, e), addId(c, aFn, id)))
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
       .then(passThrough(notify([id])));
   };
@@ -46,7 +46,7 @@ const decorateReadSome = (c, cache, notify, e, aFn) => {
     const addIds = map(([id, item]) => addId(c, aFn, id, item));
 
     return aFn(remaining)
-      .then(passThrough(compose(Cache.storeEntities(cache, e), addIds, zip(remaining))))
+      .then(compose(Cache.storeEntities(cache, e), addIds, zip(remaining)))
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
       .then((other) => {
         const asMap = compose(toIdMap, concat)(cached, other);
@@ -66,9 +66,7 @@ const decorateReadQuery = (c, cache, notify, e, aFn) => {
     }
 
     return aFn(...args)
-      .then(passThrough(
-            compose(Cache.storeQueryResponse(cache, e, aFn, args),
-                    addId(c, aFn, args))))
+      .then(compose(Cache.storeQueryResponse(cache, e, aFn, args), addId(c, aFn, args)))
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
       .then(passThrough(notify(args)));
   };

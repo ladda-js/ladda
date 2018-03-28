@@ -41,8 +41,12 @@ const toStoreValue = (strictMode, v) => ({
 // EntityStore -> String -> Value
 const read = ([_, s], k) => (s[k] ? {...s[k], value: s[k].value} : s[k]);
 
-// EntityStore -> String -> Value -> ()
-const set = ([eMap, s, c], k, v) => { s[k] = toStoreValue(c.strictMode, v); };
+// EntityStore -> String -> Value -> Value
+const set = ([eMap, s, c], k, v) => {
+  const storeValue = toStoreValue(c.strictMode, v);
+  s[k] = storeValue;
+  return storeValue.value.item;
+};
 
 // EntityStore -> String -> ()
 const rm = curry(([_, s], k) => delete s[k]);
@@ -87,8 +91,7 @@ const setEntityValue = (s, e, v) => {
     throw new Error(`Value is missing id, tried to add to entity ${e.name}`);
   }
   const k = createEntityKey(e, v);
-  set(s, k, v);
-  return v;
+  return set(s, k, v);
 };
 
 // EntityStore -> Entity -> Value -> ()
@@ -99,23 +102,21 @@ const setViewValue = (s, e, v) => {
 
   if (entityValueExist(s, e, v)) {
     const eValue = read(s, createEntityKey(e, v)).value;
-    setEntityValue(s, e, merge(v, eValue));
     rmViews(s, e); // all views will prefer entity cache since it is newer
-  } else {
-    const k = createViewKey(e, v);
-    set(s, k, v);
+    return setEntityValue(s, e, merge(v, eValue));
   }
 
-  return v;
+  const k = createViewKey(e, v);
+  return set(s, k, v);
 };
 
 // EntityStore -> Entity -> [Value] -> ()
 export const mPut = curry((es, e, xs) => {
-  map_(handle(setViewValue, setEntityValue)(es, e))(xs);
+  return map(handle(setViewValue, setEntityValue)(es, e))(xs);
 });
 
 // EntityStore -> Entity -> Value -> ()
-export const put = curry((es, e, x) => mPut(es, e, [x]));
+export const put = curry((es, e, x) => mPut(es, e, [x])[0]);
 
 // EntityStore -> Entity -> String -> Value
 const getEntityValue = (s, e, id) => {

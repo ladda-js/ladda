@@ -74,8 +74,9 @@ export const put = curry((qc, e, aFn, args, xs) => {
   } else {
     qc.cache[k] = toCacheValue(prop('__ladda__id', xs));
   }
-  mPutInEs(qc.entityStore, e, Array.isArray(xs) ? xs : [xs]);
-  return xs;
+  return Array.isArray(xs) ?
+    mPutInEs(qc.entityStore, e, xs) :
+    mPutInEs(qc.entityStore, e, [xs])[0];
 });
 
 // (CacheValue | [CacheValue]) -> Promise

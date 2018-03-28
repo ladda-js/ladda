@@ -273,7 +273,7 @@ describe('Read', () => {
       const aFn = sinon.spy(aFnWithoutSpy);
       const res = decorateRead({}, cache, curryNoop, e, aFn);
       return res(1).then((x) => {
-        expect(x).to.equal(xOrg);
+        expect(x).to.deep.equal(xOrg);
       });
     });
 
