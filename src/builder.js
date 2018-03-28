@@ -121,6 +121,7 @@ const getGlobalConfig = (config) => ({
   idField: 'id',
   enableDeduplication: true,
   useProductionBuild: process.NODE_ENV === 'production',
+  strictMode: true,
   ...(config.__config || {})
 });
 
