@@ -5,7 +5,7 @@
 
 import {on2, prop, join, reduce, identity, toPairs, flatten,
         curry, map, map_, startsWith, compose, filter} from 'ladda-fp';
-import {mPut as mPutInEs, get as getFromEs} from './entity-store';
+import {mPut as mPutInEs, put as putInEs, get as getFromEs} from './entity-store';
 import {serialize} from './serializer';
 import {removeId, addId} from './id-helper';
 
@@ -76,7 +76,7 @@ export const put = curry((qc, e, aFn, args, xs) => {
   }
   return Array.isArray(xs) ?
     mPutInEs(qc.entityStore, e, xs) :
-    mPutInEs(qc.entityStore, e, [xs])[0];
+    putInEs(qc.entityStore, e, xs);
 });
 
 // (CacheValue | [CacheValue]) -> Promise
