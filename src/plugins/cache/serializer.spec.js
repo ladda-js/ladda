@@ -5,6 +5,11 @@ describe('Serializer', () => {
     const res = serialize('hello');
     expect(res).to.equal('hello');
   });
+  it('serializes date to iso string', () => {
+    const d = new Date('2018-04-18T08:55:54.974Z');
+    const res = serialize(d);
+    expect(res).to.equal('2018-04-18T08:55:54.974Z');
+  });
   it('serializes object by taking its values and joining with -', () => {
     const res = serialize({a: 'hello', b: 'world'});
     expect(res).to.equal('hello-world');
