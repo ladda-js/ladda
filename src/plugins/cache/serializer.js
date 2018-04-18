@@ -14,6 +14,9 @@ const serializeObject = (o) => {
 };
 
 export const serialize = (x) => {
+  if (x instanceof Date) {
+    return x.toISOString();
+  }
   if (x instanceof Object) {
     return serializeObject(x);
   }
