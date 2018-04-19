@@ -18,6 +18,13 @@ describe('Serializer', () => {
     const res = serialize({a: 'hello', b: {c: 'world', d: '!'}});
     expect(res).to.equal('hello-world-!');
   });
+  it('serializes nested objects and arrays properly', () => {
+    const a = [[[[1]]]];
+    const d = new Date();
+    const o = {a: {b: d}};
+    expect(serialize(a)).to.equal('1');
+    expect(serialize(o)).to.equal(d.toISOString());
+  });
   it('int serialize to int', () => {
     const res = serialize(1);
     expect(res).to.equal(1);
