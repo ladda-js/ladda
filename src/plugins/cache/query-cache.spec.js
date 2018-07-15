@@ -75,7 +75,11 @@ describe('QueryCache', () => {
       const aFn = (x) => x;
       const args = [1, 2, 3];
       const xs = [{id: 1}, {id: 2}, {id: 3}];
-      const xsRet = [{id: 1, __ladda__id: 1}, {id: 2, __ladda__id: 2}, {id: 3, __ladda__id: 3}];
+      const xsRet = [
+        { item: { id: 1 }, __ladda__id: 1 },
+        { item: { id: 2 }, __ladda__id: 2 },
+        { item: { id: 3 }, __ladda__id: 3 }
+      ];
       put(qc, e, aFn, args, addId({}, undefined, undefined, xs));
       expect(getValue(get(qc, undefined, e, aFn, args).value)).to.deep.equal(xsRet);
     });

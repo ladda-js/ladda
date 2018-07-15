@@ -2,9 +2,9 @@ import {curry} from 'ladda-fp';
 import * as QueryCache from './query-cache';
 import * as EntityStore from './entity-store';
 
-export const createCache = (entityConfigs, onChange) => {
-  const entityStore = EntityStore.createEntityStore(entityConfigs, onChange);
-  const queryCache = QueryCache.createQueryCache(entityStore, onChange);
+export const createCache = (entityConfigs, globalConfig = {}) => {
+  const entityStore = EntityStore.createEntityStore(entityConfigs, globalConfig);
+  const queryCache = QueryCache.createQueryCache(entityStore);
   return {entityStore, queryCache};
 };
 

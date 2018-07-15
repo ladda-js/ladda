@@ -11,18 +11,42 @@
  * Of course, this also requiers the view to truly be a subset of the entity.
  */
 
-import {curry, reduce, map_, clone} from 'ladda-fp';
+import {curry, reduce, map_, map} from 'ladda-fp';
 import {merge} from './merger';
 import {removeId} from './id-helper';
 
-// Value -> StoreValue
-const toStoreValue = v => ({value: v, timestamp: Date.now()});
+const deepFreeze = o => {
+  if (Array.isArray(o)) {
+    return Object.freeze(map(deepFreeze, o));
+  }
+  if (typeof o === 'object') {
+    return Object.freeze(reduce(
+      (m, k) => {
+        m[k] = deepFreeze(o[k]);
+        return m;
+      },
+      {},
+      Object.keys(o)
+    ));
+  }
+  return o;
+};
+
+// Bool -> Value -> StoreValue
+const toStoreValue = (strictMode, v) => ({
+  value: strictMode ? { ...v, item: deepFreeze(v.item) } : v,
+  timestamp: Date.now()
+});
 
 // EntityStore -> String -> Value
-const read = ([_, s], k) => (s[k] ? {...s[k], value: clone(s[k].value)} : s[k]);
+const read = ([_, s], k) => (s[k] ? {...s[k], value: s[k].value} : s[k]);
 
-// EntityStore -> String -> Value -> ()
-const set = ([eMap, s], k, v) => { s[k] = toStoreValue(clone(v)); };
+// EntityStore -> String -> Value -> Value
+const set = ([eMap, s, c], k, v) => {
+  const storeValue = toStoreValue(c.strictMode, v);
+  s[k] = storeValue;
+  return storeValue.value.item;
+};
 
 // EntityStore -> String -> ()
 const rm = curry(([_, s], k) => delete s[k]);
@@ -67,8 +91,7 @@ const setEntityValue = (s, e, v) => {
     throw new Error(`Value is missing id, tried to add to entity ${e.name}`);
   }
   const k = createEntityKey(e, v);
-  set(s, k, v);
-  return v;
+  return set(s, k, v);
 };
 
 // EntityStore -> Entity -> Value -> ()
@@ -79,23 +102,21 @@ const setViewValue = (s, e, v) => {
 
   if (entityValueExist(s, e, v)) {
     const eValue = read(s, createEntityKey(e, v)).value;
-    setEntityValue(s, e, merge(v, eValue));
     rmViews(s, e); // all views will prefer entity cache since it is newer
-  } else {
-    const k = createViewKey(e, v);
-    set(s, k, v);
+    return setEntityValue(s, e, merge(v, eValue));
   }
 
-  return v;
+  const k = createViewKey(e, v);
+  return set(s, k, v);
 };
 
 // EntityStore -> Entity -> [Value] -> ()
 export const mPut = curry((es, e, xs) => {
-  map_(handle(setViewValue, setEntityValue)(es, e))(xs);
+  return map(handle(setViewValue, setEntityValue)(es, e))(xs);
 });
 
 // EntityStore -> Entity -> Value -> ()
-export const put = curry((es, e, x) => mPut(es, e, [x]));
+export const put = curry((es, e, x) => mPut(es, e, [x])[0]);
 
 // EntityStore -> Entity -> String -> Value
 const getEntityValue = (s, e, id) => {
@@ -152,5 +173,12 @@ const registerEntity = ([eMap, ...other], e) => {
 // EntityStore -> Entity -> EntityStore
 const updateIndex = (m, e) => { return isView(e) ? registerView(m, e) : registerEntity(m, e); };
 
-// [Entity] -> EntityStore
-export const createEntityStore = (c) => reduce(updateIndex, [{}, {}], c);
+// GlobalConfig -> EntityStoreGlobalConfig
+const getGlobalConfig = ({ strictMode }) => ({ strictMode });
+
+// [Entity] -> GlobalConfig -> EntityStore
+export const createEntityStore = (es, c = {}) => reduce(
+  updateIndex,
+  [{}, {}, getGlobalConfig(c)],
+  es
+);

@@ -19,24 +19,18 @@ export const getId = curry((c, aFn, args, o) => {
   return getIdGetter(c, aFn)(o);
 });
 
+export const withId = (id, item) => ({ __ladda__id: id, item });
+export const withoutId = (itemWithId) => itemWithId.item;
+
 export const addId = curry((c, aFn, args, o) => {
   if (aFn && aFn.idFrom === 'ARGS') {
-    return {
-      ...o,
-      __ladda__id: createIdFromArgs(args)
-    };
+    return withId(createIdFromArgs(args), o);
   }
   const getId_ = getIdGetter(c, aFn);
   if (Array.isArray(o)) {
-    return map(x => ({
-      ...x,
-      __ladda__id: getId_(x)
-    }), o);
+    return map(x => withId(getId_(x), x), o);
   }
-  return {
-    ...o,
-    __ladda__id: getId_(o)
-  };
+  return withId(getId_(o), o);
 });
 
 export const removeId = (o) => {
@@ -45,11 +39,7 @@ export const removeId = (o) => {
   }
 
   if (Array.isArray(o)) {
-    return map(x => {
-      delete x.__ladda__id;
-      return x;
-    }, o);
+    return map(withoutId, o);
   }
-  delete o.__ladda__id;
-  return o;
+  return withoutId(o);
 };

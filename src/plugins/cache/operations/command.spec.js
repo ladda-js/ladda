@@ -5,6 +5,7 @@ import {curry} from 'ladda-fp';
 import {decorateCommand} from './command';
 import * as Cache from '../cache';
 import {createApiFunction} from '../test-helper';
+import {withId} from '../id-helper';
 
 const curryNoop = () => () => {};
 
@@ -32,7 +33,7 @@ describe('Command', () => {
 
       const res = decorateCommand({}, cache, curryNoop, e, aFn);
       return res('an arg', 'other args').then((nextXOrg) => {
-        expect(Cache.getEntity(cache, e, 1).value).to.deep.equal({...nextXOrg, __ladda__id: 1});
+        expect(Cache.getEntity(cache, e, 1).value).to.deep.equal(withId(1, nextXOrg));
       });
     });
 

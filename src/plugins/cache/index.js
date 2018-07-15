@@ -34,7 +34,7 @@ const notify = curry((onChange, entity, fn, args, payload) => {
 });
 
 export const cachePlugin = (onChange) => ({ config, entityConfigs }) => {
-  const cache = createCache(values(entityConfigs));
+  const cache = createCache(values(entityConfigs), config);
   return ({ entity, fn }) => {
     const handler = HANDLERS[fn.operation];
     const notify_ = notify(onChange, entity, fn);
