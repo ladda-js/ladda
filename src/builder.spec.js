@@ -225,6 +225,18 @@ describe('builder', () => {
     });
   });
 
+  it('always returns an Array list for apiFns which return a list', () => {
+    // this used to be a bug with idFrom = 'ARGS'. Testing the base case for sanity here.
+    const myConfig = config();
+    const api = build(myConfig);
+    return api.user.getUsers().then(users1 => {
+      expect(Array.isArray(users1)).to.be.true;
+      return api.user.getUsers().then(users2 => {
+        expect(Array.isArray(users2)).to.be.true;
+      });
+    });
+  });
+
   describe('change listener', () => {
     it('exposes Ladda\'s listener/onChange interface to plugins', () => {
       const plugin = ({ addChangeListener }) => {
@@ -528,10 +540,19 @@ describe('builder', () => {
     getX.operation = 'READ';
     getX.idFrom = 'ARGS';
 
+    const getXs = () => {
+      return Promise.resolve([{ a: 'a' }, { b: 'b' }]);
+    };
+    getXs.operation = 'READ';
+    getXs.idFrom = 'ARGS';
+
     const idFromArgsConfig = () => ({
       x: {
         ttl: 300,
-        api: { getX }
+        api: {
+          getX,
+          getXs
+        }
       },
       __config: {
         useProductionBuild: true
@@ -564,6 +585,18 @@ describe('builder', () => {
         expect(x.x).to.equal('x');
         return api.x.getX('', '').then((secondX) => {
           expect(secondX.x).to.equal('xxx');
+        });
+      });
+    });
+
+    it('always returns the same type as initially returned (Array case)', () => {
+      const c = idFromArgsConfig();
+      const api = build(c);
+
+      return api.x.getXs().then(xs1 => {
+        expect(Array.isArray(xs1)).to.be.true;
+        return api.x.getXs().then(xs2 => {
+          expect(Array.isArray(xs2)).to.be.true;
         });
       });
     });
