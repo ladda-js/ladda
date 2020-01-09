@@ -1,35 +1,21 @@
+/**
+ * Merges into destination the properties of source
+ * - where destination[key] is undefinde, skip
+ * - source primitives, arrays and null are assigned to destination props
+ * - other objects are recursively merged
+ */
 export function merge(source, destination) {
   const result = { ...destination };
 
-  const keysForNonObjects = getNonObjectKeys(source);
-  keysForNonObjects.forEach(key => {
+  for (const key in source) {
     if (destination[key] !== undefined) {
-      result[key] = source[key];
+      if (source[key] === null || typeof source[key] !== 'object' || Array.isArray(source[key])) {
+        result[key] = source[key];
+      } else {
+        result[key] = merge(source[key], destination[key]);
+      }
     }
-  });
-
-  const keysForObjects = getObjectKeys(source);
-  keysForObjects.forEach(key => {
-    if (destination[key] !== undefined) {
-      result[key] = merge(source[key], destination[key]);
-    }
-  });
+  }
 
   return result;
-}
-
-function getNonObjectKeys(object) {
-  return Object.keys(object).filter(key => {
-    return object[key] === null
-      || typeof object[key] !== 'object'
-      || Array.isArray(object[key]);
-  });
-}
-
-function getObjectKeys(object) {
-  return Object.keys(object).filter(key => {
-    return object[key] !== null
-      && !Array.isArray(object[key])
-      && typeof object[key] === 'object';
-  });
 }
