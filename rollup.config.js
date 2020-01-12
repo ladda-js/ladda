@@ -1,4 +1,4 @@
-import babel from 'rollup-plugin-babel';
+import typescript from '@rollup/plugin-typescript';
 import pkg from './package.json';
 
 export default [
@@ -15,19 +15,7 @@ export default [
       }
     ],
     external: ['ladda-fp'],
-    plugins: [
-      babel({
-        babelrc: false,
-        plugins: ['external-helpers'],
-        presets: [
-          ['env', {
-            modules: false
-          }],
-          'stage-1'
-        ],
-        exclude: ['node_modules/**']
-      })
-    ]
+    plugins: [typescript()]
   }
 ];
 
