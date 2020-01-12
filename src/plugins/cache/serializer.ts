@@ -1,6 +1,6 @@
 const EMPTY_STRING = '__EMPTY_STRING__';
 
-export const serialize = (x) => {
+export const serialize = (x:any):string|number|boolean|undefined => {
   if (x instanceof Date) {
     return x.toISOString();
   }
