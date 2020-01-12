@@ -1,8 +1,11 @@
 {
-  "extends": ["airbnb-base"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": ["airbnb-typescript/base"],
   "rules": {
     "comma-dangle": ["error", "never"],
-    "no-use-before-define": ["error", { "functions": false }],
+    "no-use-before-define": 0,
+    "@typescript-eslint/no-use-before-define": ["error", { "functions": false }],
     "no-underscore-dangle": "off",
     "no-param-reassign": "off",
     "max-len": [2, 100, {
@@ -16,7 +19,9 @@
     "object-curly-spacing": 0,
     "no-prototype-builtins": 0,
     "no-plusplus": 0,
-    "no-restricted-syntax": 0
+    "no-restricted-syntax": 0,
+    "no-unused-vars": 0,
+    "@typescript-eslint/no-unused-vars": ["error", {"argsIgnorePattern": "_"}]
   },
   "globals": {
     "describe": true,
