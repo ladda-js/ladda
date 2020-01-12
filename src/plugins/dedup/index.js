@@ -3,9 +3,9 @@ import { reduce } from 'ladda-fp';
 const toKey = (args) => JSON.stringify(args);
 
 const isActive = reduce(
-    (active, conf = {}) => active && (conf.enableDeduplication ||
-                                      conf.enableDeduplication === undefined),
-    true
+  (active, conf = {}) => active && (conf.enableDeduplication
+    || conf.enableDeduplication === undefined),
+  true
 );
 
 export const dedupPlugin = ({ config }) => ({ entity, fn }) => {

@@ -3,8 +3,10 @@
  * Only ids are stored here.
  */
 
-import {on2, prop, join, reduce, identity, toPairs, flatten,
-        curry, map, map_, startsWith, compose, filter} from 'ladda-fp';
+import {
+  on2, prop, join, reduce, identity, toPairs, flatten,
+  curry, map, map_, startsWith, compose, filter
+} from 'ladda-fp';
 import {mPut as mPutInEs, get as getFromEs} from './entity-store';
 import {serialize} from './serializer';
 import {removeId, addId} from './id-helper';
@@ -46,7 +48,7 @@ export const storeCreateEvent = (queryCache, entity, id) => {
     map_((cacheValue) => cacheValue.createEvents.push(id)),
     flatten,
     map(getCacheValuesForFn(queryCache, entity)),
-    getApiFnNamesWhichUpdateOnCreate,
+    getApiFnNamesWhichUpdateOnCreate
   )(entity);
 };
 
@@ -129,7 +131,7 @@ export const get = (qc, c, e, aFn, args) => {
 
 // Entity -> Operation -> Bool
 const shouldInvalidateEntity = (e, op) => {
-  const invalidatesOn = e.invalidatesOn;
+  const {invalidatesOn} = e;
   return invalidatesOn && invalidatesOn.indexOf(op) > -1;
 };
 

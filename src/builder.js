@@ -1,6 +1,7 @@
-import {map, mapObject, mapValues, compose, toObject, reduce, fromPairs,
-        toPairs, prop, filterObject, isEqual, not, curry, copyFunction
-      } from 'ladda-fp';
+import {
+  map, mapObject, mapValues, compose, toObject, reduce, fromPairs,
+  toPairs, prop, filterObject, isEqual, not, curry, copyFunction
+} from 'ladda-fp';
 
 import {cachePlugin} from './plugins/cache/index';
 import {dedupPlugin} from './plugins/dedup/index';
@@ -130,9 +131,9 @@ const applyPlugin = curry((addChangeListener, config, entityConfigs, plugin) => 
 });
 
 const createPluginList = (core, plugins) => {
-  return plugins.length ?
-    [core, dedupPlugin, ...plugins, dedupPlugin] :
-    [core, dedupPlugin];
+  return plugins.length
+    ? [core, dedupPlugin, ...plugins, dedupPlugin]
+    : [core, dedupPlugin];
 };
 
 // Config -> Api

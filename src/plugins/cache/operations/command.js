@@ -10,4 +10,3 @@ export function decorateCommand(c, cache, notify, e, aFn) {
       .then(passThrough((o) => notify([...args], o)));
   };
 }
-

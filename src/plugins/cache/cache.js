@@ -53,4 +53,3 @@ export const removeEntity = ({entityStore}, ...args) => {
 export const containsEntity = ({entityStore}, ...args) => {
   return EntityStore.contains(entityStore, ...args);
 };
-

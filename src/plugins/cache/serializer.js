@@ -8,9 +8,7 @@ export const serialize = (x) => {
     return EMPTY_STRING;
   }
   if (x instanceof Object) {
-    return Object.keys(x).map(k =>
-        serialize(x[k])
-    ).join('-');
+    return Object.keys(x).map(k => serialize(x[k])).join('-');
   }
   return x;
 };

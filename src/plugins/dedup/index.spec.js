@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import sinon from 'sinon';
 import { dedupPlugin } from '.';
@@ -96,6 +96,7 @@ describe('dedup', () => {
 
     it('also makes subsequent calls after the first one is rejected', () => {
       const user = { id: 'x' };
+      // eslint-disable-next-line prefer-promise-reject-errors
       const fn = sinon.spy(() => delay(() => Promise.reject({ ...user })));
       fn.operation = 'READ';
       const wrappedApiFn = dedupPlugin({})({ fn });

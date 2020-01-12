@@ -20,4 +20,3 @@ export const createListenerStore = () => {
     addChangeListener: addChangeListener(listeners)
   };
 };
-

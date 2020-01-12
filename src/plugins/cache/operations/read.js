@@ -1,4 +1,6 @@
-import {passThrough, compose, curry, reduce, toIdMap, map, concat, zip} from 'ladda-fp';
+import {
+  passThrough, compose, curry, reduce, toIdMap, map, concat, zip
+} from 'ladda-fp';
 import * as Cache from '../cache';
 import {addId, removeId} from '../id-helper';
 
@@ -67,8 +69,9 @@ const decorateReadQuery = (c, cache, notify, e, aFn) => {
 
     return aFn(...args)
       .then(passThrough(
-            compose(Cache.storeQueryResponse(cache, e, aFn, args),
-                    addId(c, aFn, args))))
+        compose(Cache.storeQueryResponse(cache, e, aFn, args),
+          addId(c, aFn, args))
+      ))
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
       .then(passThrough(notify(args)));
   };

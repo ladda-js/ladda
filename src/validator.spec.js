@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import sinon from 'sinon';
 import { validateConfig } from './validator';
 import { getEntityConfigs } from './builder';
@@ -205,7 +205,7 @@ describe('validateConfig', () => {
     validateConfig(logger, eConfigs, config);
     expect(logger.error).to.have.been.called;
     expect(logger.error.args[0][0]).to.match(
-        /activity.*enableDeduplication.*string.*needs to be a boolean/
+      /activity.*enableDeduplication.*string.*needs to be a boolean/
     );
   });
 
@@ -409,7 +409,9 @@ describe('validateConfig', () => {
 
     const eConfigs = getEntityConfigs({
       user: {
-        api: { getAll, createUser, updateUser, deleteUser, commandForUser, noopUser },
+        api: {
+          getAll, createUser, updateUser, deleteUser, commandForUser, noopUser
+        },
         invalidates: ['activity']
       },
       activity: {

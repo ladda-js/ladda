@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import sinon from 'sinon';
 import {curry, toIdMap} from 'ladda-fp';
@@ -194,6 +194,7 @@ describe('builder', () => {
     const plugin = (pConfig) => {
       const pName = pConfig.name;
       pluginTracker[pName] = {};
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       return curry(({ config: c, entityConfigs }, { fn }) => {
         pluginTracker[pName][fn.fnName] = true;
         return fn;
@@ -412,7 +413,7 @@ describe('builder', () => {
       getList.operation = 'READ';
       getList.updateOnCreate = (args, newX, cachedXs) => [...cachedXs, newX];
 
-      // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const getList2 = (someArg) => Promise.resolve(xs);
       getList2.operation = 'READ';
       getList2.updateOnCreate = (args, newX, cachedXs) => [...cachedXs, newX];
@@ -421,7 +422,13 @@ describe('builder', () => {
       getList3.operation = 'READ';
       getList3.updateOnCreate = (args, newX, cachedXs) => [...cachedXs, newX];
 
-      const api = build({ x: { api: { getList, getList2, getList3, createX } } });
+      const api = build({
+        x: {
+          api: {
+            getList, getList2, getList3, createX
+          }
+        }
+      });
       return api.x.getList2('x').then(() => {
         return api.x.getList3().then(() => {
           return api.x.createX({ id: 3 }).then((nextX) => {
@@ -569,4 +576,3 @@ describe('builder', () => {
     });
   });
 });
-
