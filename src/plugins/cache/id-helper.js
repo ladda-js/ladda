@@ -12,21 +12,34 @@ const getIdGetter = (c, aFn) => {
   return prop(c.idField || 'id');
 };
 
-export const getId = curry((c, aFn, args, o) => {
-  if (aFn && aFn.idFrom === 'ARGS') {
-    return createIdFromArgs(args);
+/**
+ * Given a config, an apiFunction, its call args and an object, determine that object's id
+ *
+ * The id is either created by serializing the apiFnCallArgs or by using the getter (function or key)
+ * set in the apiFucntion
+ */
+export const getId = curry((config, apiFunction, apiFnCallArgs, o) => {
+  if (apiFunction && apiFunction.idFrom === 'ARGS') {
+    return createIdFromArgs(apiFnCallArgs);
   }
-  return getIdGetter(c, aFn)(o);
+  return getIdGetter(config, apiFunction)(o);
 });
 
-export const addId = curry((c, aFn, args, o) => {
-  if (aFn && aFn.idFrom === 'ARGS') {
+/**
+ * Writes a __ladda_id__ prop into o. If o is an array, add the id to each member instead.
+ *
+ * Operates on copies
+ * The value of the prop is determined like in getId, not sure why we're not re-using that here.
+ *
+ */
+export const addId = curry((config, apiFunction, apiFnCallArgs, o) => {
+  if (apiFunction && apiFunction.idFrom === 'ARGS') {
     return {
       ...o,
-      __ladda__id: createIdFromArgs(args)
+      __ladda__id: createIdFromArgs(apiFnCallArgs)
     };
   }
-  const getId_ = getIdGetter(c, aFn);
+  const getId_ = getIdGetter(config, apiFunction);
   if (Array.isArray(o)) {
     return map(x => ({
       ...x,
@@ -39,6 +52,9 @@ export const addId = curry((c, aFn, args, o) => {
   };
 });
 
+/**
+ * Destructively remove the __ladda_id__ from o (or each member, if o is an array)
+ */
 export const removeId = (o) => {
   if (!o) {
     return o;
