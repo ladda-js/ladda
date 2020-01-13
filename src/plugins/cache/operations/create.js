@@ -7,7 +7,7 @@ export function decorateCreate(c, cache, notify, e, aFn) {
     return aFn(...args)
       .then(passThrough(() => invalidateQuery(cache, e, aFn)))
       .then(passThrough(compose(x => storeEntity(cache, e, x), addId(c, aFn, args))))
-      .then(passThrough(compose(storeCreateEvent(cache, e), getId(c, aFn, args))))
+      .then(passThrough(compose(id => storeCreateEvent(cache, e, id), getId(c, aFn, args))))
       .then(passThrough(notify(args)));
   };
 }
