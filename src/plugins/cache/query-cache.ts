@@ -110,7 +110,9 @@ const getFromCache = <T>(
 ):CacheValue<undefined|CacheValue<T>|CacheValue<T>[]> => {
   const entityStoreIds = toValue(qc.cache[queryKey]);
   const value = Array.isArray(entityStoreIds)
-    ? <QueryCacheEntry<T>[]>entityStoreIds.map(getFromEs<T>(qc.entityStore, e)).filter(Boolean)
+    ? <QueryCacheEntry<T>[]>entityStoreIds
+      .map(id => getFromEs<T>(qc.entityStore, e, id))
+      .filter(Boolean)
     : getFromEs<T>(qc.entityStore, e, entityStoreIds);
 
   return {

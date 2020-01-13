@@ -22,7 +22,7 @@ const decorateReadSingle = (c, cache, notify, e, aFn) => {
     }
 
     return aFn(id)
-      .then(passThrough(compose(Cache.storeEntity(cache, e), addId(c, aFn, id))))
+      .then(passThrough(compose(x => Cache.storeEntity(cache, e, x), addId(c, aFn, id))))
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
       .then(passThrough(notify([id])));
   };
@@ -48,7 +48,7 @@ const decorateReadSome = (c, cache, notify, e, aFn) => {
     const addIds = map(([id, item]) => addId(c, aFn, id, item));
 
     return aFn(remaining)
-      .then(passThrough(compose(Cache.storeEntities(cache, e), addIds, zip(remaining))))
+      .then(passThrough(compose(xs => Cache.storeEntities(cache, e, xs), addIds, zip(remaining))))
       .then(passThrough(() => Cache.invalidateQuery(cache, e, aFn)))
       .then((other) => {
         const asMap = compose(toIdMap, concat)(cached, other);

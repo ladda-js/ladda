@@ -11,7 +11,7 @@
  * Of course, this also requiers the view to truly be a subset of the entity.
  */
 
-import {curry, clone} from 'ladda-fp';
+import {clone} from 'ladda-fp';
 import {merge} from './merger';
 import {removeId} from './id-helper';
 import {
@@ -79,28 +79,7 @@ const isView = (e:EntityConfig):e is View => !!(e as any).viewOf;
 /**
  * Depending on whether e is a view or an entity, applies either the viewHandler or the entityHandler
  */
-const handle:{
-  <T, R>(
-    viewHandler:(s:EntityStore, e:View, value:T) => R,
-    entityHandler:(s:EntityStore, e:Entity, value:T) => R,
-    entityStore: EntityStore,
-    entityConfig:EntityConfig,
-    value: T
-  ):R
-  <T, R>(
-    viewHandler:(s:EntityStore, e:View, value:T) => R,
-    entityHandler:(s:EntityStore, e:Entity, value:T) => R):{
-    (
-      entityStore: EntityStore,
-      entityConfig:EntityConfig,
-      value: T
-    ):R
-    (
-      entityStore: EntityStore,
-      entityConfig:EntityConfig
-    ):(value: T) => R
-  }
-} = curry(<T, R>(
+const handle = <T, R>(
   viewHandler:(s:EntityStore, e:View, value:T) => R,
   entityHandler:(s:EntityStore, e:Entity, value:T) => R,
   entityStore: EntityStore,
@@ -110,7 +89,7 @@ const handle:{
     return viewHandler(entityStore, entityConfig, value);
   }
   return entityHandler(entityStore, entityConfig, value);
-});
+};
 
 // EntityStore -> Entity -> Value -> Bool
 const entityValueExist = (s:EntityStore, e:Entity, v:Value) => !!read(s, createEntityKey(e, v));
@@ -144,20 +123,12 @@ const setViewValue = (entityStore:EntityStore, e:View, v:Value) => {
 };
 
 // EntityStore -> Entity -> [Value] -> ()
-export const mPut:{
-  (es:EntityStore, e:EntityConfig, xs:Value[]): void
-  (es:EntityStore, e:EntityConfig): (xs:Value[]) => void
-  (es:EntityStore): (e:EntityConfig, xs:Value[]) => void
-} = curry((es:EntityStore, e:EntityConfig, xs:Value[]) => {
-  xs.forEach(x => handle(setViewValue, setEntityValue)(es, e, x));
-});
+export const mPut = (es:EntityStore, e:EntityConfig, xs:Value[]) => {
+  xs.forEach(x => handle(setViewValue, setEntityValue, es, e, x));
+};
 
 // EntityStore -> Entity -> Value -> ()
-export const put:{
-  (es:EntityStore, e:EntityConfig, x:Value): void
-  (es:EntityStore, e:EntityConfig): (x:Value) => void
-  (es:EntityStore): (e:EntityConfig, x:Value) => void
-} = curry((es:EntityStore, e:EntityConfig, x:Value) => mPut(es, e, [x]));
+export const put = (es:EntityStore, e:EntityConfig, x:Value) => mPut(es, e, [x]);
 
 // EntityStore -> Entity -> String -> Value
 const getEntityValue = <T>(entityStore:EntityStore, entityConfig:EntityConfig, id:string) => {
@@ -178,10 +149,17 @@ const getViewValue = <T>(entityStore:EntityStore, view:View, id:string) => {
 };
 
 // EntityStore -> Entity -> String -> ()
-export const get:{
-  <T>(es: EntityStore, e:EntityConfig, id:string):CacheValue<T>|undefined
-  <T>(es: EntityStore, e:EntityConfig): (id:string) => CacheValue<T>|undefined
-} = handle(getViewValue, getEntityValue);
+export const get = <T>(
+  entityStore: EntityStore,
+  entity:EntityConfig,
+  id:string
+):CacheValue<T>|undefined => handle<string, CacheValue<T>|undefined>(
+    getViewValue,
+    getEntityValue,
+    entityStore,
+    entity,
+    id
+  );
 
 // EntityStore -> Entity -> String -> Value
 export const remove = <T>(es:EntityStore, e:EntityConfig, id:string) => {
@@ -199,7 +177,7 @@ export const contains = (
   es:EntityStore,
   e: EntityConfig,
   id:string
-) => !!handle<string, {}|undefined>(getViewValue, getEntityValue)(es, e, id);
+) => !!handle<string, {}|undefined>(getViewValue, getEntityValue, es, e, id);
 
 // EntityStore -> Entity -> EntityStore
 const registerView = ([eMap, store]:EntityStore, entity:View):EntityStore => {
