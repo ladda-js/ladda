@@ -3,7 +3,6 @@
  * Only ids are stored here.
  */
 
-import { curry } from 'ladda-fp';
 import {
   ApiFunctionConfig, CacheValue, Entity, Operation, Value, Config
 } from '../../types';
@@ -132,9 +131,13 @@ const getFromCache = <T>(
 //   mPutInEs(qc.entityStore, e, Array.isArray(xs) ? xs : [xs]);
 //   return xs;
 // });
-export const put:{
-  <V extends Value|Value[]>(qc:QueryCache, e:Entity, aFn:ApiFunctionConfig, args:any[], xs:V):V
-} = curry((qc:QueryCache, e:Entity, aFn:ApiFunctionConfig, args:any[], xs:Value|Value[]) => {
+export const put = (
+  qc:QueryCache,
+  e:Entity,
+  aFn:ApiFunctionConfig,
+  args:any[],
+  xs:Value|Value[]
+) => {
   const k = createKey(e, [aFn.fnName, ...args]);
   if (Array.isArray(xs)) {
     qc.cache[k] = toCacheValue(xs.map(x => x.__ladda__id));
@@ -143,7 +146,7 @@ export const put:{
   }
   mPutInEs(qc.entityStore, e, Array.isArray(xs) ? xs : [xs]);
   return xs;
-});
+};
 
 // (CacheValue | [CacheValue]) -> Promise
 export const getValue = <T>(v:{value: T}|{value: T}[]) => {
@@ -226,7 +229,7 @@ const invalidateEntity = (qc:QueryCache, entityName: string) => {
 };
 
 // Object -> [String]
-const getInvalidates = (x:{invalidates:string[]}) => x.invalidates;
+const getInvalidates = (x:{invalidates?:string[]}):string[] => x.invalidates || [];
 
 // QueryCache -> Entity -> ApiFunction -> ()
 const invalidateBasedOnEntity = (qc:QueryCache, e:Entity, aFn:ApiFunctionConfig) => {
@@ -239,7 +242,7 @@ const invalidateBasedOnEntity = (qc:QueryCache, e:Entity, aFn:ApiFunctionConfig)
 
 // QueryCache -> Entity -> ApiFunction -> ()
 const invalidateBasedOnApiFn = (qc:QueryCache, e:Entity, aFn:ApiFunctionConfig) => {
-  for (const entityName of getInvalidates(aFn)) {
+  for (const entityName of getInvalidates(aFn!)) {
     invalidateEntity(qc, `${e.name}-${entityName}`);
   }
 };
