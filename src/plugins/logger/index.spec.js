@@ -1,9 +1,11 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import sinon from 'sinon';
 
-import { compose, map, toIdMap, values } from 'ladda-fp';
-import { build } from 'ladda-cache';
+import {
+  compose, map, toIdMap, values
+} from 'ladda-fp';
+import { build } from '../../builder';
 import { logger } from '.';
 
 const toMiniUser = ({ id, name }) => ({ id, name });
@@ -40,7 +42,9 @@ const createUserApi = (container) => {
   };
   removeUser.operation = 'DELETE';
 
-  return { getUser, getUsers, getUsersRejected, createUser, updateUser, removeUser };
+  return {
+    getUser, getUsers, getUsersRejected, createUser, updateUser, removeUser
+  };
 };
 
 const createConfig = () => {
@@ -224,4 +228,3 @@ describe('Ladda logger', () => {
     });
   });
 });
-

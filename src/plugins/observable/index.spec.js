@@ -1,9 +1,11 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import sinon from 'sinon';
 
-import { compose, map, toIdMap, values } from 'ladda-fp';
-import { build } from 'ladda-cache';
+import {
+  compose, map, toIdMap, values
+} from 'ladda-fp';
+import { build } from '../../builder';
 import { observable as plugin } from '.';
 
 const delay = (t = 1) => new Promise(res => setTimeout(() => res(), t));
