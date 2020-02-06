@@ -4,7 +4,7 @@
  * - source primitives, arrays and null are assigned to destination props
  * - other objects are recursively merged
  */
-export function merge(source, destination) {
+export function merge(source:any, destination:any) {
   const result = { ...destination };
 
   for (const key in source) {
