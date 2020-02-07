@@ -39,14 +39,16 @@ const normalizePayload:{
   return Array.isArray(payload) ? payload : [payload];
 };
 
+export interface Change {
+  operation: Operation,
+  entity: string,
+  apiFn: string,
+  values: any[],
+  args: any[]
+}
+
 interface ChangeHandler {
-  (change: {
-    operation: Operation,
-    entity: string,
-    apiFn: string,
-    values: any[],
-    args: any[]
-  }):void
+  (change: Change):void
 }
 
 const notify = <R, A extends any[]>(
