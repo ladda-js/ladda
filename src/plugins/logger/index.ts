@@ -1,3 +1,8 @@
+import {
+  ApiFunction, ApiFunctionConfig, Config, Entity, EntityConfigs, Plugin, PluginDecorator
+} from '../../types';
+import { Change } from '../cache';
+
 const noop = () => {};
 
 const defaultColors = {
@@ -8,26 +13,23 @@ const defaultColors = {
   subText: 'gray'
 };
 
-const toFnName = (entity, fn) => `${entity.name}.${fn.fnName}`;
+const toFnName = (entity:Entity, fn:ApiFunctionConfig) => `${entity.name}.${fn.fnName}`;
 
-/* eslint-disable no-undef */
-/* eslint-disable max-len */
-const timer = (typeof performance !== 'undefined' && performance !== null) && typeof performance.now === 'function' ? performance : Date;
-/* eslint-enable no-undef */
-/* eslint-enable max-len */
+const timer = (typeof performance !== 'undefined' && performance !== null)
+  && typeof performance.now === 'function' ? performance : Date;
 
-const round = (value, decimals) => {
-  const rounded = Math.round(`${value}e${decimals}`);
+const round = (value:number, decimals:number) => {
+  const rounded = Math.round(Number(`${value}e${decimals}`));
   return Number(`${rounded}e-${decimals}`);
 };
 
-const getDuration = (start) => round((timer.now() - start) / 1000, 3);
+const getDuration = (start:number) => round((timer.now() - start) / 1000, 3);
 
-const inBoldStyle = (color) => `color: ${color}; font-weight: bold;`;
+const inBoldStyle = (color:string) => `color: ${color}; font-weight: bold;`;
 
-const toTimeText = (duration) => `in ${duration}ms`;
+const toTimeText = (duration:number) => `in ${duration}ms`;
 
-const logGroup = (impl, collapse, ...args) => {
+const logGroup = (impl: Console, collapse:boolean, ...args: any[]) => {
   if (collapse) {
     impl.groupCollapsed(...args);
   } else {
@@ -35,7 +37,13 @@ const logGroup = (impl, collapse, ...args) => {
   }
 };
 
-const logResult = (impl, formattedText, titleColor, colors, collapse) => {
+const logResult = (
+  impl: Console,
+  formattedText: string,
+  titleColor: string,
+  colors: typeof defaultColors,
+  collapse: boolean
+) => {
   const args = [
     formattedText,
     inBoldStyle(colors.subText),
@@ -45,7 +53,13 @@ const logResult = (impl, formattedText, titleColor, colors, collapse) => {
   logGroup(impl, collapse, ...args);
 };
 
-const createLogger = (impl, disabled, collapse, colors, noFormat) => {
+const createLogger = (
+  impl:Console,
+  disabled: boolean,
+  collapse: boolean,
+  colors: typeof defaultColors,
+  noFormat:boolean
+) => {
   if (disabled) {
     return {
       logChange: noop,
@@ -55,7 +69,7 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
     };
   }
   return {
-    logSetup: (entityConfigs, config) => {
+    logSetup: (entityConfigs: EntityConfigs, config: Config) => {
       if (noFormat) {
         impl.log('Ladda setup with entityConfigs', entityConfigs, 'and global config', config);
       } else {
@@ -65,7 +79,7 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
         impl.groupEnd();
       }
     },
-    logChange: (change) => {
+    logChange: (change: Change) => {
       const text = 'Ladda cache change';
       if (noFormat) {
         impl.log(text, change);
@@ -81,7 +95,7 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
         impl.groupEnd();
       }
     },
-    logResolve: (fnName, start, res, args) => {
+    logResolve: (fnName: string, start: number, res: any, args: any[]) => {
       const text = 'Ladda resolved';
       const timeText = toTimeText(getDuration(start));
       if (noFormat) {
@@ -94,7 +108,7 @@ const createLogger = (impl, disabled, collapse, colors, noFormat) => {
         impl.groupEnd();
       }
     },
-    logReject: (fnName, start, err, args) => {
+    logReject: (fnName: string, start: number, err: any, args: any[]) => {
       const text = 'Ladda rejected';
       const timeText = toTimeText(getDuration(start));
       if (noFormat) {
@@ -117,15 +131,15 @@ export const logger = ({
   colors = defaultColors,
   implementation = console,
   noFormat = false
-} = {}) => {
+} = {}):Plugin => {
   const l = createLogger(implementation, disable, collapse, colors, noFormat);
 
   return ({ addChangeListener, entityConfigs, config }) => {
-    addChangeListener((change) => l.logChange(change));
+    addChangeListener((change: Change) => l.logChange(change));
     l.logSetup(entityConfigs, config);
 
 
-    return ({ entity, fn }) => {
+    return (({ entity, fn }: {entity: Entity, fn: ApiFunction}) => {
       const fnName = toFnName(entity, fn);
       return (...args) => {
         const start = timer.now();
@@ -140,7 +154,6 @@ export const logger = ({
           }
         );
       };
-    };
+    }) as PluginDecorator;
   };
 };
-
