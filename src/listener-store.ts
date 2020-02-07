@@ -1,10 +1,20 @@
-export interface ListenerStore<T> {
-  onChange: Listener<T>
-  addChangeListener(listener: Listener<T>): () => Listener<T>[]
+import { Operation } from './types';
+
+export interface Change {
+  operation: Operation,
+  entity: string,
+  apiFn: string,
+  values: any[],
+  args: any[]
 }
 
-export interface Listener<T> {
-  (change:T):void
+export interface ChangeListener {
+  (change: Change):void
+}
+
+export interface ListenerStore {
+  onChange: ChangeListener
+  addChangeListener(listener: ChangeListener): () => ChangeListener[]
 }
 
 const remove = <T>(el:T, arr:T[]) => {
@@ -13,17 +23,17 @@ const remove = <T>(el:T, arr:T[]) => {
   return arr;
 };
 
-const addChangeListener = <T>(listeners: T[]) => (listener:T) => {
+const addChangeListener = (listeners: ChangeListener[]) => (listener:ChangeListener) => {
   listeners.push(listener);
   return () => remove(listener, listeners);
 };
 
-const notify = <T>(listeners:Listener<T>[]) => (
-  (change:T) => listeners.forEach((listener) => listener(change))
+const notify = (listeners:ChangeListener[]) => (
+  (change:Change) => listeners.forEach((listener) => listener(change))
 );
 
-export const createListenerStore = <T>():ListenerStore<T> => {
-  const listeners:Listener<T>[] = [];
+export const createListenerStore = ():ListenerStore => {
+  const listeners:ChangeListener[] = [];
   return {
     onChange: notify(listeners),
     addChangeListener: addChangeListener(listeners)

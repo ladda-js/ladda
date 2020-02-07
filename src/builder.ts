@@ -1,5 +1,5 @@
 import { copyFunction } from 'ladda-fp';
-import { createListenerStore } from './listener-store';
+import { createListenerStore, ChangeListener } from './listener-store';
 import { cachePlugin } from './plugins/cache/index';
 import { dedupPlugin, DupConfig } from './plugins/dedup/index';
 import {
@@ -150,7 +150,7 @@ const getGlobalConfig = (config: ExternalConfig):Config & DupConfig => ({
 });
 
 const applyPlugin = (
-  addChangeListener: <T>(listener: T) => () => T[],
+  addChangeListener: (listener: ChangeListener) => () => ChangeListener[],
   config: Config
 ) => (
   entityConfigs:EntityConfigs,
@@ -172,9 +172,9 @@ export const build = (c:ExternalConfig, ps:Plugin[] = []) => {
   const entityConfigs: EntityConfigs = getEntityConfigs(c);
   validateConfig(console, entityConfigs, config);
 
-  const listenerStore = createListenerStore<any>(/* config */);
+  const listenerStore = createListenerStore(/* config */);
   const plugins = createPluginList(cachePlugin(listenerStore.onChange), ps);
 
-  const applyPlugin_ = applyPlugin(<any>listenerStore.addChangeListener, config);
+  const applyPlugin_ = applyPlugin(listenerStore.addChangeListener, config);
   return toApi(plugins.reduce(applyPlugin_, entityConfigs));
 };

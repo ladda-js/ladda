@@ -1,3 +1,4 @@
+import { ChangeListener } from '../../listener-store';
 import {
   ApiFunction, ApiFunctionConfig, Config, Entity, Operation, Plugin, PluginDecorator, PluginParams
 } from '../../types';
@@ -39,20 +40,8 @@ const normalizePayload:{
   return Array.isArray(payload) ? payload : [payload];
 };
 
-export interface Change {
-  operation: Operation,
-  entity: string,
-  apiFn: string,
-  values: any[],
-  args: any[]
-}
-
-export interface ChangeHandler {
-  (change: Change):void
-}
-
 const notify = <R, A extends any[]>(
-  onChange: ChangeHandler,
+  onChange: ChangeListener,
   entity: Entity,
   fn: ApiFunctionConfig
 ) => (
@@ -69,7 +58,7 @@ const notify = <R, A extends any[]>(
   };
 
 export const cachePlugin = (
-  onChange:ChangeHandler
+  onChange:ChangeListener
 ):Plugin => (
   { config, entityConfigs }:PluginParams
 ):PluginDecorator => {

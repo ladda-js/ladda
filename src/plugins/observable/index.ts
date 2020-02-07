@@ -1,7 +1,7 @@
+import { ChangeListener, Change } from '../../listener-store';
 import {
   ApiFunction, ApiFunctionConfig, Entity, EntityConfigs, Plugin, PluginDecorator
 } from '../../types';
-import { Change, ChangeHandler } from '../cache';
 import { analyzeEntityRelationships, Container, Relationships } from './helper';
 
 const isNoOperation = (change:Change) => change.operation === 'NO_OPERATION';
@@ -62,7 +62,7 @@ interface Subscription<R> {
 }
 
 interface State {
-  changeListeners: ChangeHandler[]
+  changeListeners: ChangeListener[]
 }
 
 const createObservableFactory = <R, A extends any[]>(
