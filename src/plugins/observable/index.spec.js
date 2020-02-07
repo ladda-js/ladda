@@ -6,7 +6,7 @@ import {
   compose, map, toIdMap, values
 } from 'ladda-fp';
 import { build } from '../../builder';
-import { observable as plugin } from '.';
+import plugin from '.';
 
 const delay = (t = 1) => new Promise(res => setTimeout(() => res(), t));
 const toMiniUser = ({ id, name }) => ({ id, name });

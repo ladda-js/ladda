@@ -6,7 +6,7 @@ import {
   compose, map, toIdMap, values
 } from 'ladda-fp';
 import { build } from '../../builder';
-import { logger } from '.';
+import logger from '.';
 
 const toMiniUser = ({ id, name }) => ({ id, name });
 

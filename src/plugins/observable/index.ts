@@ -132,7 +132,7 @@ type DecoratedApiFunction<R, A extends any[]> = ApiFunction<R, A> & {
   createObservable: (...args: A) => Observable<R>
 };
 
-export const observable = ():Plugin => {
+const observable = ():Plugin => {
   return ({ addChangeListener, entityConfigs }) => {
     const state: State = {
       changeListeners: []
@@ -159,3 +159,5 @@ export const observable = ():Plugin => {
     }) as PluginDecorator;
   };
 };
+
+export default observable;

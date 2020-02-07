@@ -125,7 +125,7 @@ const createLogger = (
 };
 
 
-export const logger = ({
+const logger = ({
   disable = false,
   collapse = true,
   colors = defaultColors,
@@ -157,3 +157,5 @@ export const logger = ({
     }) as PluginDecorator;
   };
 };
+
+export default logger;
