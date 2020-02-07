@@ -47,7 +47,7 @@ export interface Change {
   args: any[]
 }
 
-interface ChangeHandler {
+export interface ChangeHandler {
   (change: Change):void
 }
 
