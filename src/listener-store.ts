@@ -17,25 +17,22 @@ export interface ListenerStore {
   addChangeListener(listener: ChangeListener): () => ChangeListener[]
 }
 
-const remove = <T>(el:T, arr:T[]) => {
-  const i = arr.indexOf(el);
-  if (i !== -1) { arr.splice(i, 1); }
-  return arr;
-};
-
-const addChangeListener = (listeners: ChangeListener[]) => (listener:ChangeListener) => {
-  listeners.push(listener);
-  return () => remove(listener, listeners);
-};
-
-const notify = (listeners:ChangeListener[]) => (
-  (change:Change) => listeners.forEach((listener) => listener(change))
-);
-
 export const createListenerStore = ():ListenerStore => {
   const listeners:ChangeListener[] = [];
+
   return {
-    onChange: notify(listeners),
-    addChangeListener: addChangeListener(listeners)
+    onChange(change:Change) {
+      listeners.forEach((listener) => listener(change));
+    },
+    addChangeListener(listener: ChangeListener) {
+      listeners.push(listener);
+      return () => {
+        const i = listeners.indexOf(listener);
+        if (i !== -1) {
+          listeners.splice(i, 1);
+        }
+        return listeners;
+      };
+    }
   };
 };
