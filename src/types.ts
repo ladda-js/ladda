@@ -74,11 +74,23 @@ export interface Plugin {
 }
 
 export interface PluginParams {
-  addChangeListener: <T>(listener:T) => () => T[]
+  addChangeListener: (listener: ChangeListener) => () => ChangeListener[]
   config: Config,
   entityConfigs: EntityConfigs
 }
 
 export interface PluginDecorator {
   <T extends ApiFunction>(cfg:{entity: Entity, fn: T}):T
+}
+
+export interface Change {
+  operation: Operation,
+  entity: string,
+  apiFn: string,
+  values: any[],
+  args: any[]
+}
+
+export interface ChangeListener {
+  (change: Change):void
 }

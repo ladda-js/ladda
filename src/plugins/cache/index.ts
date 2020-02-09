@@ -1,6 +1,13 @@
-import { ChangeListener } from '../../listener-store';
 import {
-  ApiFunction, ApiFunctionConfig, Config, Entity, Operation, Plugin, PluginDecorator, PluginParams
+  ApiFunction,
+  ApiFunctionConfig,
+  Config,
+  Entity,
+  Operation,
+  Plugin,
+  PluginDecorator,
+  PluginParams,
+  ChangeListener
 } from '../../types';
 import { Cache, createCache } from './cache';
 import { decorateCommand } from './operations/command';

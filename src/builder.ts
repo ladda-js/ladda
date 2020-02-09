@@ -1,10 +1,11 @@
 import { copyFunction } from 'ladda-fp';
-import { createListenerStore, ChangeListener } from './listener-store';
+import { createListenerStore } from './listener-store';
 import { cachePlugin } from './plugins/cache/index';
 import { dedupPlugin, DupConfig } from './plugins/dedup/index';
 import {
   ApiFunction,
   ApiFunctionConfig,
+  ChangeListener,
   Config,
   Entity,
   EntityApi,

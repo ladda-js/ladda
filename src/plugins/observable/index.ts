@@ -1,6 +1,12 @@
-import { ChangeListener, Change } from '../../listener-store';
 import {
-  ApiFunction, ApiFunctionConfig, Entity, EntityConfigs, Plugin, PluginDecorator
+  ApiFunction,
+  ApiFunctionConfig,
+  Change,
+  ChangeListener,
+  Entity,
+  EntityConfigs,
+  Plugin,
+  PluginDecorator
 } from '../../types';
 import { analyzeEntityRelationships, Container, Relationships } from './helper';
 

@@ -1,4 +1,4 @@
-import { Entity, EntityConfigs, View } from '../../types';
+import { Entity, EntityConfigs, View} from '../../types';
 
 export interface Container {
   invalidatedBy: string[]

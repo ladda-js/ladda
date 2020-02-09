@@ -1,7 +1,6 @@
 import {
-  ApiFunction, ApiFunctionConfig, Config, Entity, EntityConfigs, Plugin, PluginDecorator
+  ApiFunction, ApiFunctionConfig, Change, Config, Entity, EntityConfigs, Plugin, PluginDecorator
 } from '../../types';
-import { Change } from '../cache';
 
 const noop = () => {};
 

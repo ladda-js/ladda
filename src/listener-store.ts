@@ -1,16 +1,4 @@
-import { Operation } from './types';
-
-export interface Change {
-  operation: Operation,
-  entity: string,
-  apiFn: string,
-  values: any[],
-  args: any[]
-}
-
-export interface ChangeListener {
-  (change: Change):void
-}
+import { Change, ChangeListener } from './types';
 
 export interface ListenerStore {
   onChange: ChangeListener
