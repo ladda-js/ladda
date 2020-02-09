@@ -32,8 +32,6 @@ export type EntityStore = [
   ValueStore
 ];
 
-export type EntityConfig = View | Entity;
-
 /**
  * Wraps a value in an object containing the `value` and a timestamp
  */
@@ -51,30 +49,30 @@ const set = ([_, s]:EntityStore, k:string, v:Value) => { s[k] = toStoreValue(clo
 const rm = ([_, s]:EntityStore, k:string) => delete s[k];
 
 // Entity -> String
-const getEntityType = (entityConfig: EntityConfig):string => (
+const getEntityType = (entityConfig: Entity):string => (
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   isView(entityConfig) ? entityConfig.viewOf : entityConfig.name
 );
 
 // EntityStore -> Entity -> ()
-const rmViews = ([eMap, s]:EntityStore, e:EntityConfig) => {
+const rmViews = ([eMap, s]:EntityStore, e:Entity) => {
   const entityType = getEntityType(e);
   const toRemove = [...eMap[entityType]];
   toRemove.forEach(viewName => rm([eMap, s], viewName));
 };
 
 // Entity -> Value -> String
-const createEntityKey = (entityConfig:EntityConfig, v:Value):string => {
+const createEntityKey = (entityConfig:Entity, v:Value):string => {
   return getEntityType(entityConfig) + v.__ladda__id;
 };
 
 // Entity -> Value -> String
-const createViewKey = (entityConfig:EntityConfig, v:Value) => {
+const createViewKey = (entityConfig:Entity, v:Value) => {
   return entityConfig.name + v.__ladda__id;
 };
 
 // Entity -> Bool
-const isView = (e:EntityConfig):e is View => !!(e as any).viewOf;
+const isView = (e:Entity):e is View => !!(e as any).viewOf;
 
 /**
  * Depending on whether e is a view or an entity, applies either the viewHandler or the entityHandler
@@ -83,7 +81,7 @@ const handle = <T, R>(
   viewHandler:(s:EntityStore, e:View, value:T) => R,
   entityHandler:(s:EntityStore, e:Entity, value:T) => R,
   entityStore: EntityStore,
-  entityConfig:EntityConfig,
+  entityConfig:Entity,
   value: T):R => {
   if (isView(entityConfig)) {
     return viewHandler(entityStore, entityConfig, value);
@@ -123,15 +121,15 @@ const setViewValue = (entityStore:EntityStore, e:View, v:Value) => {
 };
 
 // EntityStore -> Entity -> [Value] -> ()
-export const mPut = (es:EntityStore, e:EntityConfig, xs:Value[]) => {
+export const mPut = (es:EntityStore, e:Entity, xs:Value[]) => {
   xs.forEach(x => handle(setViewValue, setEntityValue, es, e, x));
 };
 
 // EntityStore -> Entity -> Value -> ()
-export const put = (es:EntityStore, e:EntityConfig, x:Value) => mPut(es, e, [x]);
+export const put = (es:EntityStore, e:Entity, x:Value) => mPut(es, e, [x]);
 
 // EntityStore -> Entity -> String -> Value
-const getEntityValue = <T>(entityStore:EntityStore, entityConfig:EntityConfig, id:string) => {
+const getEntityValue = <T>(entityStore:EntityStore, entityConfig:Entity, id:string) => {
   const k = createEntityKey(entityConfig, {__ladda__id: id});
   return read<T>(entityStore, k);
 };
@@ -151,7 +149,7 @@ const getViewValue = <T>(entityStore:EntityStore, view:View, id:string) => {
 // EntityStore -> Entity -> String -> ()
 export const get = <T>(
   entityStore: EntityStore,
-  entity:EntityConfig,
+  entity:Entity,
   id:string
 ):CacheValue<T>|undefined => handle<string, CacheValue<T>|undefined>(
     getViewValue,
@@ -162,7 +160,7 @@ export const get = <T>(
   );
 
 // EntityStore -> Entity -> String -> Value
-export const remove = <T>(es:EntityStore, e:EntityConfig, id:string) => {
+export const remove = <T>(es:EntityStore, e:Entity, id:string) => {
   const x = get<T>(es, e, id);
   rm(es, createEntityKey(e, {__ladda__id: id}));
   rmViews(es, e);
@@ -175,7 +173,7 @@ export const remove = <T>(es:EntityStore, e:EntityConfig, id:string) => {
 // EntityStore -> Entity -> String -> Bool
 export const contains = (
   es:EntityStore,
-  e: EntityConfig,
+  e: Entity,
   id:string
 ) => !!handle<string, {}|undefined>(getViewValue, getEntityValue, es, e, id);
 
@@ -197,11 +195,11 @@ const registerEntity = ([eMap, store]: EntityStore, entityConfig: Entity):Entity
 };
 
 // EntityStore -> Entity -> EntityStore
-const updateIndex = (m: EntityStore, entity:EntityConfig):EntityStore => {
+const updateIndex = (m: EntityStore, entity:Entity):EntityStore => {
   return isView(entity) ? registerView(m, entity) : registerEntity(m, entity);
 };
 
 // [Entity] -> EntityStore
-export const createEntityStore = (configs: EntityConfig[]):EntityStore => configs.reduce(
+export const createEntityStore = (configs: Entity[]):EntityStore => configs.reduce(
   updateIndex, [{}, {}]
 );

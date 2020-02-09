@@ -49,6 +49,7 @@ export interface Entity {
   ttl: number
   invalidates: string[]
   invalidatesOn?: Operation[]
+  viewOf?: string
 }
 
 export interface View extends Entity{

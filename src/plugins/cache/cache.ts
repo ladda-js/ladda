@@ -1,12 +1,13 @@
 import * as QueryCache from './query-cache';
 import * as EntityStore from './entity-store';
+import { Entity } from '../../types';
 
 export type Cache = {
   entityStore: EntityStore.EntityStore,
   queryCache: QueryCache.QueryCache
 };
 
-export const createCache = (entityConfigs: EntityStore.EntityConfig[]):Cache => {
+export const createCache = (entityConfigs: Entity[]):Cache => {
   const entityStore = EntityStore.createEntityStore(entityConfigs);
   const queryCache = QueryCache.createQueryCache(entityStore);
   return {entityStore, queryCache};
