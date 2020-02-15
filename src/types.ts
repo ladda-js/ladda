@@ -1,12 +1,12 @@
 /** The global Ladda config */
 export interface Config {
-  idField?: string ;
-  useProductionBuild?: boolean
+  idField: string ;
+  useProductionBuild: boolean
 }
 
 /** The config a user passes into ladda from the outside into the build method */
-export type ExternalConfig = EntityConfigs & {
-  __config: Config
+export type ExternalConfig = PartialEntityConfigs & {
+  __config: Partial<Config>
 };
 
 /** The API returned by the builder, ready for use */
@@ -23,8 +23,10 @@ export enum Operation {
   NO_OPERATION = 'NO_OPERATION'
 }
 
-// TODO Need to distinguish between the config before application of the defaults and after
-export interface ApiFunctionConfig {
+/**
+ * Config object for the Api function
+ */
+export interface PartialApiFunctionConfig {
   updateOnCreate?: <T>(args: any[], newValue: T, cachedValues: T[]) => T[]
   fnName?: string
   operation?: Operation
@@ -35,25 +37,66 @@ export interface ApiFunctionConfig {
   idFrom?: 'ARGS' | 'ENTITY' | (() => string)
 }
 
-export type ApiFunction<R=unknown, A extends any[] = any[]> = {
-  (...args:A):Promise<R>
-} & ApiFunctionConfig;
+/**
+ * Config object with defaults applied
+ */
+export interface ApiFunctionConfig {
+  updateOnCreate?: <T>(args: any[], newValue: T, cachedValues: T[]) => T[]
+  fnName: string
+  operation: Operation
+  invalidates: string[]
+  alwaysGetFreshData?: boolean
+  byId: boolean
+  byIds: boolean
+  idFrom: 'ARGS' | 'ENTITY' | (() => string)
+}
+
+export interface ApiCall<R, A extends any[]> {
+  (...args: A):Promise<R>
+}
+
+export type PartialApiFunction<R=unknown, A extends any[] = any[]> =
+  ApiCall<R, A> & PartialApiFunctionConfig;
+
+export type ApiFunction<R=unknown, A extends any[] = any[]> =
+  ApiCall<R, A> & ApiFunctionConfig;
+
+export interface PartialEntityApi {
+  [apiFnName: string]: PartialApiFunction
+}
 
 export interface EntityApi {
   [apiFnName: string]: ApiFunction
 }
 
-export interface Entity {
+/**
+ * The required fields as configured by user
+ */
+export interface PartialEntity {
   name: string
   api: EntityApi
+  ttl?: number
+  invalidates?: string[]
+  invalidatesOn?: Operation[]
+  viewOf?: string
+}
+
+/**
+ * The entity configuration object with defaults applied
+ */
+export interface Entity extends PartialEntity{
   ttl: number
   invalidates: string[]
-  invalidatesOn?: Operation[]
+  invalidatesOn: Operation[]
   viewOf?: string
 }
 
 export interface View extends Entity{
   viewOf: string
+}
+
+export interface PartialEntityConfigs {
+  [entityName: string]: PartialEntity
 }
 
 export interface EntityConfigs {
@@ -81,7 +124,7 @@ export interface PluginParams {
 }
 
 export interface PluginDecorator {
-  <T extends ApiFunction>(cfg:{entity: Entity, fn: T}):T
+  <R, A extends any[]>(cfg:{entity: Entity, fn: ApiFunction<R, A>}):ApiCall<R, A>
 }
 
 export interface Change {

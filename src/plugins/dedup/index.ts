@@ -1,5 +1,5 @@
 import {
-  ApiFunction, Config, Entity, Plugin
+  ApiFunction, Config, Entity, Plugin, ApiCall
 } from '../../types';
 
 const toKey = (args:any) => JSON.stringify(args);
@@ -27,7 +27,7 @@ export const dedupPlugin:Plugin = (
     entity: Entity & DupConfig,
     fn: ApiFunction<R, A> & DupConfig
   }
-):ApiFunction<R, A> => {
+):ApiCall<R, A> => {
   if (fn.operation !== 'READ') { return fn; }
   const cache:{[key: string]: Promise<R>} = {};
 

@@ -13,7 +13,9 @@ import {
   ExternalConfig,
   Operation,
   Plugin,
-  PluginDecorator
+  PluginDecorator,
+  PartialEntity,
+  PartialApiFunction
 } from './types';
 import { validateConfig } from './validator';
 
@@ -72,7 +74,7 @@ export const mapApiFunctions = (
   ...entity,
   api: mapProps(entity.api, (apiFn: ApiFunction) => {
     const decoratedFunction = fn({ entity, fn: apiFn });
-    return hoistMetaData(apiFn, decoratedFunction);
+    return hoistMetaData(apiFn, decoratedFunction) as ApiFunction;
   })
 }));
 
@@ -82,7 +84,7 @@ const toApi = (entities: EntityConfigs):{[name:string]: EntityApi} => (
 );
 
 // EntityConfig -> EntityConfig
-const setEntityConfigDefaults = (ec: Entity):Entity & DupConfig => {
+const setEntityConfigDefaults = (ec: PartialEntity):Entity & DupConfig => {
   return {
     ttl: 300,
     invalidates: [],
@@ -93,8 +95,8 @@ const setEntityConfigDefaults = (ec: Entity):Entity & DupConfig => {
 };
 
 // EntityConfig -> EntityConfig
-const setApiConfigDefaults = (ec: Entity):Entity => {
-  const defaults:ApiFunctionConfig & DupConfig = {
+const setApiConfigDefaults = (ec: PartialEntity):PartialEntity => {
+  const defaults:Omit<ApiFunctionConfig, 'fnName'> & DupConfig = {
     operation: Operation.NO_OPERATION,
     invalidates: [],
     idFrom: 'ENTITY',
@@ -103,7 +105,7 @@ const setApiConfigDefaults = (ec: Entity):Entity => {
     enableDeduplication: true
   };
 
-  const setDefaults = (apiConfig:ApiFunction):ApiFunction => {
+  const setDefaults = (apiConfig:PartialApiFunction):ApiFunction => {
     // Do we ever need the special behavior of copyFunction?
     // We could probably just as well operate on the original function
     const copy = copyFunction(apiConfig);
@@ -137,7 +139,7 @@ export const getEntityConfigs = (config: ExternalConfig):EntityConfigs => {
       entity = setEntityConfigDefaults(entity);
       entity = setApiConfigDefaults(entity);
       entity.name = entityName;
-      configWithNames[entityName] = entity;
+      configWithNames[entityName] = entity as Entity;
     }
   }
   return configWithNames;

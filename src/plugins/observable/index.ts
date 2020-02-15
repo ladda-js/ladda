@@ -27,8 +27,8 @@ const isInvalidatedByFunction = (entity: Entity, fn: ApiFunctionConfig, change: 
   if (change.entity !== entity.name) {
     return false;
   }
-  const invalidations = entity.api[change.apiFn].invalidates!; // TODO invalidates should have been initialized to empty array in setEntityConfigDefaults
-  return Boolean(invalidations.length) && invalidations.indexOf(fn.fnName!) !== -1; // TODO fnName should have been initialized by setApiConfigDefaults
+  const invalidations = entity.api[change.apiFn].invalidates;
+  return Boolean(invalidations.length) && invalidations.indexOf(fn.fnName) !== -1;
 };
 
 const isRelevantChange = (
@@ -151,17 +151,17 @@ const observable = ():Plugin => {
     return (<R, A extends any[]>(
       { entity, fn }: {
         entity: Entity,
-        fn: DecoratedApiFunction<R, A>
+        fn: ApiFunction<R, A>
       }) => {
       if (fn.operation !== 'READ') { return fn; }
-      fn.createObservable = createObservableFactory<R, A>(
+      (fn as DecoratedApiFunction<R, A>).createObservable = createObservableFactory<R, A>(
         state,
         relationships,
         entityConfigs,
         entity,
         fn
       );
-      return fn;
+      return fn as DecoratedApiFunction<R, A>;
     }) as PluginDecorator;
   };
 };

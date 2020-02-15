@@ -7,7 +7,8 @@ import {
   Plugin,
   PluginDecorator,
   PluginParams,
-  ChangeListener
+  ChangeListener,
+  ApiCall
 } from '../../types';
 import { Cache, createCache } from './cache';
 import { decorateCommand } from './operations/command';
@@ -24,7 +25,7 @@ interface Decorator<R, A extends any[]> {
     notify: (args: A, result: R)=> void,
     e: Entity,
     aFn: ApiFunction<R, A>
-  ):ApiFunction
+  ):ApiCall<R, A>
 }
 
 const HANDLERS:{[operation in Operation]: Decorator<any, any>} = {
@@ -56,9 +57,9 @@ const notify = <R, A extends any[]>(
     payload: R
   ) => {
     onChange({
-      operation: fn.operation!, // We know that at this point the operation has been filled with defaults
+      operation: fn.operation,
       entity: entity.name,
-      apiFn: fn.fnName!, // We know that at this point the operation has been filled with defaults
+      apiFn: fn.fnName,
       values: normalizePayload(payload),
       args
     });
