@@ -4,7 +4,7 @@ import sinon from 'sinon';
 
 import {
   compose, map, toIdMap, values
-} from 'ladda-fp';
+} from '../../fp';
 import { build } from '../../builder';
 import plugin from '.';
 

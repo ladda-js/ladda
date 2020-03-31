@@ -11,7 +11,7 @@
  * Of course, this also requiers the view to truly be a subset of the entity.
  */
 
-import {clone} from 'ladda-fp';
+import {clone} from '../../fp';
 import {merge} from './merger';
 import {removeId} from './id-helper';
 import {

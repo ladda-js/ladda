@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import sinon from 'sinon';
-import {curry} from 'ladda-fp';
+import {curry} from '../../../fp';
 import {decorateDelete} from './delete';
 import * as Cache from '../cache';
 import {addId} from '../id-helper';

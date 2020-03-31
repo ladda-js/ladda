@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import sinon from 'sinon';
-import {curry} from 'ladda-fp';
+import {curry} from '../../../fp';
 import {decorateNoOperation} from './no-operation';
 import * as Cache from '../cache';
 import {createSampleConfig, createApiFunction} from '../test-helper';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const debug = (x) => {
   console.log(x); // eslint-disable-line no-console
   return x;
@@ -53,8 +54,9 @@ export const reduce = curry((f, currResult, xs) => {
   return currResult;
 });
 
-export const compose = (...fns) => (...args) =>
-    reduce((m, f) => f(m), last(fns)(...args), tail(reverse(fns)));
+export const compose = (...fns) => (...args) => (
+  reduce((m, f) => f(m), last(fns)(...args), tail(reverse(fns)))
+);
 
 export const prop = curry((key, x) => x[key]);
 
@@ -177,7 +179,7 @@ export const concat = curry((a, b) => a.concat(b));
 
 export const flatten = (arrs) => reduce(concat, [], arrs);
 
-export const uniq = (arr) => [...new Set(arr)];
+export const uniq = (arr) => Array.from(new Set(arr));
 
 export const fst = (arr) => arr[0];
 export const snd = (arr) => arr[1];
@@ -192,4 +194,3 @@ export const removeAtIndex = curry((i, list) => {
 });
 
 export const removeElement = curry((el, list) => removeAtIndex(list.indexOf(el), list));
-

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import sinon from 'sinon';
-import {curry, toIdMap} from 'ladda-fp';
+import {curry, toIdMap} from './fp';
 import {build} from './builder';
 
 const users = [{ id: 1 }, { id: 2 }];

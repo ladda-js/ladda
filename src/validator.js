@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { compose, map_, toPairs } from 'ladda-fp';
+import { compose, map_, toPairs } from './fp';
 
 const warn = (logger, msg, ...args) => {
   logger.error(`Ladda Config Error: ${msg}`, ...args);

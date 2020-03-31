@@ -7,9 +7,7 @@
   "files": [
     "dist/module.js"
   ],
-  "dependencies": {
-    "ladda-fp": "^0.2.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@rollup/plugin-typescript": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^2.15.0",

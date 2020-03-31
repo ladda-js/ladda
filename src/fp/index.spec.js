@@ -1,13 +1,15 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import sinon from 'sinon';
-import {debug, identity, curry, passThrough,
-        startsWith, join, on, isEqual, noop,
-        on2, init, tail, last, head, map, map_, reverse,
-        reduce, compose, prop, zip, flip, toPairs, fromPairs,
-        mapObject, mapValues, toObject, filter, clone, filterObject,
-        copyFunction, get, set, concat, flatten, uniq, toIdMap,
-        removeAtIndex, removeElement} from '.';
+import {
+  debug, identity, curry, passThrough,
+  startsWith, join, on, isEqual, noop,
+  on2, init, tail, last, head, map, map_, reverse,
+  reduce, compose, prop, zip, flip, toPairs, fromPairs,
+  mapObject, mapValues, toObject, filter, clone, filterObject,
+  copyFunction, get, set, concat, flatten, uniq, toIdMap,
+  removeAtIndex, removeElement
+} from '.';
 
 describe('fp', () => {
   describe('debug', () => {
@@ -24,17 +26,17 @@ describe('fp', () => {
 
   describe('curry', () => {
     it('returns a function if one of 3 args are provided', () => {
-      const fn = curry((x, y, z) => x); // eslint-disable-line no-unused-vars
+      const fn = curry((x, y, z) => x); // eslint-disable-line @typescript-eslint/no-unused-vars
       expect(fn('hej')).to.be.a('function');
     });
 
     it('returns a function if two of 3 args are provided', () => {
-      const fn = curry((x, y, z) => x); // eslint-disable-line no-unused-vars
+      const fn = curry((x, y, z) => x); // eslint-disable-line @typescript-eslint/no-unused-vars
       expect(fn('hej', 1)).to.be.a('function');
     });
 
     it('returns a value if all args are provided', () => {
-      const fn = curry((x, y, z) => x); // eslint-disable-line no-unused-vars
+      const fn = curry((x, y, z) => x); // eslint-disable-line @typescript-eslint/no-unused-vars
       expect(fn('hej', 1, 2)).to.be.equal('hej');
     });
   });
@@ -270,7 +272,9 @@ describe('fp', () => {
       expect(fnUnderTest).to.throw(Error);
     });
     it('entries for which the predicate returns false are removed', () => {
-      const input = {1: 'a', 2: 'b', 3: 'c', 4: 'd'};
+      const input = {
+        1: 'a', 2: 'b', 3: 'c', 4: 'd'
+      };
       const expected = {2: 'b', 4: 'd'};
       const keepEven = filterObject(x => x % 2 === 0);
       expect(keepEven(input)).to.deep.equal(expected);

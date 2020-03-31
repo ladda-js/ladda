@@ -14,7 +14,6 @@ export default [
         format: 'es'
       }
     ],
-    external: ['ladda-fp'],
     plugins: [typescript()]
   }
 ];
