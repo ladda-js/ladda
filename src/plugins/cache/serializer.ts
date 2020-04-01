@@ -1,6 +1,6 @@
 const EMPTY_STRING = '__EMPTY_STRING__';
 
-export const serialize = (x) => {
+export const serialize = (x:any):string|number|boolean|undefined => {
   if (x instanceof Date) {
     return x.toISOString();
   }
@@ -8,9 +8,7 @@ export const serialize = (x) => {
     return EMPTY_STRING;
   }
   if (x instanceof Object) {
-    return Object.keys(x).map(k =>
-        serialize(x[k])
-    ).join('-');
+    return Object.keys(x).map(k => serialize(x[k])).join('-');
   }
   return x;
 };

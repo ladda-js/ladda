@@ -1,7 +1,9 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
 import {createEntityStore} from './entity-store';
-import {createQueryCache, getValue, put, contains, get, invalidate} from './query-cache';
+import {
+  createQueryCache, getValue, put, contains, get, invalidate
+} from './query-cache';
 import {addId} from './id-helper';
 import {createSampleConfig, createApiFunction} from './test-helper';
 

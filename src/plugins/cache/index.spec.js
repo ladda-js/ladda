@@ -1,6 +1,7 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
-import {decorate} from './index';
+// eslint-disable-next-line import/named
+import {decorate} from './index'; // This is used in a test that never runs
 import {createEntityStore} from './entity-store';
 import {createQueryCache, put, contains} from './query-cache';
 import {addId} from './id-helper';

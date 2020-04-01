@@ -1,6 +1,8 @@
-/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
-import {createEntityStore, put, mPut, get, contains, remove} from './entity-store';
+import {
+  createEntityStore, put, mPut, get, contains, remove
+} from './entity-store';
 import {addId} from './id-helper';
 
 const config = [

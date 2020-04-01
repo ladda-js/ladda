@@ -1,9 +1,9 @@
-import babel from 'rollup-plugin-babel';
+import typescript from 'rollup-plugin-typescript2';
 import pkg from './package.json';
 
 export default [
   {
-    input: 'src/index.js',
+    input: 'src/index.ts',
     output: [
       {
         file: pkg.main,
@@ -14,20 +14,12 @@ export default [
         format: 'es'
       }
     ],
-    external: ['ladda-fp'],
-    plugins: [
-      babel({
-        babelrc: false,
-        plugins: ['external-helpers'],
-        presets: [
-          ['env', {
-            modules: false
-          }],
-          'stage-1'
-        ],
-        exclude: ['node_modules/**']
-      })
-    ]
+    plugins: [typescript({
+      tsconfigOverride: {
+        compilerOptions: { module: 'ESNext' },
+        exclude: ['*.spec.?s', '**/*.spec.?s']
+      },
+      clean: true
+    })]
   }
 ];
-

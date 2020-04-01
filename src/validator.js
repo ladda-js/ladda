@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { compose, map_, toPairs } from 'ladda-fp';
+import { compose, map_, toPairs } from './fp';
 
 const warn = (logger, msg, ...args) => {
   logger.error(`Ladda Config Error: ${msg}`, ...args);
@@ -30,7 +30,9 @@ const checkApiDeclaration = (logger, entityConfigs, entityName, entity) => {
   compose(
     // eslint-disable-next-line no-unused-vars
     map_(([fnName, fn]) => {
-      const { operation, invalidates, idFrom, byId, byIds, enableDeduplication } = fn;
+      const {
+        operation, invalidates, idFrom, byId, byIds, enableDeduplication
+      } = fn;
       const fullName = `${entityName}.${fnName}`;
       if (!isOperation(operation)) {
         warnApi(

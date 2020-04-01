@@ -1,4 +1,4 @@
-import {identity} from 'ladda-fp';
+import {identity} from '../../fp';
 
 export const createApiFunction = (fn, config = {}) => {
   const fnCopy = fn.bind(null);
