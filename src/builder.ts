@@ -1,4 +1,4 @@
-import { copyFunction } from './fp';
+import { copyFunction } from './fp/index';
 import { createListenerStore } from './listener-store';
 import { cachePlugin } from './plugins/cache/index';
 import { dedupPlugin, DupConfig } from './plugins/dedup/index';

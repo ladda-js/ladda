@@ -1,4 +1,4 @@
-import typescript from '@rollup/plugin-typescript';
+import typescript from 'rollup-plugin-typescript2';
 import pkg from './package.json';
 
 export default [
@@ -14,7 +14,10 @@ export default [
         format: 'es'
       }
     ],
-    plugins: [typescript()]
+    plugins: [typescript({
+      tsconfigOverride: {
+        compilerOptions: { module: 'ESNext' }
+      }
+    })]
   }
 ];
-

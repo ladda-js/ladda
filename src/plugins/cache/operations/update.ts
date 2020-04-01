@@ -1,4 +1,4 @@
-import { Config, Entity } from '../../../types';
+import { Config, Entity, ApiFunction } from '../../../types';
 import * as Cache from '../cache';
 import { addId } from '../id-helper';
 
