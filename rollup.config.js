@@ -16,8 +16,10 @@ export default [
     ],
     plugins: [typescript({
       tsconfigOverride: {
-        compilerOptions: { module: 'ESNext' }
-      }
+        compilerOptions: { module: 'ESNext' },
+        exclude: ['*.spec.?s', '**/*.spec.?s']
+      },
+      clean: true
     })]
   }
 ];
