@@ -56,6 +56,13 @@ export const createSampleConfig = () => {
         getCars: createApiFunction(identity, {operation: 'READ'}),
         updateCar: createApiFunction(identity, {operation: 'UPDATE'})
       }
+    }),
+    createEntityConfig({
+      name: 'userSettings',
+      api: {
+        getSettings: createApiFunction(identity, {operation: 'READ'}),
+        updateSettings: createApiFunction(identity, {operation: 'UPDATE'})
+      }
     })
   ];
 };

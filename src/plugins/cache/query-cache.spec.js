@@ -112,5 +112,18 @@ describe('QueryCache', () => {
       const fn = () => invalidate(qc, eBikes, aFn);
       expect(fn).to.not.throw();
     });
+    it('does not invalidate other cache that starts with the same string', () => {
+      const es = createEntityStore(config);
+      const qc = createQueryCache(es);
+      const eCars = config[2];
+      const eUserSettings = config[4];
+      const aFn = createApiFunction(x => x, {operation: 'CREATE'});
+      const args = [1, 2, 3];
+      const xs = [{id: 1}, {id: 2}, {id: 3}];
+      put(qc, eUserSettings, aFn, args, addId({}, undefined, undefined, xs));
+      invalidate(qc, eCars, aFn);
+      const hasUserSettings = contains(qc, eUserSettings, aFn, args);
+      expect(hasUserSettings).to.be.true;
+    });
   });
 });

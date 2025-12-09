@@ -137,7 +137,7 @@ const shouldInvalidateEntity = (e, op) => {
 const invalidateEntity = curry((qc, entityName) => {
   const keys = Object.keys(qc.cache);
   const removeIfEntity = k => {
-    if (startsWith(entityName, k)) {
+    if (startsWith(`${entityName}-`, k)) {
       delete qc.cache[k];
     }
   };
