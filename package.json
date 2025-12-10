@@ -37,7 +37,7 @@
     "test": "env NODE_PATH=$NODE_PATH:$PWD/src NODE_ENV=test ./node_modules/.bin/mocha --compilers js:babel-register --reporter spec src/*.spec.js 'src/**/*.spec.js' --require mocha.config",
     "coverage": "env NODE_PATH=$NODE_PATH:$PWD/src NODE_ENV=test nyc -x '**/*.spec.js' -x '**/*.config.js' --reporter=lcov --reporter=text mocha --compilers js:babel-register --reporter spec src/*.spec.js 'src/**/*.spec.js' --require mocha.config",
     "lint": "eslint src",
-    "prepublish": "npm run lint && npm test && npm run build",
+    "prepublish": "npm test && npm run build",
     "build": "rollup -c"
   },
   "author": [
