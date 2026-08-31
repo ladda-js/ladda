@@ -125,5 +125,18 @@ describe('QueryCache', () => {
       const hasUserSettings = contains(qc, eUserSettings, aFn, args);
       expect(hasUserSettings).to.be.true;
     });
+    it('invalidates a same-entity function that was called with no arguments', () => {
+      const es = createEntityStore(config);
+      const qc = createQueryCache(es);
+      const eUser = config[0];
+      const getUsersFn = eUser.api.getUsers;
+      getUsersFn.fnName = 'getUsers';
+      const aFn = createApiFunction(x => x, {operation: 'NO_OPERATION', invalidates: ['getUsers']});
+      const xs = [{id: 1}, {id: 2}];
+      put(qc, eUser, getUsersFn, [], addId({}, undefined, undefined, xs));
+      invalidate(qc, eUser, aFn);
+      const hasUsers = contains(qc, eUser, getUsersFn, []);
+      expect(hasUsers).to.be.false;
+    });
   });
 });
