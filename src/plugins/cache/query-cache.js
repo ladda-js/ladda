@@ -156,8 +156,11 @@ const invalidateBasedOnEntity = (qc, e, aFn) => {
 
 // QueryCache -> Entity -> ApiFunction -> ()
 const invalidateBasedOnApiFn = (qc, e, aFn) => {
-  const prependEntity = x => `${e.name}-${x}`;
-  const invalidateEntityByApiFn = compose(invalidateEntity(qc), prependEntity);
+  const invalidateEntityByApiFn = fnName => {
+    const key = createKey(e, [fnName]);
+    delete qc.cache[key];
+    invalidateEntity(qc, key);
+  };
   map_(invalidateEntityByApiFn, getInvalidates(aFn));
 };
 

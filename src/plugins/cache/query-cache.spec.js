@@ -3,7 +3,7 @@
 import {createEntityStore} from './entity-store';
 import {createQueryCache, getValue, put, contains, get, invalidate} from './query-cache';
 import {addId} from './id-helper';
-import {createSampleConfig, createApiFunction} from './test-helper';
+import {createSampleConfig, createApiFunction, createEntityConfig} from './test-helper';
 
 const config = createSampleConfig();
 
@@ -124,6 +124,42 @@ describe('QueryCache', () => {
       invalidate(qc, eCars, aFn);
       const hasUserSettings = contains(qc, eUserSettings, aFn, args);
       expect(hasUserSettings).to.be.true;
+    });
+    it('invalidates a same-entity function that was called with no arguments', () => {
+      const es = createEntityStore(config);
+      const qc = createQueryCache(es);
+      const eUser = config[0];
+      const getUsersFn = eUser.api.getUsers;
+      getUsersFn.fnName = 'getUsers';
+      const aFn = createApiFunction(x => x, {operation: 'NO_OPERATION', invalidates: ['getUsers']});
+      const xs = [{id: 1}, {id: 2}];
+      put(qc, eUser, getUsersFn, [], addId({}, undefined, undefined, xs));
+      invalidate(qc, eUser, aFn);
+      const hasUsers = contains(qc, eUser, getUsersFn, []);
+      expect(hasUsers).to.be.false;
+    });
+    it('does not invalidate an exact cache key belonging to another entity', () => {
+      const getFoo = createApiFunction(x => x, {operation: 'READ'});
+      getFoo.fnName = 'bar';
+      const eFoo = createEntityConfig({
+        name: 'foo',
+        api: {bar: getFoo}
+      });
+      const updateFooBar = createApiFunction(x => x, {operation: 'UPDATE'});
+      const eFooBar = createEntityConfig({
+        name: 'foo-bar',
+        api: {update: updateFooBar},
+        invalidates: ['foo-bar']
+      });
+      const es = createEntityStore([eFoo, eFooBar]);
+      const qc = createQueryCache(es);
+      const xs = [{id: 1}];
+
+      put(qc, eFoo, getFoo, [], addId({}, undefined, undefined, xs));
+      invalidate(qc, eFooBar, updateFooBar);
+
+      const hasFoo = contains(qc, eFoo, getFoo, []);
+      expect(hasFoo).to.be.true;
     });
   });
 });
