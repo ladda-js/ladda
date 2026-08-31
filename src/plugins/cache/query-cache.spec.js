@@ -3,7 +3,7 @@
 import {createEntityStore} from './entity-store';
 import {createQueryCache, getValue, put, contains, get, invalidate} from './query-cache';
 import {addId} from './id-helper';
-import {createSampleConfig, createApiFunction} from './test-helper';
+import {createSampleConfig, createApiFunction, createEntityConfig} from './test-helper';
 
 const config = createSampleConfig();
 
@@ -137,6 +137,29 @@ describe('QueryCache', () => {
       invalidate(qc, eUser, aFn);
       const hasUsers = contains(qc, eUser, getUsersFn, []);
       expect(hasUsers).to.be.false;
+    });
+    it('does not invalidate an exact cache key belonging to another entity', () => {
+      const getFoo = createApiFunction(x => x, {operation: 'READ'});
+      getFoo.fnName = 'bar';
+      const eFoo = createEntityConfig({
+        name: 'foo',
+        api: {bar: getFoo}
+      });
+      const updateFooBar = createApiFunction(x => x, {operation: 'UPDATE'});
+      const eFooBar = createEntityConfig({
+        name: 'foo-bar',
+        api: {update: updateFooBar},
+        invalidates: ['foo-bar']
+      });
+      const es = createEntityStore([eFoo, eFooBar]);
+      const qc = createQueryCache(es);
+      const xs = [{id: 1}];
+
+      put(qc, eFoo, getFoo, [], addId({}, undefined, undefined, xs));
+      invalidate(qc, eFooBar, updateFooBar);
+
+      const hasFoo = contains(qc, eFoo, getFoo, []);
+      expect(hasFoo).to.be.true;
     });
   });
 });
