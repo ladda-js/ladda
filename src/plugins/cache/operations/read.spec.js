@@ -35,6 +35,67 @@ describe('Read', () => {
       });
     });
 
+    describe('getCached()', () => {
+      it('reports not cached before any read has happened', () => {
+        const cache = createCache(config);
+        const e = config[0];
+        const aFn = createApiFunction(() => Promise.resolve({ id: 1, name: 'Kalle' }), { byId: true });
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        expect(res.getCached(1)).to.deep.equal({ isCached: false });
+      });
+
+      it('synchronously reflects a value once it has been read once (byId)', () => {
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = { id: 1, name: 'Kalle' };
+        const aFn = createApiFunction(() => Promise.resolve(xOrg), { byId: true });
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        return res(1).then(() => {
+          expect(res.getCached(1)).to.deep.equal({ isCached: true, value: xOrg });
+        });
+      });
+
+      it('reports not cached again once the entry has expired (byId)', () => {
+        const myConfig = createSampleConfig();
+        myConfig[0].ttl = 0;
+        const cache = createCache(myConfig);
+        const e = myConfig[0];
+        const aFn = createApiFunction(() => Promise.resolve({ id: 1, name: 'Kalle' }), { byId: true });
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        const delay = () => new Promise((resolve) => setTimeout(resolve, 1));
+        return res(1).then(delay).then(() => {
+          expect(res.getCached(1)).to.deep.equal({ isCached: false });
+        });
+      });
+
+      it('only reports cached once all ids are present (byIds)', () => {
+        const users = { a: { id: 'a' }, b: { id: 'b' } };
+        const fn = (ids) => Promise.resolve(map((id) => users[id], ids));
+        const aFn = createApiFunction(fn, { byIds: true });
+        const cache = createCache(config);
+        const e = config[0];
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        return res(['a']).then(() => {
+          expect(res.getCached(['a', 'b'])).to.deep.equal({ isCached: false });
+          return res(['a', 'b']).then(() => {
+            expect(res.getCached(['a', 'b'])).to.deep.equal({ isCached: true, value: [users.a, users.b] });
+          });
+        });
+      });
+
+      it('synchronously reflects a value once it has been read once (query)', () => {
+        const cache = createCache(config);
+        const e = config[0];
+        const xOrg = [{ id: 1, name: 'Kalle' }];
+        const aFn = createApiFunction(() => Promise.resolve(xOrg));
+        const res = decorateRead({}, cache, curryNoop, e, aFn);
+        expect(res.getCached(1)).to.deep.equal({ isCached: false });
+        return res(1).then(() => {
+          expect(res.getCached(1)).to.deep.equal({ isCached: true, value: xOrg });
+        });
+      });
+    });
+
     describe('with byId set', () => {
       it('calls api fn if not in cache', () => {
         const cache = createCache(config);
